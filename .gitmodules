@@ -1,0 +1,9 @@
+[submodule "vendor/gitea"]
+	path = vendor/gitea
+	url = https://github.com/go-gitea/gitea.git
+[submodule "vendor/freellmapi"]
+	path = vendor/freellmapi
+	url = https://github.com/tashfeenahmed/freellmapi.git
+[submodule "vendor/rustfs"]
+	path = vendor/rustfs
+	url = https://github.com/rustfs/rustfs.git

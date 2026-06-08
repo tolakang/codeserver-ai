@@ -12,6 +12,7 @@ Production-grade self-hosted Code Server with AI integration, Gitea, and RustFS 
 - Claude Memory Persistence
 - Self-hosted Gitea Git Server
 - Auto-installed Extensions
+- Built from Source (git submodules + .deb releases)
 
 ## Architecture
 
@@ -39,20 +40,25 @@ Dokploy
 
 ## Services
 
-| Service | Image | Port | Purpose |
-|---------|-------|------|---------|
-| code-server | ghcr.io/coder/code-server:latest | 8080 | Web IDE |
-| gitea | docker.io/gitea/gitea:latest | 3001 | Git hosting |
-| freellmapi | ghcr.io/tashfeenahmed/freellmapi:latest | 3000 | LLM proxy |
-| rustfs | docker.io/rustfs/rustfs:latest | 9000 | S3 backup |
+| Service | Source | Build Method | Port |
+|---------|--------|--------------|------|
+| code-server | [coder/code-server](https://github.com/coder/code-server) | .deb from GitHub releases | 8080 |
+| gitea | [go-gitea/gitea](https://github.com/go-gitea/gitea) | Git submodule, multi-stage build | 3001 |
+| freellmapi | [tashfeenahmed/freellmapi](https://github.com/tashfeenahmed/freellmapi) | Git submodule, multi-stage build | 3000 |
+| rustfs | [rustfs/rustfs](https://github.com/rustfs/rustfs) | Git submodule, binary download | 9000 |
 
 ## Deployment
 
-### 1. Clone Repository
+### 1. Clone Repository with Submodules
 
 ```bash
-git clone https://github.com/youruser/codeserver-ai.git
+git clone --recurse-submodules https://github.com/youruser/codeserver-ai.git
 cd codeserver-ai
+```
+
+If already cloned without submodules:
+```bash
+git submodule update --init --recursive
 ```
 
 ### 2. Configure Environment
@@ -67,15 +73,20 @@ cp .env.example .env
 ```bash
 sudo mkdir -p /mnt/storage/code-server/{config,workspace,extensions}
 sudo mkdir -p /mnt/storage/gitea/data
+sudo mkdir -p /mnt/storage/freellmapi/data
 sudo mkdir -p /mnt/storage/rustfs/data
 sudo chown -R 1000:1000 /mnt/storage
 ```
 
-### 4. Deploy with Dokploy
+### 4. Build and Deploy
 
-**Option A: All services at once**
+```bash
+# Build all images
+docker compose build
 
-Upload `docker-compose.yml` to Dokploy as a compose stack.
+# Deploy all services
+docker compose up -d
+```
 
 **Option B: Individual services**
 
@@ -95,10 +106,33 @@ Deploy each compose file as a separate Dokploy application:
 
 ## Update
 
-Redeploy image only. Workspace remains persistent.
+Update all services from source:
 
 ```bash
-docker compose pull
+./scripts/update.sh
+```
+
+Update specific service:
+
+```bash
+./scripts/update.sh code-server
+./scripts/update.sh gitea
+./scripts/update.sh freellmapi
+./scripts/update.sh rustfs
+```
+
+Manual update:
+
+```bash
+# Pull latest source
+git submodule update --remote
+
+# Get latest code-server version
+CODESERVER_VERSION=$(curl -fsSL https://api.github.com/repos/coder/code-server/releases/latest \
+  | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
+
+# Rebuild and redeploy
+CODESERVER_VERSION=$CODESERVER_VERSION docker compose build
 docker compose up -d
 ```
 

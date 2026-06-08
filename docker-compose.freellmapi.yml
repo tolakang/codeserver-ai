@@ -1,11 +1,14 @@
 # docker-compose.freellmapi.yml
 # Deploy as separate Dokploy application
+# Build from official tashfeenahmed/freellmapi source
 # Source: https://github.com/tashfeenahmed/freellmapi
-# Image: ghcr.io/tashfeenahmed/freellmapi:latest
 
 services:
   freellmapi:
-    image: ghcr.io/tashfeenahmed/freellmapi:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.freellmapi
+    image: freellmapi-custom:latest
     container_name: freellmapi
     restart: unless-stopped
     ports:

@@ -1,18 +1,75 @@
 # Dockerfile.codeserver
-# Extends official code-server image with custom scripts and config
+# Build code-server from official .deb releases
 # Source: https://github.com/coder/code-server
+# Releases: https://github.com/coder/code-server/releases
 
-FROM ghcr.io/coder/code-server:latest
+# syntax=docker/dockerfile:1
+ARG BASE=debian:13
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      python3-pip \
-      groff \
-      less && \
-    pip3 install --break-system-packages awscli && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+FROM ${BASE}
 
+ARG CODESERVER_VERSION=4.123.0
+ARG TARGETARCH=amd64
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    dumb-init \
+    git \
+    git-lfs \
+    htop \
+    locales \
+    lsb-release \
+    man-db \
+    nano \
+    openssh-client \
+    procps \
+    sudo \
+    vim-tiny \
+    wget \
+    zsh \
+    && git lfs install \
+    && rm -rf /var/lib/apt/lists/*
+
+# Locale setup
+RUN sed -i "s/# en_US.UTF-8/en_US.UTF-8/" /etc/locale.gen \
+    && locale-gen
+ENV LANG=en_US.UTF-8
+
+# Create coder user
+RUN if grep -q 1000 /etc/passwd; then \
+      userdel -r "$(id -un 1000)"; \
+    fi \
+    && adduser --gecos '' --disabled-password coder \
+    && echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
+
+# Install fixuid
+RUN ARCH="$(dpkg --print-architecture)" \
+    && curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixuid-0.6.0-linux-$ARCH.tar.gz" \
+    | tar -C /usr/local/bin -xzf - \
+    && chown root:root /usr/local/bin/fixuid \
+    && chmod 4755 /usr/local/bin/fixuid \
+    && mkdir -p /etc/fixuid \
+    && printf "user: coder\ngroup: coder\n" > /etc/fixuid/config.yml
+
+# Download and install code-server .deb from GitHub releases
+RUN curl -fsSL \
+    "https://github.com/coder/code-server/releases/download/v${CODESERVER_VERSION}/code-server_${CODESERVER_VERSION}_${TARGETARCH}.deb" \
+    -o /tmp/code-server.deb \
+    && dpkg -i /tmp/code-server.deb \
+    && rm /tmp/code-server.deb
+
+# Install AWS CLI for backup/restore
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip \
+    groff \
+    less \
+    && pip3 install --break-system-packages awscli \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy custom scripts and config
 COPY scripts/ /scripts/
 RUN chmod +x /scripts/*.sh
 
@@ -20,4 +77,12 @@ COPY config/opencode/ /config/opencode/
 
 RUN mkdir -p /workspace/.memory
 
-ENTRYPOINT ["/scripts/init.sh"]
+ENV ENTRYPOINTD=${HOME}/entrypoint.d
+
+EXPOSE 8080
+
+USER 1000
+ENV USER=coder
+WORKDIR /home/coder
+
+ENTRYPOINT ["/usr/bin/entrypoint.sh", "--bind-addr", "0.0.0.0:8080", "."]

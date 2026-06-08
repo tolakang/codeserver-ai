@@ -1,11 +1,17 @@
 # docker-compose.code-server.yml
 # Deploy as separate Dokploy application
+# Build from official .deb releases
 # Source: https://github.com/coder/code-server
-# Image: ghcr.io/coder/code-server:latest
 
 services:
   code-server:
-    image: ghcr.io/coder/code-server:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.codeserver
+      args:
+        CODESERVER_VERSION: ${CODESERVER_VERSION:-4.123.0}
+        TARGETARCH: ${TARGETARCH:-amd64}
+    image: codeserver-custom:latest
     container_name: code-server
     restart: unless-stopped
     ports:
