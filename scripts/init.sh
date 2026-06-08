@@ -1,0 +1,43 @@
+#!/bin/bash
+# init.sh
+# Container entrypoint initialization
+
+set -e
+
+echo "=== Code Server Init ==="
+
+# Run extension installer
+/scripts/install-extensions.sh
+
+# Copy OpenCode config if not already in place
+if [ ! -f /home/coder/.config/opencode/config.json ]; then
+  mkdir -p /home/coder/.config/opencode
+  cp /config/opencode/config.json /home/coder/.config/opencode/config.json 2>/dev/null || true
+  echo "OpenCode config installed"
+fi
+
+# Create memory directory
+mkdir -p /workspace/.memory
+
+# Create default git config if not exists
+if [ ! -f /home/coder/.gitconfig ]; then
+  cat > /home/coder/.gitconfig <<'EOF'
+[user]
+    name = coder
+    email = coder@localhost
+[core]
+    editor = code-server
+[alias]
+    st = status
+    co = checkout
+    br = branch
+    ci = commit
+    lg = log --oneline --graph --decorate -20
+EOF
+  echo "Git config created"
+fi
+
+echo "=== Init Complete ==="
+
+# Execute code-server
+exec code-server /workspace

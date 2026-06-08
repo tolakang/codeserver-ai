@@ -1,0 +1,33 @@
+# docker-compose.yml
+# Combined orchestrator - deploys all services together
+# For individual service deployment, use separate compose files
+
+services:
+  code-server:
+    extends:
+      file: docker-compose.code-server.yml
+      service: code-server
+    depends_on:
+      gitea:
+        condition: service_healthy
+      freellmapi:
+        condition: service_healthy
+
+  freellmapi:
+    extends:
+      file: docker-compose.freellmapi.yml
+      service: freellmapi
+
+  rustfs:
+    extends:
+      file: docker-compose.rustfs.yml
+      service: rustfs
+
+  gitea:
+    extends:
+      file: docker-compose.gitea.yml
+      service: gitea
+
+networks:
+  default:
+    name: codeserver-network

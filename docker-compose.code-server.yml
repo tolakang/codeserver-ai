@@ -1,0 +1,28 @@
+# docker-compose.code-server.yml
+# Deploy as separate Dokploy application
+
+services:
+  code-server:
+    image: linuxserver/code-server:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: code-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /mnt/storage/code-server/config:/config
+      - /mnt/storage/code-server/workspace:/workspace
+      - /mnt/storage/code-server/extensions:/extensions
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-UTC}
+      - DEFAULT_WORKSPACE=/workspace
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

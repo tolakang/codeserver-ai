@@ -1,0 +1,33 @@
+# Environment
+.env
+.env.local
+.env.production
+
+# Backups
+*.tar.gz
+*.tar.bz2
+backups/
+
+# Caches
+.cache/
+node_modules/
+.npm/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode-server/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary
+tmp/
+temp/
+.tmp/
