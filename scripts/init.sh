@@ -12,8 +12,11 @@ echo "=== Code Server Init ==="
 # Copy OpenCode config if not already in place
 if [ ! -f /home/coder/.config/opencode/config.json ]; then
   mkdir -p /home/coder/.config/opencode
-  cp /config/opencode/config.json /home/coder/.config/opencode/config.json 2>/dev/null || true
-  echo "OpenCode config installed"
+  if cp /config/opencode/config.json /home/coder/.config/opencode/config.json 2>/dev/null; then
+    echo "OpenCode config installed"
+  else
+    echo "Warning: OpenCode config not found, skipping"
+  fi
 fi
 
 # Create memory directory

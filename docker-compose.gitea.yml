@@ -17,13 +17,19 @@ services:
       - USER_UID=1000
       - USER_GID=1000
       - GITEA__database__DB_TYPE=sqlite3
-      - GITEA__server__ROOT_URL=http://${GITEA_DOMAIN:-gitea:3001}/
+      - GITEA__server__ROOT_URL=http://${GITEA_DOMAIN:-gitea:3000}/
       - GITEA__server__HTTP_PORT=3000
       - GITEA__server__DOMAIN=${GITEA_DOMAIN:-gitea}
       - GITEA__service__DISABLE_REGISTRATION=false
+    networks:
+      - codeserver-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/version"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
+
+networks:
+  codeserver-network:
+    external: true

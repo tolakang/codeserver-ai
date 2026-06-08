@@ -22,10 +22,10 @@ Daily automated backups using RustFS (S3-compatible storage).
 
 ## Backup Schedule
 
-Daily at 2 AM via cron:
+Daily at 2 AM via cron (run inside code-server container):
 
 ```bash
-0 2 * * * /mnt/storage/code-server/scripts/backup.sh
+0 2 * * * docker exec code-server /scripts/backup.sh >> /var/log/backup.log 2>&1
 ```
 
 ## Retention Policy
@@ -37,13 +37,13 @@ Daily at 2 AM via cron:
 ## Manual Backup
 
 ```bash
-/mnt/storage/code-server/scripts/backup.sh
+docker exec code-server /scripts/backup.sh
 ```
 
 ## Restore
 
 ```bash
-/mnt/storage/code-server/scripts/restore.sh <backup-file>
+docker exec code-server /scripts/restore.sh <backup-filename>
 ```
 
 ## Setup
@@ -68,7 +68,7 @@ RUSTFS_BUCKET=code-server-backups
 ```bash
 crontab -e
 # Add:
-0 2 * * * /mnt/storage/code-server/scripts/backup.sh >> /var/log/backup.log 2>&1
+0 2 * * * docker exec code-server /scripts/backup.sh >> /var/log/backup.log 2>&1
 ```
 
 ## Backup Script
@@ -97,7 +97,7 @@ aws s3 ls s3://code-server-backups/ --endpoint-url https://rustfs.yourdomain.com
 docker compose down
 
 # Restore from backup
-./scripts/restore.sh s3://code-server-backups/workspace-20250101-020000.tar.gz
+docker exec code-server /scripts/restore.sh workspace-20250101-020000.tar.gz
 
 # Restart services
 docker compose up -d

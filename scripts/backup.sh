@@ -9,13 +9,11 @@ TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 BACKUP_DIR="/tmp/backups"
 RUSTFS_ENDPOINT="${RUSTFS_ENDPOINT:-http://rustfs:9000}"
 RUSTFS_BUCKET="${RUSTFS_BUCKET:-code-server-backups}"
-RUSTFS_ACCESS_KEY="${RUSTFS_ACCESS_KEY}"
-RUSTFS_SECRET_KEY="${RUSTFS_SECRET_KEY}"
 
-# Directories to backup
-WORKSPACE_DIR="/mnt/storage/code-server/workspace"
-CONFIG_DIR="/mnt/storage/code-server/config"
-GITEA_DIR="/mnt/storage/gitea/data"
+# Map to AWS CLI environment variables
+export AWS_ACCESS_KEY_ID="${RUSTFS_ACCESS_KEY}"
+export AWS_SECRET_ACCESS_KEY="${RUSTFS_SECRET_KEY}"
+export AWS_DEFAULT_REGION="us-east-1"
 
 # Retention (days)
 DAILY_RETENTION=7
@@ -23,6 +21,12 @@ DAILY_RETENTION=7
 echo "=== Backup Started: ${TIMESTAMP} ==="
 
 mkdir -p "${BACKUP_DIR}"
+
+# Validate credentials
+if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+  echo "Error: RUSTFS_ACCESS_KEY and RUSTFS_SECRET_KEY must be set"
+  exit 1
+fi
 
 # Backup workspace
 echo "Backing up workspace..."
@@ -44,45 +48,53 @@ tar czf "${BACKUP_DIR}/gitea-${TIMESTAMP}.tar.gz" \
   --exclude='*.log' \
   -C /mnt/storage gitea 2>/dev/null || true
 
+# Validate archives are non-empty
+for archive in workspace config gitea; do
+  FILE="${BACKUP_DIR}/${archive}-${TIMESTAMP}.tar.gz"
+  if [ ! -s "${FILE}" ]; then
+    echo "Warning: ${archive} backup is empty, skipping upload"
+    rm -f "${FILE}"
+  fi
+done
+
 # Upload to RustFS
 echo "Uploading to RustFS..."
+UPLOAD_ERRORS=0
 
-if [ -n "${RUSTFS_ACCESS_KEY}" ]; then
-  aws s3 cp "${BACKUP_DIR}/workspace-${TIMESTAMP}.tar.gz" \
-    "s3://${RUSTFS_BUCKET}/workspace-${TIMESTAMP}.tar.gz" \
-    --endpoint-url "${RUSTFS_ENDPOINT}" \
-    --region us-east-1 2>/dev/null || echo "Warning: workspace upload failed"
+for archive in workspace config gitea; do
+  FILE="${BACKUP_DIR}/${archive}-${TIMESTAMP}.tar.gz"
+  if [ -f "${FILE}" ]; then
+    if ! aws s3 cp "${FILE}" \
+      "s3://${RUSTFS_BUCKET}/${archive}-${TIMESTAMP}.tar.gz" \
+      --endpoint-url "${RUSTFS_ENDPOINT}" 2>/dev/null; then
+      echo "Error: ${archive} upload failed"
+      UPLOAD_ERRORS=$((UPLOAD_ERRORS + 1))
+    fi
+  fi
+done
 
-  aws s3 cp "${BACKUP_DIR}/config-${TIMESTAMP}.tar.gz" \
-    "s3://${RUSTFS_BUCKET}/config-${TIMESTAMP}.tar.gz" \
-    --endpoint-url "${RUSTFS_ENDPOINT}" \
-    --region us-east-1 2>/dev/null || echo "Warning: config upload failed"
-
-  aws s3 cp "${BACKUP_DIR}/gitea-${TIMESTAMP}.tar.gz" \
-    "s3://${RUSTFS_BUCKET}/gitea-${TIMESTAMP}.tar.gz" \
-    --endpoint-url "${RUSTFS_ENDPOINT}" \
-    --region us-east-1 2>/dev/null || echo "Warning: gitea upload failed"
-else
-  echo "Warning: RUSTFS_ACCESS_KEY not set, skipping upload"
-fi
-
-# Cleanup old local backups
-echo "Cleaning up old backups..."
+# Cleanup local backups
+echo "Cleaning up old local backups..."
 find "${BACKUP_DIR}" -name "*.tar.gz" -mtime +${DAILY_RETENTION} -delete 2>/dev/null || true
 
 # Cleanup old remote backups
-if [ -n "${RUSTFS_ACCESS_KEY}" ]; then
-  echo "Cleaning up old remote backups..."
-  CUTOFF_DATE=$(date -d "-${DAILY_RETENTION} days" +%Y%m%d 2>/dev/null || date -v-${DAILY_RETENTION}d +%Y%m%d 2>/dev/null || echo "")
-  if [ -n "${CUTOFF_DATE}" ]; then
-    aws s3 ls "s3://${RUSTFS_BUCKET}/" \
-      --endpoint-url "${RUSTFS_ENDPOINT}" \
-      --region us-east-1 2>/dev/null | \
-      awk -v cutoff="${CUTOFF_DATE}" '$2 < cutoff {print $4}' | \
-      xargs -I {} aws s3 rm "s3://${RUSTFS_BUCKET}/{}" \
-        --endpoint-url "${RUSTFS_ENDPOINT}" \
-        --region us-east-1 2>/dev/null || true
-  fi
+echo "Cleaning up old remote backups..."
+CUTOFF_DATE=$(date -d "-${DAILY_RETENTION} days" +%Y-%m-%d 2>/dev/null || date -v-${DAILY_RETENTION}d +%Y-%m-%d 2>/dev/null || echo "")
+if [ -n "${CUTOFF_DATE}" ]; then
+  aws s3 ls "s3://${RUSTFS_BUCKET}/" \
+    --endpoint-url "${RUSTFS_ENDPOINT}" 2>/dev/null | \
+    awk -v cutoff="${CUTOFF_DATE}" '$1 < cutoff {print $4}' | \
+    grep -v '^$' | \
+    xargs -I {} aws s3 rm "s3://${RUSTFS_BUCKET}/{}" \
+      --endpoint-url "${RUSTFS_ENDPOINT}" 2>/dev/null || true
+fi
+
+# Cleanup temp files
+rm -f "${BACKUP_DIR}"/*.tar.gz
+
+if [ ${UPLOAD_ERRORS} -gt 0 ]; then
+  echo "=== Backup Completed with Errors: ${TIMESTAMP} ==="
+  exit 1
 fi
 
 echo "=== Backup Complete: ${TIMESTAMP} ==="

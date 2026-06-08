@@ -12,10 +12,16 @@ services:
       - /mnt/storage/rustfs/data:/data
     environment:
       - RUSTFS_ROOT_USER=${RUSTFS_ROOT_USER:-admin}
-      - RUSTFS_ROOT_PASSWORD=${RUSTFS_ROOT_PASSWORD:-changeme}
+      - RUSTFS_ROOT_PASSWORD=${RUSTFS_ROOT_PASSWORD}
+    networks:
+      - codeserver-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+
+networks:
+  codeserver-network:
+    external: true

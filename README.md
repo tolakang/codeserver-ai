@@ -109,7 +109,7 @@ See [BACKUP.md](BACKUP.md) for RustFS backup strategy.
 Daily automated backups at 2 AM:
 
 ```bash
-0 2 * * * /mnt/storage/code-server/scripts/backup.sh
+0 2 * * * docker exec code-server /scripts/backup.sh >> /var/log/backup.log 2>&1
 ```
 
 ## Documentation

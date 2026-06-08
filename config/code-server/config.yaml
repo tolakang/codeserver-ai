@@ -1,5 +1,4 @@
 bind-addr: 0.0.0.0:8080
 auth: password
 password: ${CS_PASSWORD}
-cert:
 disable-telemetry: true

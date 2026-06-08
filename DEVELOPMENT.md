@@ -24,6 +24,7 @@ Installed automatically at startup via `scripts/install-extensions.sh`:
 
 - OpenCode AI
 - Amazon S3 Explorer
+- GitLens
 
 To add more extensions, edit `scripts/install-extensions.sh`.
 
