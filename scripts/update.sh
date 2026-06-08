@@ -34,26 +34,42 @@ SERVICE="${1:-all}"
 update_codeserver() {
   echo "--- Updating code-server ---"
   CODESERVER_VERSION=$CODESERVER_VERSION TARGETARCH=$TARGETARCH \
-    docker compose build code-server
-  docker compose up -d code-server
+    docker compose -f deploy/docker-compose.code-server.yml build
+  docker compose -f deploy/docker-compose.code-server.yml up -d
 }
 
 update_gitea() {
   echo "--- Updating gitea ---"
-  docker compose build gitea
-  docker compose up -d gitea
+  docker compose -f deploy/docker-compose.gitea.yml build
+  docker compose -f deploy/docker-compose.gitea.yml up -d
 }
 
 update_freellmapi() {
   echo "--- Updating freellmapi ---"
-  docker compose build freellmapi
-  docker compose up -d freellmapi
+  docker compose -f deploy/docker-compose.freellmapi.yml build
+  docker compose -f deploy/docker-compose.freellmapi.yml up -d
 }
 
 update_rustfs() {
   echo "--- Updating rustfs ---"
-  docker compose build rustfs
-  docker compose up -d rustfs
+  docker compose -f deploy/docker-compose.rustfs.yml build
+  docker compose -f deploy/docker-compose.rustfs.yml up -d
+}
+
+update_all() {
+  echo "--- Updating all services ---"
+  CODESERVER_VERSION=$CODESERVER_VERSION TARGETARCH=$TARGETARCH \
+    docker compose -f deploy/docker-compose.code-server.yml build
+  docker compose -f deploy/docker-compose.code-server.yml up -d
+
+  docker compose -f deploy/docker-compose.gitea.yml build
+  docker compose -f deploy/docker-compose.gitea.yml up -d
+
+  docker compose -f deploy/docker-compose.freellmapi.yml build
+  docker compose -f deploy/docker-compose.freellmapi.yml up -d
+
+  docker compose -f deploy/docker-compose.rustfs.yml build
+  docker compose -f deploy/docker-compose.rustfs.yml up -d
 }
 
 case "$SERVICE" in
@@ -61,12 +77,7 @@ case "$SERVICE" in
   gitea)       update_gitea ;;
   freellmapi)  update_freellmapi ;;
   rustfs)      update_rustfs ;;
-  all)
-    update_codeserver
-    update_gitea
-    update_freellmapi
-    update_rustfs
-    ;;
+  all)         update_all ;;
   *)
     echo "Unknown service: $SERVICE"
     echo "Usage: $0 [code-server|gitea|freellmapi|rustfs|all]"
@@ -78,4 +89,7 @@ echo ""
 echo "=== Update Complete ==="
 echo "Services updated: $SERVICE"
 echo ""
-docker compose ps
+docker compose -f deploy/docker-compose.code-server.yml ps 2>/dev/null || true
+docker compose -f deploy/docker-compose.gitea.yml ps 2>/dev/null || true
+docker compose -f deploy/docker-compose.freellmapi.yml ps 2>/dev/null || true
+docker compose -f deploy/docker-compose.rustfs.yml ps 2>/dev/null || true

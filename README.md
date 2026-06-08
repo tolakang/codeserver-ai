@@ -47,7 +47,7 @@ Dokploy
 | freellmapi | [tashfeenahmed/freellmapi](https://github.com/tashfeenahmed/freellmapi) | Git submodule, multi-stage build | 3000 |
 | rustfs | [rustfs/rustfs](https://github.com/rustfs/rustfs) | Git submodule, binary download | 9000 |
 
-## Deployment
+## Quick Start
 
 ### 1. Clone Repository with Submodules
 
@@ -78,31 +78,48 @@ sudo mkdir -p /mnt/storage/rustfs/data
 sudo chown -R 1000:1000 /mnt/storage
 ```
 
-### 4. Build and Deploy
+### 4. Deploy
+
+**Option A: All services at once (docker compose)**
 
 ```bash
-# Build all images
-docker compose build
-
-# Deploy all services
 docker compose up -d
 ```
 
-**Option B: Individual services**
+**Option B: Individual services via Dokploy**
 
-Deploy each compose file as a separate Dokploy application:
+See [deploy/README.md](deploy/README.md) for detailed Dokploy setup.
 
-1. `docker-compose.code-server.yml`
-2. `docker-compose.gitea.yml`
-3. `docker-compose.freellmapi.yml`
-4. `docker-compose.rustfs.yml`
+## File Structure
 
-### 5. First-Time Setup
-
-1. Access Code Server at `http://your-server:8080`
-2. Access Gitea at `http://your-server:3001` and complete setup wizard
-3. Create admin user in Gitea
-4. OpenCode and FreeLLMAPI connect automatically
+```
+/
+├── Dockerfile.codeserver          ← builds code-server from .deb
+├── Dockerfile.gitea               ← builds gitea from source
+├── Dockerfile.freellmapi          ← builds freellmapi from source
+├── Dockerfile.rustfs              ← builds rustfs from source
+├── docker-compose.yml             ← combined orchestrator
+├── deploy/
+│   ├── docker-compose.code-server.yml
+│   ├── docker-compose.gitea.yml
+│   ├── docker-compose.freellmapi.yml
+│   └── docker-compose.rustfs.yml
+├── vendor/
+│   ├── gitea/                     ← git submodule
+│   ├── freellmapi/                ← git submodule
+│   └── rustfs/                    ← git submodule
+├── scripts/
+│   ├── backup.sh
+│   ├── restore.sh
+│   ├── init.sh
+│   ├── install-extensions.sh
+│   └── update.sh
+├── config/
+├── docs/
+├── .env.example
+├── .gitmodules
+└── README.md
+```
 
 ## Update
 
@@ -121,21 +138,6 @@ Update specific service:
 ./scripts/update.sh rustfs
 ```
 
-Manual update:
-
-```bash
-# Pull latest source
-git submodule update --remote
-
-# Get latest code-server version
-CODESERVER_VERSION=$(curl -fsSL https://api.github.com/repos/coder/code-server/releases/latest \
-  | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
-
-# Rebuild and redeploy
-CODESERVER_VERSION=$CODESERVER_VERSION docker compose build
-docker compose up -d
-```
-
 ## Backup
 
 See [BACKUP.md](BACKUP.md) for RustFS backup strategy.
@@ -148,6 +150,7 @@ Daily automated backups at 2 AM:
 
 ## Documentation
 
+- [Dokploy Deployment Guide](deploy/README.md)
 - [Development Guide](DEVELOPMENT.md)
 - [Backup Strategy](BACKUP.md)
 - [RustFS Setup](docs/rustfs.md)
