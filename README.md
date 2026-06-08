@@ -41,10 +41,10 @@ Dokploy
 
 | Service | Image | Port | Purpose |
 |---------|-------|------|---------|
-| code-server | linuxserver/code-server:latest | 8080 | Web IDE |
-| gitea | gitea/gitea:latest | 3001 | Git hosting |
+| code-server | ghcr.io/coder/code-server:latest | 8080 | Web IDE |
+| gitea | docker.io/gitea/gitea:latest | 3001 | Git hosting |
 | freellmapi | ghcr.io/tashfeenahmed/freellmapi:latest | 3000 | LLM proxy |
-| rustfs | ghcr.io/rustfs/rustfs:latest | 9000 | S3 backup |
+| rustfs | docker.io/rustfs/rustfs:latest | 9000 | S3 backup |
 
 ## Deployment
 

@@ -1,13 +1,11 @@
 # docker-compose.code-server.yml
 # Deploy as separate Dokploy application
 # Source: https://github.com/coder/code-server
+# Image: ghcr.io/coder/code-server:latest
 
 services:
   code-server:
-    build:
-      context: .
-      dockerfile: Dockerfile.codeserver
-    image: codeserver-custom:latest
+    image: ghcr.io/coder/code-server:latest
     container_name: code-server
     restart: unless-stopped
     ports:
@@ -21,7 +19,7 @@ services:
       - PGID=1000
       - TZ=${TZ:-UTC}
       - DEFAULT_WORKSPACE=/workspace
-      - CS_PASSWORD=${CS_PASSWORD}
+      - PASSWORD=${CS_PASSWORD}
     networks:
       - codeserver-network
     healthcheck:

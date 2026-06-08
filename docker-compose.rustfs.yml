@@ -1,13 +1,11 @@
 # docker-compose.rustfs.yml
 # Deploy as separate Dokploy application
 # Source: https://github.com/rustfs/rustfs
+# Image: docker.io/rustfs/rustfs:latest
 
 services:
   rustfs:
-    build:
-      context: .
-      dockerfile: Dockerfile.rustfs
-    image: rustfs-custom:latest
+    image: rustfs/rustfs:latest
     container_name: rustfs
     restart: unless-stopped
     ports:
@@ -17,6 +15,7 @@ services:
     environment:
       - RUSTFS_ROOT_USER=${RUSTFS_ROOT_USER:-admin}
       - RUSTFS_ROOT_PASSWORD=${RUSTFS_ROOT_PASSWORD}
+      - RUSTFS_VOLUMES=/data
     networks:
       - codeserver-network
     healthcheck:

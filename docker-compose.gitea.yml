@@ -1,13 +1,11 @@
 # docker-compose.gitea.yml
 # Deploy as separate Dokploy application
 # Source: https://github.com/go-gitea/gitea
+# Image: docker.io/gitea/gitea:latest
 
 services:
   gitea:
-    build:
-      context: .
-      dockerfile: Dockerfile.gitea
-    image: gitea-custom:latest
+    image: gitea/gitea:latest
     container_name: gitea
     restart: unless-stopped
     ports:
@@ -21,7 +19,7 @@ services:
       - USER_UID=1000
       - USER_GID=1000
       - GITEA__database__DB_TYPE=sqlite3
-      - GITEA__server__ROOT_URL=http://${GITEA_DOMAIN}
+      - GITEA__server__ROOT_URL=${GITEA_DOMAIN}
       - GITEA__server__HTTP_PORT=3000
       - GITEA__server__DOMAIN=${GITEA_DOMAIN}
       - GITEA__service__DISABLE_REGISTRATION=false
