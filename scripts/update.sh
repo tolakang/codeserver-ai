@@ -1,6 +1,6 @@
 #!/bin/bash
 # update.sh
-# Pull latest source and rebuild all services
+# Rebuild all services from source
 # Usage: ./scripts/update.sh [service]
 #   Without args: updates all services
 #   With service name: updates only that service (code-server, gitea, freellmapi, rustfs)
@@ -8,10 +8,6 @@
 set -e
 
 echo "=== codeserver-ai Update ==="
-
-# Update git submodules
-echo "Updating git submodules..."
-git submodule update --remote
 
 # Get latest code-server version from GitHub releases
 echo "Checking latest code-server version..."
@@ -34,41 +30,41 @@ SERVICE="${1:-all}"
 update_codeserver() {
   echo "--- Updating code-server ---"
   CODESERVER_VERSION=$CODESERVER_VERSION TARGETARCH=$TARGETARCH \
-    docker compose -f deploy/docker-compose.code-server.yml build
+    docker compose -f deploy/docker-compose.code-server.yml build --no-cache
   docker compose -f deploy/docker-compose.code-server.yml up -d
 }
 
 update_gitea() {
   echo "--- Updating gitea ---"
-  docker compose -f deploy/docker-compose.gitea.yml build
+  docker compose -f deploy/docker-compose.gitea.yml build --no-cache
   docker compose -f deploy/docker-compose.gitea.yml up -d
 }
 
 update_freellmapi() {
   echo "--- Updating freellmapi ---"
-  docker compose -f deploy/docker-compose.freellmapi.yml build
+  docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
   docker compose -f deploy/docker-compose.freellmapi.yml up -d
 }
 
 update_rustfs() {
   echo "--- Updating rustfs ---"
-  docker compose -f deploy/docker-compose.rustfs.yml build
+  docker compose -f deploy/docker-compose.rustfs.yml build --no-cache
   docker compose -f deploy/docker-compose.rustfs.yml up -d
 }
 
 update_all() {
   echo "--- Updating all services ---"
   CODESERVER_VERSION=$CODESERVER_VERSION TARGETARCH=$TARGETARCH \
-    docker compose -f deploy/docker-compose.code-server.yml build
+    docker compose -f deploy/docker-compose.code-server.yml build --no-cache
   docker compose -f deploy/docker-compose.code-server.yml up -d
 
-  docker compose -f deploy/docker-compose.gitea.yml build
+  docker compose -f deploy/docker-compose.gitea.yml build --no-cache
   docker compose -f deploy/docker-compose.gitea.yml up -d
 
-  docker compose -f deploy/docker-compose.freellmapi.yml build
+  docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
   docker compose -f deploy/docker-compose.freellmapi.yml up -d
 
-  docker compose -f deploy/docker-compose.rustfs.yml build
+  docker compose -f deploy/docker-compose.rustfs.yml build --no-cache
   docker compose -f deploy/docker-compose.rustfs.yml up -d
 }
 

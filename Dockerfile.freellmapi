@@ -9,18 +9,28 @@ FROM ${NODE_IMAGE} AS deps
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3 make g++ \
+    && apt-get install -y --no-install-recommends python3 make g++ git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY vendor/freellmapi/package.json vendor/freellmapi/package-lock.json ./
-COPY vendor/freellmapi/shared/package.json ./shared/
-COPY vendor/freellmapi/server/package.json ./server/
-COPY vendor/freellmapi/client/package.json ./client/
+RUN git clone --depth 1 https://github.com/tashfeenahmed/freellmapi.git .
+
+RUN cp package.json package-lock.json ./tmp/ \
+    && cp shared/package.json ./tmp/shared/ \
+    && cp server/package.json ./tmp/server/ \
+    && cp client/package.json ./tmp/client/ \
+    && rm -rf node_modules shared server client \
+    && mkdir -p shared server client \
+    && mv tmp/package.json tmp/package-lock.json . \
+    && mv tmp/shared/package.json shared/ \
+    && mv tmp/server/package.json server/ \
+    && mv tmp/client/package.json client/ \
+    && rm -rf tmp
+
 RUN npm ci
 
 FROM deps AS build
 WORKDIR /app
-COPY vendor/freellmapi/ .
+COPY . .
 RUN npm run build
 RUN npm prune --omit=dev
 

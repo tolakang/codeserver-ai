@@ -192,9 +192,6 @@ docker network create codeserver-network
 
 ### Build fails with `COPY vendor/...: no such file or directory`
 
-**Cause:** Git submodules not initialized.
+**Cause:** Source code not cloned during build.
 
-**Fix:**
-```bash
-git submodule update --init --recursive
-```
+**Fix:** This should not happen with the current Dockerfiles (they clone source at build time). If you see this error, ensure you're using the latest Dockerfiles from the repository.

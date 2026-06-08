@@ -10,10 +10,8 @@ FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.26-alpine3.23 AS front
 RUN apk --no-cache add build-base git nodejs pnpm
 WORKDIR /src
 
-COPY vendor/gitea/package.json vendor/gitea/pnpm-lock.yaml vendor/gitea/pnpm-workspace.yaml ./
+RUN git clone --depth 1 https://github.com/go-gitea/gitea.git .
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
-
-COPY vendor/gitea/ .
 RUN make frontend
 
 # Build backend for each target platform
@@ -26,17 +24,14 @@ RUN apk --no-cache add build-base git
 
 WORKDIR ${GOPATH}/src/gitea.dev
 
-COPY vendor/gitea/go.mod vendor/gitea/go.sum ./
-RUN go mod download
-
-COPY vendor/gitea/ .
+RUN git clone --depth 1 https://github.com/go-gitea/gitea.git .
 COPY --from=frontend-build /src/public/assets public/assets
 
 RUN --mount=type=cache,target="/root/.cache/go-build" \
-    --mount=type=bind,source="vendor/gitea/.git/",target=".git/" \
+    --mount=type=bind,source=".git/",target=".git/" \
     make backend
 
-COPY vendor/gitea/docker/root /tmp/local
+COPY docker/root /tmp/local
 
 RUN chmod 755 /tmp/local/usr/bin/entrypoint \
               /tmp/local/usr/local/bin/* \

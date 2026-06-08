@@ -12,7 +12,7 @@ Production-grade self-hosted Code Server with AI integration, Gitea, and RustFS 
 - Claude Memory Persistence
 - Self-hosted Gitea Git Server
 - Auto-installed Extensions
-- Built from Source (git submodules + .deb releases)
+- Built from Source (cloned at Docker build time)
 
 ## Architecture
 
@@ -43,22 +43,17 @@ Dokploy
 | Service | Source | Build Method | Port |
 |---------|--------|--------------|------|
 | code-server | [coder/code-server](https://github.com/coder/code-server) | .deb from GitHub releases | 8080 |
-| gitea | [go-gitea/gitea](https://github.com/go-gitea/gitea) | Git submodule, multi-stage build | 3001 |
-| freellmapi | [tashfeenahmed/freellmapi](https://github.com/tashfeenahmed/freellmapi) | Git submodule, multi-stage build | 3000 |
-| rustfs | [rustfs/rustfs](https://github.com/rustfs/rustfs) | Git submodule, binary download | 9000 |
+| gitea | [go-gitea/gitea](https://github.com/go-gitea/gitea) | Cloned at build time | 3001 |
+| freellmapi | [tashfeenahmed/freellmapi](https://github.com/tashfeenahmed/freellmapi) | Cloned at build time | 3000 |
+| rustfs | [rustfs/rustfs](https://github.com/rustfs/rustfs) | Binary from releases | 9000 |
 
 ## Quick Start
 
-### 1. Clone Repository with Submodules
+### 1. Clone Repository
 
 ```bash
-git clone --recurse-submodules https://github.com/youruser/codeserver-ai.git
+git clone https://github.com/youruser/codeserver-ai.git
 cd codeserver-ai
-```
-
-If already cloned without submodules:
-```bash
-git submodule update --init --recursive
 ```
 
 ### 2. Configure Environment
@@ -95,19 +90,15 @@ See [deploy/README.md](deploy/README.md) for detailed Dokploy setup.
 ```
 /
 ├── Dockerfile.codeserver          ← builds code-server from .deb
-├── Dockerfile.gitea               ← builds gitea from source
-├── Dockerfile.freellmapi          ← builds freellmapi from source
-├── Dockerfile.rustfs              ← builds rustfs from source
+├── Dockerfile.gitea               ← clones and builds gitea
+├── Dockerfile.freellmapi          ← clones and builds freellmapi
+├── Dockerfile.rustfs              ← downloads rustfs binary
 ├── docker-compose.yml             ← combined orchestrator
 ├── deploy/
 │   ├── docker-compose.code-server.yml
 │   ├── docker-compose.gitea.yml
 │   ├── docker-compose.freellmapi.yml
 │   └── docker-compose.rustfs.yml
-├── vendor/
-│   ├── gitea/                     ← git submodule
-│   ├── freellmapi/                ← git submodule
-│   └── rustfs/                    ← git submodule
 ├── scripts/
 │   ├── backup.sh
 │   ├── restore.sh
@@ -117,13 +108,12 @@ See [deploy/README.md](deploy/README.md) for detailed Dokploy setup.
 ├── config/
 ├── docs/
 ├── .env.example
-├── .gitmodules
 └── README.md
 ```
 
 ## Update
 
-Update all services from source:
+Update all services (rebuilds from latest source):
 
 ```bash
 ./scripts/update.sh

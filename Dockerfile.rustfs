@@ -11,7 +11,7 @@ ARG RELEASE=latest
 RUN apk add --no-cache ca-certificates curl unzip
 WORKDIR /build
 
-# Download binary from GitHub releases (same as upstream)
+# Download binary from GitHub releases
 RUN set -eux; \
     case "$TARGETARCH" in \
       amd64)  ARCH_SUBSTR="x86_64-musl"  ;; \
@@ -68,9 +68,9 @@ RUN apk update && \
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /build/rustfs /usr/bin/rustfs
 
-# Use upstream entrypoint
-COPY vendor/rustfs/entrypoint.sh /entrypoint.sh
-RUN chmod +x /usr/bin/rustfs /entrypoint.sh
+# Download entrypoint.sh from upstream
+RUN curl -fsSL https://raw.githubusercontent.com/rustfs/rustfs/main/entrypoint.sh -o /entrypoint.sh \
+    && chmod +x /usr/bin/rustfs /entrypoint.sh
 
 RUN addgroup -g 10001 -S rustfs && \
     adduser -u 10001 -G rustfs -S rustfs -D && \

@@ -31,8 +31,3 @@ logs/
 tmp/
 temp/
 .tmp/
-
-# Vendor submodule contents (managed by git submodules)
-vendor/gitea/
-vendor/freellmapi/
-vendor/rustfs/
