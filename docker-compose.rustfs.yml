@@ -1,9 +1,13 @@
 # docker-compose.rustfs.yml
 # Deploy as separate Dokploy application
+# Source: https://github.com/rustfs/rustfs
 
 services:
   rustfs:
-    image: ghcr.io/rustfs/rustfs:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.rustfs
+    image: rustfs-custom:latest
     container_name: rustfs
     restart: unless-stopped
     ports:

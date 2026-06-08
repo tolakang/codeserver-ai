@@ -1,12 +1,13 @@
 # docker-compose.code-server.yml
 # Deploy as separate Dokploy application
+# Source: https://github.com/coder/code-server
 
 services:
   code-server:
-    image: linuxserver/code-server:latest
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.codeserver
+    image: codeserver-custom:latest
     container_name: code-server
     restart: unless-stopped
     ports:

@@ -1,9 +1,13 @@
 # docker-compose.gitea.yml
 # Deploy as separate Dokploy application
+# Source: https://github.com/go-gitea/gitea
 
 services:
   gitea:
-    image: gitea/gitea:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.gitea
+    image: gitea-custom:latest
     container_name: gitea
     restart: unless-stopped
     ports:
