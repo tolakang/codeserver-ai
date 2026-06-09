@@ -22,6 +22,8 @@ ENV TAGS="bindata timetzdata $TAGS"
 
 RUN apk --no-cache add build-base git curl
 
+ENV GOPROXY=https://proxy.golang.org,direct
+
 WORKDIR ${GOPATH}/src/gitea.dev
 
 COPY --from=frontend-build /src /go/src/gitea.dev
@@ -29,7 +31,7 @@ COPY --from=frontend-build /src/public/assets public/assets
 
 RUN --mount=type=cache,target="/root/.cache/go-build" \
     --mount=type=cache,target="/go/pkg/mod" \
-    go mod download
+    for i in 1 2 3; do go mod download && break || sleep 10; done
 
 RUN --mount=type=cache,target="/root/.cache/go-build" \
     --mount=type=bind,source=".git/",target=".git/" \
