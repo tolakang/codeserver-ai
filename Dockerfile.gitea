@@ -31,15 +31,12 @@ RUN --mount=type=cache,target="/root/.cache/go-build" \
     --mount=type=bind,source=".git/",target=".git/" \
     make backend
 
-# Download docker/root from official Gitea repo (not in this repo)
+# Download docker/root from official Gitea repo and copy to /tmp/local
 RUN set -eux; \
     curl -fsSL "https://github.com/go-gitea/gitea/archive/refs/heads/main.tar.gz" \
     | tar -xz -C /tmp --strip-components=1 gitea-main/docker/root && \
-    ls -la /tmp/docker/root/
-
-COPY /tmp/docker/root /tmp/local
-
-RUN chmod 755 /tmp/local/usr/bin/entrypoint \
+    cp -r /tmp/docker/root /tmp/local && \
+    chmod 755 /tmp/local/usr/bin/entrypoint \
               /tmp/local/usr/local/bin/* \
               /tmp/local/etc/s6/gitea/* \
               /tmp/local/etc/s6/openssh/* \
