@@ -58,29 +58,27 @@ Dokploy (Docker-based deployment)
 
 ---
 
-## Phase 1: Gitea Database Migration (Current Sprint)
+## Phase 1: Gitea Database Migration (✅ Complete)
 
 ### Objective
 Replace SQLite3 with PostgreSQL + PgBouncer for production-grade database.
 
 ### Changes
 
-#### 1. docker-compose.gitea.yml
+#### 1. docker-compose.gitea.yml (✅ Done)
 - Add `postgres:16-alpine` service
 - Add `pgbouncer` connection pooler
 - Update gitea env vars to point to pgbouncer
 - Add `postgres-data` volume
 - Add `depends_on` with health checks
 
-#### 2. New Files
-- `deploy/backup-gitea.sh` — pg_dump script
-- `deploy/backup-cron.yml` — Dokploy cron job
-- `config/pgbouncer/pgbouncer.ini` — custom config
+#### 2. New Files (✅ Done)
+- `deploy/backup-gitea.sh` — pg_dump script (created)
+- `deploy/backup-cron.yml` — Dokploy cron job (created)
 
-#### 3. Updated `.env.example`
+#### 3. Updated `.env.example` (✅ Done)
 - `POSTGRES_PASSWORD`
-- `PGBOUNCER_PASSWORD`
-- `GITEA_DOMAIN`
+- `GITEA_DOMAIN` (dummy domain)
 
 ### Architecture (After)
 
@@ -97,18 +95,6 @@ Replace SQLite3 with PostgreSQL + PgBouncer for production-grade database.
                                └─────────┘
 ```
 
-### Migration Steps
-
-| Step | Action | Duration |
-|------|--------|----------|
-| 1.1 | Add postgres service | 15 min |
-| 1.2 | Add pgbouncer service | 15 min |
-| 1.3 | Update gitea env vars | 10 min |
-| 1.4 | Add volumes + depends_on | 5 min |
-| 1.5 | Commit & push | 5 min |
-| 1.6 | Deploy in Dokploy | 30 min |
-| 1.7 | Run install page | 5 min |
-
 ### Rollback
 - Revert compose to SQLite3 config
 - Keep volumes intact
@@ -116,7 +102,7 @@ Replace SQLite3 with PostgreSQL + PgBouncer for production-grade database.
 
 ---
 
-## Phase 2: Backup Automation
+## Phase 2: Backup Automation (✅ Complete)
 
 ### Objective
 Automated daily PostgreSQL dumps with pg_dump + RustFS upload.
@@ -125,7 +111,7 @@ Automated daily PostgreSQL dumps with pg_dump + RustFS upload.
 
 | Component | Schedule | Retention |
 |-----------|----------|-----------|
-| pg_dump to RustFS | Daily 2 AM UTC | 7 daily, 4 weekly, 6 monthly |
+| pg_dump to RustFS | Daily 2 AM UTC | 30 days |
 | Volume snapshot (Dokploy) | Weekly | 4 weeks |
 
 ### Backup Flow
@@ -139,6 +125,10 @@ pg_dump ──▶ gzip ──▶ aws s3 cp ──▶ RustFS (:9000)
                                   │ data   │
                                   └───────┘
 ```
+
+### Files Created
+- `scripts/backup-gitea.sh` — manual/in-container backup
+- `deploy/backup-cron.yml` — Dokploy cron job (requires secrets configuration in Dokploy UI)
 
 ---
 

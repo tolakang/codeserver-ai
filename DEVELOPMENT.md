@@ -63,10 +63,12 @@ docker compose logs code-server
 
 ### Gitea database issues
 
-Gitea uses SQLite stored in `/mnt/storage/gitea/data`.
+Gitea uses PostgreSQL via PgBouncer pooler.
 
 ```bash
 docker compose logs gitea
+docker compose logs gitea-postgres
+docker compose logs gitea-pgbouncer
 ```
 
 ### FreeLLMAPI not connecting

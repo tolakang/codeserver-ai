@@ -29,7 +29,7 @@ Dokploy
     |
     +-- Gitea (port 3001)
     |       +-- Git Repos
-    |       +-- SQLite DB
+    |       +-- PostgreSQL via PgBouncer
     |
     +-- FreeLLMAPI (port 3000)
     |       +-- OpenRouter Free Models

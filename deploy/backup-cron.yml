@@ -1,0 +1,55 @@
+# backup-cron.yml
+# Dokploy cron job for daily Gitea PostgreSQL backup
+# Deploy as a separate Dokploy application with type "Cron"
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gitea-db-backup
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: backup
+              image: postgres:16-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  apk add --no-cache aws-cli
+                  PGPASSWORD="${POSTGRES_PASSWORD}" pg_dump \
+                    -h pgbouncer -p 6432 -U gitea -d gitea \
+                    --no-owner --no-privileges --clean --if-exists \
+                    | gzip > /tmp/gitea-db-$(date +%F-%H%M).sql.gz
+                  aws s3 cp /tmp/gitea-db-*.sql.gz \
+                    s3://${RUSTFS_BUCKET}/ \
+                    --endpoint-url ${RUSTFS_ENDPOINT}
+              env:
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: gitea-db-secrets
+                      key: POSTGRES_PASSWORD
+                - name: RUSTFS_ENDPOINT
+                  value: http://rustfs:9000
+                - name: RUSTFS_BUCKET
+                  value: gitea-backups
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: rustfs-credentials
+                      key: AWS_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: rustfs-credentials
+                      key: AWS_SECRET_ACCESS_KEY
+                - name: AWS_DEFAULT_REGION
+                  value: us-east-1
+          restartPolicy: OnFailure

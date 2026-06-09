@@ -17,6 +17,18 @@ Deploy Gitea as a Dokploy application using `docker-compose.gitea.yml`.
 | 3001 | 3000 | Web UI |
 | 2222 | 22 | SSH Git access |
 
+## Database
+
+Gitea uses **PostgreSQL** via **PgBouncer** connection pooler.
+
+| Component | Container | Port |
+|-----------|-----------|------|
+| PostgreSQL 16 | gitea-postgres | 5432 |
+| PgBouncer | gitea-pgbouncer | 6432 |
+| Gitea | gitea | 3000 |
+
+Connection flow: `Gitea ──▶ PgBouncer (6432) ──▶ PostgreSQL (5432)`
+
 ## First-Time Setup
 
 ### 1. Access Web UI
@@ -27,7 +39,7 @@ Open `http://your-server:3001` in browser.
 
 The Gitea setup wizard will appear. Configure:
 
-- **Database**: SQLite (default, stored in `/data/gitea/gitea.db`)
+- **Database**: PostgreSQL (pre-configured via env vars)
 - **Repository Root Path**: `/data/git/repositories`
 - **LFS Path**: `/data/git/lfs`
 - **Server Domain**: `your-server-domain`
@@ -79,33 +91,51 @@ git push -u origin main
 
 ## Persistence
 
-Gitea data is stored in:
+Gitea data is stored in volumes:
 
-```
-/mnt/storage/gitea/data
-```
-
-This includes:
-
-- Git repositories
-- SQLite database
-- User avatars
-- LFS objects
+| Volume | Container | Contents |
+|--------|-----------|----------|
+| `gitea-data` | gitea | Git repos, config, SSH keys, avatars |
+| `postgres-data` | gitea-postgres | PostgreSQL database files |
 
 ## Environment Variables
 
 Set in `.env`:
 
 ```bash
-GITEA_DOMAIN=gitea.yourdomain.com
-GITEA_ADMIN_USER=admin
-GITEA_ADMIN_PASSWORD=changeme
-GITEA_ADMIN_EMAIL=admin@yourdomain.com
+# ---- Gitea ----
+GITEA_DOMAIN=https://gitea.yourdomain.com
+
+# ---- PostgreSQL ----
+POSTGRES_PASSWORD=your-postgres-password
 ```
+
+Database config is auto-configured via env vars in `docker-compose.gitea.yml`.
 
 ## Backup
 
-Gitea data is included in daily backups. See [BACKUP.md](../BACKUP.md).
+### Daily pg_dump
+
+A separate backup script (`scripts/backup-gitea.sh`) runs daily via Dokploy cron job at 2 AM UTC:
+
+```bash
+pg_dump -h pgbouncer -p 6432 -U gitea -d gitea | gzip > gitea-db-$(date +%F).sql.gz
+aws s3 cp ... s3://gitea-backups/
+```
+
+Retention: 30 days.
+
+### Manual Backup
+
+```bash
+docker exec gitea-postgres pg_dump -U gitea -d gitea | gzip > gitea-backup.sql.gz
+```
+
+### Restore
+
+```bash
+gunzip < gitea-backup.sql.gz | docker exec -i gitea-postgres psql -U gitea -d gitea
+```
 
 ## Health Check
 
@@ -129,11 +159,13 @@ Ensure port 2222 is mapped and accessible:
 ssh -p 2222 git@your-server
 ```
 
-### Database locked
+### Database connection issues
 
-If SQLite database is locked:
+Check PostgreSQL and PgBouncer health:
 
 ```bash
+docker compose logs gitea-postgres
+docker compose logs gitea-pgbouncer
 docker compose restart gitea
 ```
 
