@@ -7,16 +7,18 @@
 # Build frontend on the native platform to avoid QEMU-related issues
 FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.26-alpine3.23 AS frontend-build
 
+ARG GITEA_VERSION=1.23.0
 RUN apk --no-cache add build-base git nodejs pnpm
 WORKDIR /src
 
-RUN git clone --depth 1 https://github.com/go-gitea/gitea.git .
+RUN git clone --depth 1 --branch v${GITEA_VERSION} https://github.com/go-gitea/gitea.git .
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 RUN make frontend
 
 # Build backend for each target platform
 FROM docker.io/library/golang:1.26-alpine3.23 AS build-env
 
+ARG GITEA_VERSION=1.23.0
 ARG TAGS=""
 ENV TAGS="bindata timetzdata $TAGS"
 
@@ -34,7 +36,6 @@ RUN --mount=type=cache,target="/root/.cache/go-build" \
     for i in 1 2 3; do go mod download && break || sleep 10; done
 
 RUN --mount=type=cache,target="/root/.cache/go-build" \
-    --mount=type=bind,source=".git/",target=".git/" \
     make backend
 
 # Copy docker/root from cloned source (no separate download)

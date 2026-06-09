@@ -66,6 +66,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.gitea
+      args:
+        GITEA_VERSION: ${GITEA_VERSION:-1.23.0}
     image: gitea-custom:latest
     container_name: gitea
     restart: unless-stopped
