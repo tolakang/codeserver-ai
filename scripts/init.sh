@@ -27,6 +27,9 @@ fi
 # Create memory directory
 mkdir -p /workspace/.memory
 
+# Ensure workspace and config dirs exist
+mkdir -p /workspace /home/coder/.config/code-server
+
 # Create default git config if not exists
 if [ ! -f /home/coder/.gitconfig ]; then
   cat > /home/coder/.gitconfig <<'EOF'
