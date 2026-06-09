@@ -83,6 +83,8 @@ COPY config/opencode/ /config/opencode/
 COPY config/code-server/config.yaml /home/coder/.config/code-server/config.yaml
 COPY config/code-server/settings.json /home/coder/.config/code-server/User/settings.json
 
+RUN chown -R 1000:1000 /home/coder/.config
+
 RUN mkdir -p /workspace/.memory
 
 EXPOSE 8080

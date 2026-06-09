@@ -48,4 +48,4 @@ fi
 echo "=== Init Complete ==="
 
 # Execute code-server
-exec code-server "$@"
+exec code-server --bind-addr 0.0.0.0:8080 /workspace "$@"

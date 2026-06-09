@@ -1,5 +1,5 @@
 {
   "provider": "openai",
-  "baseURL": "http://freellmapi:3000/v1",
-  "apiKey": ""
+  "baseURL": "https://freellmapi.nokor24.com/v1",
+  "apiKey": "freellmapi-9328de5edb2af9792e742b9029211383a37f946ebb6e6fc4"
 }
