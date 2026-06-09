@@ -16,10 +16,10 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /mnt/storage/code-server/config:/config
-      - /mnt/storage/code-server/workspace:/workspace
-      - /mnt/storage/code-server/extensions:/extensions
-      - /mnt/storage/code-server/code-server-config:/home/coder/.config/code-server
+      - code-server-config:/config
+      - code-server-workspace:/workspace
+      - code-server-extensions:/extensions
+      - code-server-code-server-config:/home/coder/.config/code-server
     environment:
       - PUID=1000
       - PGID=1000
@@ -38,3 +38,9 @@ services:
 networks:
   codeserver-network:
     external: true
+
+volumes:
+  code-server-config:
+  code-server-workspace:
+  code-server-extensions:
+  code-server-code-server-config:

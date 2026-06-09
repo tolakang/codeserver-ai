@@ -29,13 +29,9 @@ This is the recommended approach for each service.
    - `deploy/docker-compose.freellmapi.yml`
    - `deploy/docker-compose.rustfs.yml`
 4. **Configure environment variables** in the Dokploy UI
-5. **Configure Pre-deploy command** (for code-server only):
-   - Go to **Settings** → **Lifecycle** → **Pre-deploy command**
-   - Paste:
-     ```bash
-     mkdir -p /mnt/storage/code-server/{config,workspace,extensions,code-server-config} && chown -R 1000:1000 /mnt/storage/code-server
-     ```
-6. **Deploy**
+5. **Deploy**
+
+> **Note for code-server:** Uses Docker named volumes for persistence (automatic, no host setup required). Works with Dokploy Volume Backups to RustFS/S3.
 
 ### Example: Deploying FreeLLMAPI
 
