@@ -24,18 +24,20 @@ RUN apk --no-cache add build-base git curl
 
 WORKDIR ${GOPATH}/src/gitea.dev
 
-RUN git clone --depth 1 https://github.com/go-gitea/gitea.git .
+COPY --from=frontend-build /src /go/src/gitea.dev
 COPY --from=frontend-build /src/public/assets public/assets
+
+RUN --mount=type=cache,target="/root/.cache/go-build" \
+    --mount=type=cache,target="/go/pkg/mod" \
+    go mod download
 
 RUN --mount=type=cache,target="/root/.cache/go-build" \
     --mount=type=bind,source=".git/",target=".git/" \
     make backend
 
-# Download docker/root from official Gitea repo and copy to /tmp/local
+# Copy docker/root from cloned source (no separate download)
 RUN set -eux; \
-    curl -fsSL "https://github.com/go-gitea/gitea/archive/refs/heads/main.tar.gz" \
-    | tar -xz -C /tmp --strip-components=1 gitea-main/docker/root && \
-    cp -r /tmp/docker/root /tmp/local && \
+    cp -r /go/src/gitea.dev/docker/root /tmp/local && \
     chmod 755 /tmp/local/usr/bin/entrypoint \
               /tmp/local/usr/local/bin/* \
               /tmp/local/etc/s6/gitea/* \
