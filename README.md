@@ -12,7 +12,7 @@ Production-grade self-hosted Code Server with AI integration, Gitea, and RustFS 
 - Claude Memory Persistence
 - Self-hosted Gitea Git Server
 - Auto-installed Extensions
-- Built from Source (cloned at Docker build time)
+- Built from Source (multi-arch: amd64/arm64 auto-detected)
 
 ## Architecture
 
@@ -110,6 +110,8 @@ See [deploy/README.md](deploy/README.md) for detailed Dokploy setup.
 ├── .env.example
 └── README.md
 ```
+
+> **Architecture Note:** code-server builds for **both amd64 and arm64** automatically via Docker/buildx. No manual `TARGETARCH` configuration needed.
 
 ## Update
 

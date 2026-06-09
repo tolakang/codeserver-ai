@@ -73,7 +73,7 @@ Use this if you want to build custom images without compose.
    - `Dockerfile.rustfs`
 4. **Set build context** to `.` (repository root)
 5. **Configure build args** if needed:
-   - code-server: `CODESERVER_VERSION=4.123.0`, `TARGETARCH=amd64`
+    - code-server: `CODESERVER_VERSION=4.123.0`  # TARGETARCH auto-detected by buildx
 6. **Configure run settings** (ports, volumes, environment) in the Dokploy UI
 7. **Deploy**
 
@@ -117,7 +117,7 @@ RUSTFS_SECRET_KEY=your-secret-key
 ```
 CS_PASSWORD=changeme
 CODESERVER_VERSION=4.123.0
-TARGETARCH=amd64
+# TARGETARCH=amd64  # Auto-detected by Docker/buildx; do not override
 GITEA_DOMAIN=gitea.yourdomain.com
 RUSTFS_ENDPOINT=http://rustfs:9000
 RUSTFS_BUCKET=code-server-backups
@@ -195,3 +195,33 @@ docker network create codeserver-network
 **Cause:** Source code not cloned during build.
 
 **Fix:** This should not happen with the current Dockerfiles (they clone source at build time). If you see this error, ensure you're using the latest Dockerfiles from the repository.
+
+---
+
+## Architecture-Specific Notes
+
+### code-server Multi-Arch Support
+
+The code-server Dockerfile now automatically detects the target architecture via Docker's built-in `TARGETARCH` build argument (set by buildx during multi-platform builds).
+
+**Do not set `TARGETARCH` manually:**
+- ❌ Don't add `TARGETARCH` to build args in Dokploy
+- ❌ Don't set `TARGETARCH` in Project/Environment variables
+- ✅ Let Docker/buildx auto-detect it
+
+**How it works:**
+| Build Scenario | TARGETARCH Value |
+|----------------|------------------|
+| buildx multi-platform (amd64) | `amd64` |
+| buildx multi-platform (arm64) | `arm64` |
+| Single-platform on arm64 host | `arm64` |
+| Single-platform on amd64 host | `amd64` |
+
+**If you see architecture mismatch error:**
+```
+Arch mismatch: TARGETARCH=amd64, system=arm64
+```
+This means `TARGETARCH` was overridden. Remove any manual `TARGETARCH` setting from:
+1. Dokploy build args
+2. Project environment variables
+3. `.env` file

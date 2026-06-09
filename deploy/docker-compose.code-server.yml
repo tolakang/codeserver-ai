@@ -10,7 +10,6 @@ services:
       dockerfile: Dockerfile.codeserver
       args:
         CODESERVER_VERSION: ${CODESERVER_VERSION:-4.123.0}
-        TARGETARCH: ${TARGETARCH:-amd64}
     image: codeserver-custom:latest
     container_name: code-server
     restart: unless-stopped
