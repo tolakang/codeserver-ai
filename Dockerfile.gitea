@@ -34,7 +34,8 @@ RUN --mount=type=cache,target="/root/.cache/go-build" \
 # Download docker/root from official Gitea repo (not in this repo)
 RUN set -eux; \
     curl -fsSL "https://github.com/go-gitea/gitea/archive/refs/heads/main.tar.gz" \
-    | tar -xz -C /tmp --strip-components=2 gitea-main/docker/root
+    | tar -xz -C /tmp --strip-components=1 gitea-main/docker/root && \
+    ls -la /tmp/docker/root/
 
 COPY /tmp/docker/root /tmp/local
 
