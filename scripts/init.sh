@@ -19,6 +19,11 @@ if [ ! -f /home/coder/.config/opencode/config.json ]; then
   fi
 fi
 
+# Substitute ${CS_PASSWORD} in code-server config
+if [ -f /home/coder/.config/code-server/config.yaml ]; then
+  sed -i "s|\${CS_PASSWORD}|${CS_PASSWORD:-changeme}|g" /home/coder/.config/code-server/config.yaml
+fi
+
 # Create memory directory
 mkdir -p /workspace/.memory
 
@@ -43,4 +48,4 @@ fi
 echo "=== Init Complete ==="
 
 # Execute code-server
-exec code-server /workspace
+exec code-server "$@"
