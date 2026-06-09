@@ -15,7 +15,7 @@ services:
       - "3001:3000"
       - "2222:22"
     volumes:
-      - /mnt/storage/gitea/data:/data
+      - gitea-data:/data
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
@@ -38,3 +38,6 @@ services:
 networks:
   codeserver-network:
     external: true
+
+volumes:
+  gitea-data:
