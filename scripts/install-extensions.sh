@@ -6,12 +6,8 @@ set -e
 
 echo "Installing Code Server extensions..."
 
-# OpenCode AI
-code-server --install-extension opencode.opencode 2>/dev/null || \
-  echo "Warning: opencode.opencode not found on marketplace, skipping"
-
-# Amazon S3 Explorer
-code-server --install-extension amazonwebservices.aws-toolkit-vscode 2>/dev/null || \
+# Amazon S3 Explorer (pinned to v4.7.0+ for url.parse deprecation fix)
+code-server --install-extension amazonwebservices.aws-toolkit-vscode@4.7.0 2>/dev/null || \
   echo "Warning: AWS Toolkit not found, skipping"
 
 # Git integration

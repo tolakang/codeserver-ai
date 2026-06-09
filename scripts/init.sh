@@ -30,6 +30,9 @@ mkdir -p /workspace/.memory
 # Ensure workspace and config dirs exist
 mkdir -p /workspace /home/coder/.config/code-server
 
+# Clear extension cache to avoid VSDA issues
+rm -rf /home/coder/.local/share/code-server/extensions/* 2>/dev/null || true
+
 # Create default git config if not exists
 if [ ! -f /home/coder/.gitconfig ]; then
   cat > /home/coder/.gitconfig <<'EOF'

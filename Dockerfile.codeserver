@@ -60,8 +60,9 @@ RUN curl -fsSL \
     && dpkg -i /tmp/code-server.deb \
     && rm /tmp/code-server.deb
 
-# Validate architecture matches
-RUN ARCH="$(dpkg --print-architecture)" && \
+# Validate architecture matches (with local-build fallback)
+RUN TARGETARCH=${TARGETARCH:-$(dpkg --print-architecture)} && \
+    ARCH="$(dpkg --print-architecture)" && \
     if [ "$ARCH" != "$TARGETARCH" ]; then \
         echo "Arch mismatch: TARGETARCH=$TARGETARCH, system=$ARCH" && exit 1; \
     fi
