@@ -47,7 +47,7 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 # Install curl and fixuid for PUID/PGID support
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && ARCH="$(dpkg --print-architecture)" \
     && curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixuid-0.6.0-linux-$ARCH.tar.gz" \
