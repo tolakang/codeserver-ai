@@ -42,13 +42,13 @@ These work with Dokploy Volume Backups to RustFS/S3.
 
 ## Supported Providers
 
-| Provider | Free Models | Env Var |
-|----------|-------------|---------|
-| Google | Gemini 2.5 Flash, 3.x previews | `GOOGLE_API_KEY` |
-| NVIDIA NIM | Llama 4 Scout/Maverick | `NIM_API_KEY` |
-| GitHub Models | GPT-4.1, GPT-4o | `GITHUB_TOKEN` |
-| OpenCode Zen | DeepSeek V4 Flash, Nemotron | `OPENCODE_ZEN_API_KEY` |
-| OpenRouter | 21+ free models | `OPENROUTER_API_KEY` |
+| Provider | Free Models | Key Config |
+|----------|-------------|------------|
+| Google | Gemini 2.5 Flash, 3.x previews | Via dashboard |
+| NVIDIA NIM | Llama 4 Scout/Maverick | Via dashboard |
+| GitHub Models | GPT-4.1, GPT-4o | Via dashboard |
+| OpenCode Zen | DeepSeek V4 Flash, Nemotron | Via dashboard |
+| OpenRouter | 21+ free models | Via dashboard |
 | Groq | Llama 3.3, Llama 4, GPT-OSS | Via dashboard |
 | Cerebras | Qwen3 235B | Via dashboard |
 | Mistral | Large 3, Codestral | Via dashboard |
@@ -64,19 +64,14 @@ Deploy as a Dokploy application using `docker-compose.freellmapi.yml`.
 
 ### Environment Variables
 
-Set in `.env`:
+FreeLLMAPI only requires one environment variable at deployment:
 
 ```bash
-# Encryption key (required for key storage)
+# Encryption key (required for key storage at rest)
 ENCRYPTION_KEY=$(openssl rand -hex 32)
-
-# Provider API keys
-OPENROUTER_API_KEY=your-openrouter-api-key
-GOOGLE_API_KEY=your-google-api-key
-NIM_API_KEY=your-nvidia-nim-api-key
-GITHUB_TOKEN=your-github-token
-OPENCODE_ZEN_API_KEY=your-opencode-zen-api-key
 ```
+
+**Provider API keys are NOT set as environment variables.** They are configured through the FreeLLMAPI dashboard after deployment (see [Dashboard Setup](#dashboard-setup)).
 
 ### Generate Encryption Key
 

@@ -23,11 +23,6 @@ services:
       - PGID=1000
       - TZ=${TZ:-UTC}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - NIM_API_KEY=${NIM_API_KEY}
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - OPENCODE_ZEN_API_KEY=${OPENCODE_ZEN_API_KEY}
     networks:
       - codeserver-network
     healthcheck:

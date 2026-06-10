@@ -42,9 +42,9 @@ This is the recommended approach for each service.
 5. Go to **Environment Variables** and add:
    ```
    ENCRYPTION_KEY=your-encryption-key
-   OPENROUTER_API_KEY=your-openrouter-key
    FREELLM_VERSION=latest
    ```
+   > Provider API keys are configured through the FreeLLMAPI dashboard after deployment, not as environment variables.
 6. Click **Deploy**
 
 > **Note:** FreeLLMAPI uses named volumes (`freellmapi-data`, `freellmapi-config`) for persistence. These work with Dokploy Volume Backups to RustFS/S3.
@@ -94,11 +94,12 @@ Use this if you want to build custom images without compose.
    - Volume: `/mnt/storage/freellmapi/data:/app/server/data`
 7. Go to **Environment Variables** and add:
    ```
-   ENCRYPTION_KEY=your-encryption-key
-   PORT=3000
-   PUID=1000
-   PGID=1000
-   ```
+    ENCRYPTION_KEY=your-encryption-key
+    PORT=3000
+    PUID=1000
+    PGID=1000
+    ```
+   > Provider API keys are configured through the FreeLLMAPI dashboard after deployment, not as environment variables.
 8. Click **Deploy**
 
 ---
@@ -147,11 +148,10 @@ GITEA_ADMIN_EMAIL=admin@yourdomain.com
 
 **FreeLLMAPI:**
 ```
+ENCRYPTION_KEY=your-encryption-key
 FREELLM_VERSION=latest
-GOOGLE_API_KEY=your-google-api-key
-NIM_API_KEY=your-nvidia-nim-api-key
-OPENCODE_ZEN_API_KEY=your-opencode-zen-api-key
 ```
+> Provider API keys (Google, NIM, OpenCode Zen, OpenRouter, GitHub, etc.) are configured through the FreeLLMAPI dashboard → Keys page, not as environment variables.
 
 **RustFS:**
 ```
