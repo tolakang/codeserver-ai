@@ -93,7 +93,9 @@ See [deploy/README.md](deploy/README.md) for detailed Dokploy setup.
 ├── Dockerfile.gitea               ← clones and builds gitea
 ├── Dockerfile.freellmapi          ← clones and builds freellmapi
 ├── Dockerfile.rustfs              ← downloads rustfs binary
+├── Dockerfile.opencode-web        ← builds OpenCode WEB server
 ├── docker-compose.yml             ← combined orchestrator
+├── docker-compose.opencode-web.yml ← OpenCode WEB service config
 ├── deploy/
 │   ├── docker-compose.code-server.yml
 │   ├── docker-compose.gitea.yml
@@ -104,8 +106,14 @@ See [deploy/README.md](deploy/README.md) for detailed Dokploy setup.
 │   ├── restore.sh
 │   ├── init.sh
 │   ├── install-extensions.sh
+│   ├── install-opencode-web.sh
+│   ├── opencode-web.sh
 │   └── update.sh
 ├── config/
+│   ├── opencode/
+│   │   └── config.json
+│   └── opencode-web/
+│       └── opencode.json
 ├── docs/
 ├── .env.example
 └── README.md
@@ -128,6 +136,7 @@ Update specific service:
 ./scripts/update.sh gitea
 ./scripts/update.sh freellmapi
 ./scripts/update.sh rustfs
+./scripts/update.sh opencode-web
 ```
 
 ## Backup

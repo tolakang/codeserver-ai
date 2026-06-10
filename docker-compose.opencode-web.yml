@@ -1,0 +1,49 @@
+# docker-compose.opencode-web.yml
+# Deploy OpenCode WEB as separate Dokploy application
+# Source: https://github.com/anomalyco/opencode
+
+# syntax=docker/compose.yml
+
+version: '3.9'
+
+services:
+  opencode-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.opencode-web
+      args:
+        OPENCODE_VERSION: ${OPENCODE_VERSION:-latest}
+    image: opencode-web-custom:latest
+    container_name: opencode-web
+    restart: unless-stopped
+    ports:
+      - "4001:4001"
+    volumes:
+      - opencode-web-data:/data
+      - opencode-web-config:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-UTC}
+      - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD}
+      - OPENCODE_SERVER_USERNAME=${OPENCODE_SERVER_USERNAME:-opencode}
+      - FREELLMAPI_API_KEY=${FREELLMAPI_API_KEY}
+    networks:
+      - codeserver-network
+    depends_on:
+      freellmapi:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  codeserver-network:
+    external: true
+
+volumes:
+  opencode-web-data:
+  opencode-web-config:

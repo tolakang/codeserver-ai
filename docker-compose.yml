@@ -12,6 +12,8 @@ services:
         condition: service_healthy
       freellmapi:
         condition: service_healthy
+      opencode-web:
+        condition: service_healthy
 
   freellmapi:
     extends:
@@ -27,6 +29,11 @@ services:
     extends:
       file: deploy/docker-compose.gitea.yml
       service: gitea
+
+  opencode-web:
+    extends:
+      file: docker-compose.opencode-web.yml
+      service: opencode-web
 
 networks:
   default:

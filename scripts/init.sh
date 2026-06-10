@@ -13,10 +13,16 @@ echo "=== Code Server Init ==="
 if [ ! -f /home/coder/.config/opencode/config.json ]; then
   mkdir -p /home/coder/.config/opencode
   if cp /config/opencode/config.json /home/coder/.config/opencode/config.json 2>/dev/null; then
-    echo "OpenCode config installed"
+    echo "OpenCode extension config installed"
   else
-    echo "Warning: OpenCode config not found, skipping"
+    echo "Warning: OpenCode extension config not found, skipping"
   fi
+fi
+
+# Copy OpenCode WEB config if not already in place
+if [ ! -f /config/opencode-web/opencode.json ]; then
+  mkdir -p /config/opencode-web
+  echo "Warning: OpenCode WEB config not found, skipping"
 fi
 
 # Substitute ${CS_PASSWORD} in code-server config

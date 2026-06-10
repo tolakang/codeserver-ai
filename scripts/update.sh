@@ -53,6 +53,13 @@ update_rustfs() {
   docker compose -f deploy/docker-compose.rustfs.yml up -d
 }
 
+update_opencode_web() {
+  echo "--- Updating opencode-web ---"
+  OPENCODE_VERSION=${OPENCODE_VERSION:-latest} \
+    docker compose -f docker-compose.opencode-web.yml build --no-cache
+  docker compose -f docker-compose.opencode-web.yml up -d
+}
+
 update_all() {
   echo "--- Updating all services ---"
   CODESERVER_VERSION=$CODESERVER_VERSION TARGETARCH=$TARGETARCH \
@@ -68,6 +75,10 @@ update_all() {
 
   docker compose -f deploy/docker-compose.rustfs.yml build --no-cache
   docker compose -f deploy/docker-compose.rustfs.yml up -d
+
+  OPENCODE_VERSION=${OPENCODE_VERSION:-latest} \
+    docker compose -f docker-compose.opencode-web.yml build --no-cache
+  docker compose -f docker-compose.opencode-web.yml up -d
 }
 
 case "$SERVICE" in
@@ -75,19 +86,21 @@ case "$SERVICE" in
   gitea)       update_gitea ;;
   freellmapi)  update_freellmapi ;;
   rustfs)      update_rustfs ;;
+  opencode-web) update_opencode_web ;;
   all)         update_all ;;
   *)
     echo "Unknown service: $SERVICE"
-    echo "Usage: $0 [code-server|gitea|freellmapi|rustfs|all]"
+    echo "Usage: $0 [code-server|gitea|freellmapi|rustfs|opencode-web|all]"
     exit 1
     ;;
 esac
 
 echo ""
-echo "=== Update Complete ==="
-echo "Services updated: $SERVICE"
-echo ""
-docker compose -f deploy/docker-compose.code-server.yml ps 2>/dev/null || true
-docker compose -f deploy/docker-compose.gitea.yml ps 2>/dev/null || true
-docker compose -f deploy/docker-compose.freellmapi.yml ps 2>/dev/null || true
-docker compose -f deploy/docker-compose.rustfs.yml ps 2>/dev/null || true
+  echo "=== Update Complete ==="
+  echo "Services updated: $SERVICE"
+  echo ""
+  docker compose -f deploy/docker-compose.code-server.yml ps 2>/dev/null || true
+  docker compose -f deploy/docker-compose.gitea.yml ps 2>/dev/null || true
+  docker compose -f deploy/docker-compose.freellmapi.yml ps 2>/dev/null || true
+  docker compose -f deploy/docker-compose.rustfs.yml ps 2>/dev/null || true
+  docker compose -f docker-compose.opencode-web.yml ps 2>/dev/null || true

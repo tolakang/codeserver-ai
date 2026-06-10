@@ -1,0 +1,33 @@
+# Dockerfile.opencode-web
+# Build OpenCode WEB server optimized for web interface
+# Source: https://github.com/anomalyco/opencode
+
+# syntax=docker/dockerfile:1.7
+ARG NODE_IMAGE=node:20-bookworm-slim
+ARG OPENCODE_VERSION=latest
+
+FROM ${NODE_IMAGE}
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl dumb-init ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create opencode user
+RUN adduser --gecos '' --disabled-password opencode \
+    && echo "opencode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
+
+# Install fixuid for PUID/PGID support
+RUN ARCH="$(dpkg --print-architecture)" \
+    && curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixuid-0.6.0-linux-$ARCH.tar.gz" \
+    | tar -C /usr/local/bin -xzf - \
+    && chown root:root /usr/local/bin/fixuid \
+    && chmod 4755 /usr/local/bin/fixuid \
+    && mkdir -p /etc/fixuid \
+    && printf "user: opencode\ngroup: opencode\n" > /etc/fixuid/config.yml
+
+COPY scripts/opencode-web.sh /scripts/
+RUN chmod +x /scripts/*.sh
+
+EXPOSE 4001
+
+USER opencode
+ENTRYPOINT ["/scripts/opencode-web.sh"]
