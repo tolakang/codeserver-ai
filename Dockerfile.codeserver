@@ -81,6 +81,7 @@ COPY scripts/ /scripts/
 RUN chmod +x /scripts/*.sh
 
 COPY config/opencode/ /config/opencode/
+COPY config/opencode-web/ /config/opencode-web/
 COPY config/code-server/config.yaml /home/coder/.config/code-server/config.yaml
 COPY config/code-server/settings.json /home/coder/.config/code-server/User/settings.json
 
