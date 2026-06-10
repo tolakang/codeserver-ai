@@ -28,6 +28,18 @@ FreeLLMAPI (port 3000)
       +---> ...and more
 ```
 
+## Deployment
+
+Deploy as a Dokploy application using `docker-compose.freellmapi.yml`.
+
+### Named Volumes
+
+FreeLLMAPI uses Docker named volumes for persistence:
+- `freellmapi-data` — API keys, settings, provider configs
+- `freellmapi-config` — Application configuration
+
+These work with Dokploy Volume Backups to RustFS/S3.
+
 ## Supported Providers
 
 | Provider | Free Models | Env Var |
@@ -96,6 +108,12 @@ http://freellmapi:3000/v1
 
 ```
 http://your-server:3000/v1
+```
+
+### Health Check
+
+```bash
+curl http://localhost:3000/health
 ```
 
 ## Dashboard Setup

@@ -42,7 +42,8 @@ update_gitea() {
 
 update_freellmapi() {
   echo "--- Updating freellmapi ---"
-  docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
+  FREELLM_VERSION=${FREELLM_VERSION:-latest} \
+    docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
   docker compose -f deploy/docker-compose.freellmapi.yml up -d
 }
 
@@ -61,7 +62,8 @@ update_all() {
   docker compose -f deploy/docker-compose.gitea.yml build --no-cache
   docker compose -f deploy/docker-compose.gitea.yml up -d
 
-  docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
+  FREELLM_VERSION=${FREELLM_VERSION:-latest} \
+    docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
   docker compose -f deploy/docker-compose.freellmapi.yml up -d
 
   docker compose -f deploy/docker-compose.rustfs.yml build --no-cache

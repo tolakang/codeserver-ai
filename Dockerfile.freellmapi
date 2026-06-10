@@ -4,6 +4,7 @@
 
 # syntax=docker/dockerfile:1.7
 ARG NODE_IMAGE=node:20-bookworm-slim
+ARG FREELLM_VERSION=latest
 
 FROM ${NODE_IMAGE} AS deps
 WORKDIR /app
@@ -13,6 +14,12 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth 1 https://github.com/tashfeenahmed/freellmapi.git .
+
+# Checkout specific version if not latest
+ARG FREELLM_VERSION=latest
+RUN if [ "${FREELLM_VERSION}" != "latest" ]; then \
+      git fetch --tags && git checkout "tags/${FREELLM_VERSION}" 2>/dev/null || git checkout "${FREELLM_VERSION}"; \
+    fi
 
 RUN cp package.json package-lock.json ./tmp/ \
     && cp shared/package.json ./tmp/shared/ \
@@ -37,7 +44,16 @@ RUN npm prune --omit=dev
 FROM ${NODE_IMAGE} AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=3000
+
+# Install fixuid for PUID/PGID support
+RUN ARCH="$(dpkg --print-architecture)" \
+    && curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixuid-0.6.0-linux-$ARCH.tar.gz" \
+    | tar -C /usr/local/bin -xzf - \
+    && chown root:root /usr/local/bin/fixuid \
+    && chmod 4755 /usr/local/bin/fixuid \
+    && mkdir -p /etc/fixuid \
+    && printf "user: node\ngroup: node\n" > /etc/fixuid/config.yml
 
 COPY --from=build --chown=node:node /app/package.json /app/package-lock.json ./
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
@@ -46,15 +62,16 @@ COPY --from=build --chown=node:node /app/server/package.json ./server/package.js
 COPY --from=build --chown=node:node /app/server/dist ./server/dist
 COPY --from=build --chown=node:node /app/client/dist ./client/dist
 
-RUN mkdir -p /app/server/data && chown -R node:node /app/server/data
+RUN mkdir -p /app/server/data /app/server/config && chown -R node:node /app/server/data /app/server/config
 
 USER node
 
-EXPOSE 3001
+EXPOSE 3000
 
-VOLUME ["/app/server/data"]
+VOLUME ["/app/server/data", "/app/server/config"]
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3001) + '/api/ping').then((res) => { if (!res.ok) process.exit(1); }).catch(() => process.exit(1));"
+  CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/api/ping').then((res) => { if (!res.ok) process.exit(1); }).catch(() => process.exit(1));"
 
+ENTRYPOINT ["fixuid", "-q"]
 CMD ["node", "server/dist/index.js"]

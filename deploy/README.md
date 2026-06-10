@@ -43,8 +43,11 @@ This is the recommended approach for each service.
    ```
    ENCRYPTION_KEY=your-encryption-key
    OPENROUTER_API_KEY=your-openrouter-key
+   FREELLM_VERSION=latest
    ```
 6. Click **Deploy**
+
+> **Note:** FreeLLMAPI uses named volumes (`freellmapi-data`, `freellmapi-config`) for persistence. These work with Dokploy Volume Backups to RustFS/S3.
 
 ### Example: Deploying Gitea
 
@@ -92,7 +95,9 @@ Use this if you want to build custom images without compose.
 7. Go to **Environment Variables** and add:
    ```
    ENCRYPTION_KEY=your-encryption-key
-   PORT=3001
+   PORT=3000
+   PUID=1000
+   PGID=1000
    ```
 8. Click **Deploy**
 
@@ -142,6 +147,7 @@ GITEA_ADMIN_EMAIL=admin@yourdomain.com
 
 **FreeLLMAPI:**
 ```
+FREELLM_VERSION=latest
 GOOGLE_API_KEY=your-google-api-key
 NIM_API_KEY=your-nvidia-nim-api-key
 OPENCODE_ZEN_API_KEY=your-opencode-zen-api-key

@@ -8,14 +8,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.freellmapi
+      args:
+        FREELLM_VERSION: ${FREELLM_VERSION:-latest}
     image: freellmapi-custom:latest
     container_name: freellmapi
     restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
-      - /mnt/storage/freellmapi/data:/app/server/data
+      - freellmapi-data:/app/server/data
+      - freellmapi-config:/app/server/config
     environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ:-UTC}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
@@ -34,3 +40,7 @@ services:
 networks:
   codeserver-network:
     external: true
+
+volumes:
+  freellmapi-data:
+  freellmapi-config:
