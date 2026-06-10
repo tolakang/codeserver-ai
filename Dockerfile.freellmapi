@@ -10,10 +10,10 @@ FROM ${NODE_IMAGE} AS deps
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3 make g++ git \
+    && apt-get install -y --no-install-recommends ca-certificates python3 make g++ git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone --depth 1 https://github.com/tashfeenahmed/freellmapi.git .
+RUN git clone --depth 1 --quiet https://github.com/tashfeenahmed/freellmapi.git .
 
 # Checkout specific version if not latest
 ARG FREELLM_VERSION=latest
