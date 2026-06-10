@@ -21,7 +21,8 @@ RUN if [ "${FREELLM_VERSION}" != "latest" ]; then \
       git fetch --tags && git checkout "tags/${FREELLM_VERSION}" 2>/dev/null || git checkout "${FREELLM_VERSION}"; \
     fi
 
-RUN cp package.json package-lock.json ./tmp/ \
+RUN mkdir -p tmp \
+    && cp package.json package-lock.json ./tmp/ \
     && cp shared/package.json ./tmp/shared/ \
     && cp server/package.json ./tmp/server/ \
     && cp client/package.json ./tmp/client/ \
