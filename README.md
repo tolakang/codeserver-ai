@@ -100,29 +100,27 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 │   ├── docker-compose.gitea.yml
 │   ├── docker-compose.freellmapi.yml
 │   ├── docker-compose.rustfs.yml
-│   └── docker-compose.opencode-web.yml
+│   ├── docker-compose.opencode-web.yml
+│   └── backup-cron.yml
 ├── scripts/
-│   ├── backup.sh                 ← backup to RustFS
-│   ├── restore.sh                ← restore from RustFS
-│   ├── init.sh                   ← container initialization
-│   ├── install-extensions.sh     ← AI extensions installer
+│   ├── backup.sh                  ← backup to RustFS
+│   ├── restore.sh                 ← restore from RustFS
+│   ├── init.sh                    ← container initialization
+│   ├── install-extensions.sh      ← AI extensions installer
 │   ├── install-opencode-web.sh    ← OpenCode WEB installer
 │   ├── opencode-web.sh            ← OpenCode WEB server
 │   ├── update.sh                  ← update all services
-│   └── configure-provider.sh      ← AI provider management
+│   ├── configure-provider.sh      ← AI provider management
+│   └── generate-configs.sh        ← configuration generation
 ├── config/
 │   ├── unified-config.json        ← unified provider configuration
+│   ├── code-server/               ← code-server config
+│   ├── gitea/                     ← gitea config
 │   ├── opencode/                  ← OpenCode extension config
-│   │   └── config.json
 │   └── opencode-web/              ← OpenCode WEB config
-│       └── opencode.json
 ├── docs/
 │   └── backup.md                  ← backup procedures
-└── deploy/
-    ├── docker-compose.code-server.yml
-    ├── docker-compose.gitea.yml
-    ├── docker-compose.freellmapi.yml
-    └── docker-compose.rustfs.yml
+└── .env.example                   ← environment template
 ```
 
 > **Architecture Note:** code-server builds for **both amd64 and arm64** automatically via Docker/buildx. No manual `TARGETARCH` configuration needed.
