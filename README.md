@@ -112,20 +112,7 @@ See [docs/quick-start.md](docs/quick-start.md) for detailed Dokploy setup.
 │   └── manage-providers.sh        ← AI provider management
 ├── config/
 │   ├── unified-config.json        ← unified provider configuration
-│   ├── opencode/                  ← OpenCode extension config
-│   │   └── config.json
-│   └── opencode-web/              ← OpenCode WEB config
-│       └── opencode.json
-├── docs/
-│   ├── backup.sh                 ← backup to RustFS
-│   ├── restore.sh                ← restore from RustFS
-│   ├── init.sh                   ← container initialization
-│   ├── install-extensions.sh     ← AI extensions installer
-│   ├── install-opencode-web.sh    ← OpenCode WEB installer
-│   ├── opencode-web.sh            ← OpenCode WEB server
-│   └── update.sh                  ← update all services
-├── config/
-│   ├── unified-config.json        ← unified provider configuration
+│   ├── .env.template              ← environment variable template
 │   ├── opencode/                  ← OpenCode extension config
 │   │   └── config.json
 │   └── opencode-web/              ← OpenCode WEB config
