@@ -116,7 +116,9 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 ├── config/
 │   ├── unified-config.json        ← unified provider configuration
 │   ├── code-server/               ← code-server config
-│   └── gitea/                     ← gitea config
+│   ├── gitea/                     ← gitea config
+│   ├── opencode/                  ← OpenCode extension config
+│   └── opencode-web/              ← OpenCode WEB config
 ├── docs/
 │   └── backup.md                  ← backup procedures
 ├── .env.example                   ← environment template
