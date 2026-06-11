@@ -59,7 +59,7 @@ cd codeserver-ai
 ### 2. Deploy with Dokploy
 
 1. **Set Environment Variables** in Dokploy's UI using values from `.env.example`:
-   - Copy the `PROJECT_*` values from `.env.example`
+   - Copy the values from the `ENVIRONMENT SECTION` in `.env.example`
    - Set each variable in Dokploy's Environment Variables UI
 
 2. **Create Application** in Dokploy:
@@ -78,12 +78,9 @@ See [deploy/README.md](deploy/README.md) for detailed Dokploy deployment instruc
 sudo mkdir -p /mnt/storage/{code-server,gitea/data,freellmapi/data,rustfs/data}
 sudo chown -R 1000:1000 /mnt/storage
 
-# Copy and edit values file
-cp .env.values .env.values.local
-# Edit .env.values.local with your values
-
-# Resolve placeholders
-source scripts/resolve-env.sh
+# Copy and edit env file
+cp .env.example .env
+# Edit .env with your values
 
 # Deploy
 docker compose up -d
@@ -127,8 +124,7 @@ docker compose up -d
 │   └── opencode-web/              ← OpenCode WEB config
 ├── docs/
 │   └── backup.md                  ← backup procedures
-├── .env.example                   ← environment template with placeholders
-├── .env.values                    ← sample values file (gitignored)
+├── .env.example                   ← environment template (set values here)
 ├── .dockerignore                  ← Docker build exclusions
 ├── LICENSE                        ← MIT license
 └── README.md

@@ -108,38 +108,46 @@ Use this if you want to build custom images without compose.
 
 Set these variables in Dokploy's Environment Variables UI. The `${{project.*}}` placeholders in docker-compose files will resolve to these values at deploy time.
 
-### Required Variables
+### Complete Variable Reference
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `CS_PASSWORD` | Code Server authentication password | `your-secure-password` |
-| `GITEA_DOMAIN` | Gitea domain (with protocol) | `https://gitea.yourdomain.com` |
-| `GITEA_ADMIN_PASSWORD` | Gitea admin password | `your-gitea-password` |
-| `GITEA_ADMIN_EMAIL` | Gitea admin email | `admin@yourdomain.com` |
-| `POSTGRES_PASSWORD` | PostgreSQL password for Gitea | `your-postgres-password` |
-| `ENCRYPTION_KEY` | FreeLLMAPI encryption key | `openssl rand -hex 32` |
-| `OPENCODE_SERVER_PASSWORD` | OpenCode WEB password | `your-opencode-password` |
-| `RUSTFS_ROOT_PASSWORD` | RustFS root password | `your-rustfs-password` |
-| `RUSTFS_ACCESS_KEY` | RustFS S3 access key | `your-access-key` |
-| `RUSTFS_SECRET_KEY` | RustFS S3 secret key | `your-secret-key` |
-| `OPENROUTER_API_KEY` | OpenRouter API key (if using) | `sk-your-key` |
-| `ANTHROPIC_API_KEY` | Anthropic API key (if using) | `sk-ant-your-key` |
-| `OPENAI_API_KEY` | OpenAI API key (if using) | `sk-your-key` |
+All variables from `.env.example` must be set in Dokploy. Here's the complete list:
 
-### Optional Variables (with defaults)
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `TZ` | `UTC` | Timezone |
-| `CS_DEFAULT_WORKSPACE` | `/workspace` | Default workspace path |
-| `CODESERVER_VERSION` | `4.123.0` | Code Server version |
-| `GITEA_VERSION` | `1.23.0` | Gitea version |
-| `FREELLM_VERSION` | `latest` | FreeLLMAPI version |
-| `OPENCODE_VERSION` | `latest` | OpenCode WEB version |
-| `DEFAULT_PROVIDER` | `freellmapi` | AI provider (openrouter|opencode-zen|freellmapi|anthropic|openai) |
-| `RUSTFS_ENDPOINT` | `http://rustfs:9000` | RustFS endpoint |
-| `RUSTFS_BUCKET` | `code-server-backups` | RustFS bucket name |
-| `RUSTFS_ROOT_USER` | `admin` | RustFS root username |
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `TZ` | Timezone | `UTC` | Yes |
+| `CS_PASSWORD` | Code Server authentication password | `your-secure-password` | Yes |
+| `CS_DEFAULT_WORKSPACE` | Default workspace path | `/workspace` | Yes |
+| `DEFAULT_PROVIDER` | AI provider | `freellmapi` | Yes |
+| `OPENROUTER_BASE_URL` | OpenRouter API base URL | `https://openrouter.ai/api/v1` | Yes |
+| `OPENROUTER_API_KEY` | OpenRouter API key | `sk-your-openrouter-key` | Yes |
+| `OPENCODE_ZEN_BASE_URL` | OpenCode Zen API base URL | `https://opencode.ai/zen/api/v1` | Yes |
+| `OPENCODE_ZEN_API_KEY` | OpenCode Zen API key | `your-opencode-zen-key` | Yes |
+| `FRELLMAPI_BASE_URL` | FreeLLMAPI API base URL | `http://freellmapi:3000/v1` | Yes |
+| `FRELLMAPI_API_KEY` | FreeLLMAPI API key | `your-freellmapi-key` | Yes |
+| `ANTHROPIC_BASE_URL` | Anthropic API base URL | `https://api.anthropic.com` | Yes |
+| `ANTHROPIC_API_KEY` | Anthropic API key | `sk-ant-your-key` | Yes |
+| `OPENAI_BASE_URL` | OpenAI API base URL | `https://api.openai.com/v1` | Yes |
+| `OPENAI_API_KEY` | OpenAI API key | `sk-your-openai-key` | Yes |
+| `RUSTFS_ACCESS_KEY` | RustFS S3 access key | `your-access-key` | Yes |
+| `RUSTFS_SECRET_KEY` | RustFS S3 secret key | `your-secret-key` | Yes |
+| `RUSTFS_ENDPOINT` | RustFS endpoint | `http://rustfs:9000` | Yes |
+| `RUSTFS_BUCKET` | RustFS bucket name | `code-server-backups` | Yes |
+| `RUSTFS_ROOT_USER` | RustFS root username | `admin` | Yes |
+| `RUSTFS_ROOT_PASSWORD` | RustFS root password | `your-rustfs-password` | Yes |
+| `ENCRYPTION_KEY` | FreeLLMAPI encryption key | `openssl rand -hex 32` | Yes |
+| `GITEA_DOMAIN` | Gitea domain (with protocol) | `https://gitea.yourdomain.com` | Yes |
+| `GITEA_DB_USER` | Gitea database user | `gitea` | Yes |
+| `GITEA_DB_NAME` | Gitea database name | `gitea` | Yes |
+| `GITEA_ADMIN_USER` | Gitea admin username | `admin` | Yes |
+| `GITEA_ADMIN_PASSWORD` | Gitea admin password | `your-gitea-password` | Yes |
+| `GITEA_ADMIN_EMAIL` | Gitea admin email | `admin@yourdomain.com` | Yes |
+| `POSTGRES_PASSWORD` | PostgreSQL password for Gitea | `your-postgres-password` | Yes |
+| `OPENCODE_SERVER_USERNAME` | OpenCode WEB username | `opencode` | Yes |
+| `OPENCODE_SERVER_PASSWORD` | OpenCode WEB password | `your-opencode-password` | Yes |
+| `CODESERVER_VERSION` | Code Server version | `4.123.0` | Yes |
+| `GITEA_VERSION` | Gitea version | `1.23.0` | Yes |
+| `FREELLM_VERSION` | FreeLLMAPI version | `latest` | Yes |
+| `OPENCODE_VERSION` | OpenCode WEB version | `latest` | Yes |
 
 ---
 

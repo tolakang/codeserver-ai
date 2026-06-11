@@ -7,12 +7,6 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
-# Resolve placeholders from .env.values if .env doesn't exist
-if [ ! -f .env ] && [ -f "$ROOT_DIR/.env.values" ]; then
-    echo "No .env found, resolving from .env.values..."
-    source "$SCRIPT_DIR/resolve-env.sh"
-fi
-
 # Load environment variables
 if [ -f .env ]; then
     source .env

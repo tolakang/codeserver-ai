@@ -1,58 +1,66 @@
 #!/bin/bash
-# scripts/resolve-env.sh - Resolve ${{project.*}} placeholders from .env.values
+# scripts/resolve-env.sh - Generate .env from .env.example
 # Usage: source scripts/resolve-env.sh
+#
+# This script reads .env.example, resolves any ${ENVIRONMENT.VAR} or ${PROJECT.VAR}
+# links, and writes the result to .env for use with docker-compose or other tools.
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
-VALUES_FILE="${ROOT_DIR}/.env.values"
-TEMPLATE_FILE="${ROOT_DIR}/.env.example"
+EXAMPLE_FILE="${ROOT_DIR}/.env.example"
 OUTPUT_FILE="${ROOT_DIR}/.env"
 
-# Check if values file exists
-if [ ! -f "$VALUES_FILE" ]; then
-    echo "Error: $VALUES_FILE not found"
-    echo "Please create it from .env.values template and fill in your values"
+# Check if example file exists
+if [ ! -f "$EXAMPLE_FILE" ]; then
+    echo "Error: $EXAMPLE_FILE not found"
+    echo "Please create .env.example from the template"
     exit 1
 fi
 
-# Check if template file exists
-if [ ! -f "$TEMPLATE_FILE" ]; then
-    echo "Error: $TEMPLATE_FILE not found"
-    exit 1
-fi
+echo "Generating .env from .env.example..."
 
-echo "Resolving environment variables from $VALUES_FILE..."
+# Copy example to output
+cp "$EXAMPLE_FILE" "$OUTPUT_FILE"
 
-# Create output file
-cp "$TEMPLATE_FILE" "$OUTPUT_FILE"
-
-# Read each key=value pair from .env.values
+# First pass: collect all KEY=VALUE pairs from Environment section
+declare -A VALUES
 while IFS='=' read -r key value; do
     # Skip comments and empty lines
     [[ "$key" =~ ^#.*$ ]] && continue
     [[ -z "$key" ]] && continue
     
-    # Escape special characters for sed
-    escaped_value=$(printf '%s\n' "$value" | sed 's/[&/\]/\\&/g')
+    # Only collect from Environment section (before Project/Service sections)
+    # Store the value for later resolution
+    VALUES["$key"]="$value"
+done < "$OUTPUT_FILE"
+
+# Second pass: resolve ${ENVIRONMENT.VAR} and ${PROJECT.VAR} links
+for key in "${!VALUES[@]}"; do
+    value="${VALUES[$key]}"
     
-    # Replace ${{project.KEY}} with actual value in output file
-    sed -i "s|\${{project.${key}}}|${escaped_value}|g" "$OUTPUT_FILE"
-    
-    echo "Resolved: ${key}=***"
-done < "$VALUES_FILE"
+    # Check for ${ENVIRONMENT.VAR} or ${PROJECT.VAR} patterns
+    if [[ "$value" =~ \$\{(ENVIRONMENT|PROJECT)\.([A-Z_]+)\} ]]; then
+        ref_key="${BASH_REMATCH[2]}"
+        if [[ -n "${VALUES[$ref_key]}" ]]; then
+            # Replace the reference with the actual value
+            sed -i "s|\${\(ENVIRONMENT\|PROJECT\)\.${ref_key}}|${VALUES[$ref_key]}|g" "$OUTPUT_FILE"
+            echo "Resolved: ${key} -> ${ref_key}"
+        else
+            echo "Warning: Referenced variable ${ref_key} not found for ${key}"
+        fi
+    fi
+done
 
 # Check for any unresolved placeholders
-if grep -q '${{project\.' "$OUTPUT_FILE"; then
+if grep -q '${\(ENVIRONMENT\|PROJECT\)\.' "$OUTPUT_FILE"; then
     echo ""
     echo "Warning: Some placeholders could not be resolved:"
-    grep -n '${{project\.' "$OUTPUT_FILE" || true
-    echo ""
-    echo "Please add the missing values to $VALUES_FILE"
+    grep -n '${\(ENVIRONMENT\|PROJECT\)\.' "$OUTPUT_FILE" || true
 fi
 
 echo ""
-echo "Environment variables resolved successfully to $OUTPUT_FILE"
+echo "Environment variables written to $OUTPUT_FILE"
 echo "You can now use this file with Docker Compose or other tools."
