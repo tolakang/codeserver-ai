@@ -3,11 +3,10 @@
 # Rebuild all services from source
 # Usage: ./scripts/update.sh [service]
 #   Without args: updates all services
-#   With service name: updates only that service (code-server, gitea, freellmapi, rustfs)
+#   With service name: updates only that service (code-server, gitea, freellmapi, rustfs, opencode-web)
 
-set -e
+set -euo pipefail
 
-# Validate .env file exists
 if [ ! -f .env ]; then
   echo "Error: .env file not found. Copy .env.example to .env and configure it."
   exit 1
@@ -15,14 +14,12 @@ fi
 
 echo "=== codeserver-ai Update ==="
 
-# Get latest code-server version from GitHub releases
 echo "Checking latest code-server version..."
-CODESERVER_VERSION=$(curl -fsSL https://api.github.com/repos/coder/code-server/releases/latest \
-  | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
+CODESERVER_VERSION="$(curl -fsSL https://api.github.com/repos/coder/code-server/releases/latest \
+  | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')"
 echo "Latest code-server: $CODESERVER_VERSION"
 
-# Detect architecture
-ARCH=$(uname -m)
+ARCH="$(uname -m)"
 case "$ARCH" in
   x86_64)  TARGETARCH="amd64" ;;
   aarch64) TARGETARCH="arm64" ;;
@@ -30,12 +27,11 @@ case "$ARCH" in
 esac
 echo "Architecture: $TARGETARCH"
 
-# Update specific service or all
 SERVICE="${1:-all}"
 
 update_codeserver() {
   echo "--- Updating code-server ---"
-  CODESERVER_VERSION=$CODESERVER_VERSION TARGETARCH=$TARGETARCH \
+  CODESERVER_VERSION="$CODESERVER_VERSION" TARGETARCH="$TARGETARCH" \
     docker compose -f deploy/docker-compose.code-server.yml build --no-cache
   docker compose -f deploy/docker-compose.code-server.yml up -d
 }
@@ -48,7 +44,7 @@ update_gitea() {
 
 update_freellmapi() {
   echo "--- Updating freellmapi ---"
-  FREELLMAPI_VERSION=${FREELLMAPI_VERSION:-latest} \
+  FREELLMAPI_VERSION="${FREELLMAPI_VERSION:-latest}" \
     docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
   docker compose -f deploy/docker-compose.freellmapi.yml up -d
 }
@@ -61,39 +57,27 @@ update_rustfs() {
 
 update_opencode_web() {
   echo "--- Updating opencode-web ---"
-  OPENCODE_VERSION=${OPENCODE_VERSION:-latest} \
+  OPENCODE_VERSION="${OPENCODE_VERSION:-latest}" \
     docker compose -f deploy/docker-compose.opencode-web.yml build --no-cache
   docker compose -f deploy/docker-compose.opencode-web.yml up -d
 }
 
 update_all() {
   echo "--- Updating all services ---"
-  CODESERVER_VERSION=$CODESERVER_VERSION TARGETARCH=$TARGETARCH \
-    docker compose -f deploy/docker-compose.code-server.yml build --no-cache
-  docker compose -f deploy/docker-compose.code-server.yml up -d
-
-  docker compose -f deploy/docker-compose.gitea.yml build --no-cache
-  docker compose -f deploy/docker-compose.gitea.yml up -d
-
-  FREELLMAPI_VERSION=${FREELLMAPI_VERSION:-latest} \
-    docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
-  docker compose -f deploy/docker-compose.freellmapi.yml up -d
-
-  docker compose -f deploy/docker-compose.rustfs.yml build --no-cache
-  docker compose -f deploy/docker-compose.rustfs.yml up -d
-
-  OPENCODE_VERSION=${OPENCODE_VERSION:-latest} \
-    docker compose -f deploy/docker-compose.opencode-web.yml build --no-cache
-  docker compose -f deploy/docker-compose.opencode-web.yml up -d
+  update_codeserver
+  update_gitea
+  update_freellmapi
+  update_rustfs
+  update_opencode_web
 }
 
 case "$SERVICE" in
   code-server) update_codeserver ;;
-  gitea)       update_gitea ;;
-  freellmapi)  update_freellmapi ;;
-  rustfs)      update_rustfs ;;
+  gitea) update_gitea ;;
+  freellmapi) update_freellmapi ;;
+  rustfs) update_rustfs ;;
   opencode-web) update_opencode_web ;;
-  all)         update_all ;;
+  all) update_all ;;
   *)
     echo "Unknown service: $SERVICE"
     echo "Usage: $0 [code-server|gitea|freellmapi|rustfs|opencode-web|all]"
@@ -105,8 +89,8 @@ echo ""
 echo "=== Update Complete ==="
 echo "Services updated: $SERVICE"
 echo ""
-  docker compose -f deploy/docker-compose.code-server.yml ps 2>/dev/null || true
-  docker compose -f deploy/docker-compose.gitea.yml ps 2>/dev/null || true
-  docker compose -f deploy/docker-compose.freellmapi.yml ps 2>/dev/null || true
-  docker compose -f deploy/docker-compose.rustfs.yml ps 2>/dev/null || true
-  docker compose -f deploy/docker-compose.opencode-web.yml ps 2>/dev/null || true
+docker compose -f deploy/docker-compose.code-server.yml ps 2>/dev/null || true
+docker compose -f deploy/docker-compose.gitea.yml ps 2>/dev/null || true
+docker compose -f deploy/docker-compose.freellmapi.yml ps 2>/dev/null || true
+docker compose -f deploy/docker-compose.rustfs.yml ps 2>/dev/null || true
+docker compose -f deploy/docker-compose.opencode-web.yml ps 2>/dev/null || true

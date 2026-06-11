@@ -5,7 +5,7 @@
 # syntax=docker/dockerfile:1
 FROM docker.io/library/alpine:3.23.4 AS build
 
-ARG TARGETARCH
+ARG TARGETARCH=amd64
 ARG RELEASE=latest
 
 RUN apk add --no-cache ca-certificates curl unzip
@@ -53,7 +53,7 @@ ARG VCS_REF
 LABEL name="RustFS" \
       vendor="RustFS Team" \
       maintainer="RustFS Team <dev@rustfs.com>" \
-      version="v${RELEASE#v}" \
+      version="${RELEASE#v}" \
       release="${RELEASE}" \
       build-date="${BUILD_DATE}" \
       vcs-ref="${VCS_REF}" \
@@ -62,8 +62,7 @@ LABEL name="RustFS" \
       url="https://rustfs.com" \
       license="Apache-2.0"
 
-RUN apk update && \
-    apk add --no-cache ca-certificates coreutils curl
+RUN apk add --no-cache ca-certificates coreutils curl
 
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /build/rustfs /usr/bin/rustfs

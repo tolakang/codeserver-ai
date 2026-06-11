@@ -24,13 +24,21 @@ spec:
                 - |
                   apk add --no-cache aws-cli
                   PGPASSWORD="${POSTGRES_PASSWORD}" pg_dump \
-                    -h pgbouncer -p 6432 -U gitea -d gitea \
+                    -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" \
                     --no-owner --no-privileges --clean --if-exists \
-                    | gzip > /tmp/gitea-db-$(date +%F-%H%M).sql.gz
+                    | gzip > "/tmp/gitea-db-$(date +%Y%m%d-%H%M%S).sql.gz"
                   aws s3 cp /tmp/gitea-db-*.sql.gz \
-                    s3://${RUSTFS_BUCKET}/ \
-                    --endpoint-url ${RUSTFS_ENDPOINT}
+                    "s3://${RUSTFS_BUCKET}/" \
+                    --endpoint-url "${RUSTFS_ENDPOINT}"
               env:
+                - name: POSTGRES_HOST
+                  value: pgbouncer
+                - name: POSTGRES_PORT
+                  value: "6432"
+                - name: POSTGRES_USER
+                  value: gitea
+                - name: POSTGRES_DB
+                  value: gitea
                 - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
@@ -39,7 +47,7 @@ spec:
                 - name: RUSTFS_ENDPOINT
                   value: http://rustfs:9000
                 - name: RUSTFS_BUCKET
-                  value: gitea-backups
+                  value: code-server-backups
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:

@@ -6,8 +6,8 @@
 services:
   code-server:
     build:
-      context: .
-      dockerfile: Dockerfile.codeserver
+      context: ..
+      dockerfile: ../Dockerfile.codeserver
       args:
         CODESERVER_VERSION: ${{project.CODESERVER_VERSION}}
     image: codeserver-custom:latest
@@ -41,6 +41,11 @@ services:
       - RUSTFS_ENDPOINT=${{project.RUSTFS_ENDPOINT}}
       - RUSTFS_BUCKET=${{project.RUSTFS_BUCKET}}
       - ENCRYPTION_KEY=${{project.ENCRYPTION_KEY}}
+      - POSTGRES_HOST=pgbouncer
+      - POSTGRES_PORT=6432
+      - POSTGRES_USER=${{project.GITEA_DB_USER}}
+      - POSTGRES_DB=${{project.GITEA_DB_NAME}}
+      - POSTGRES_PASSWORD=${{project.POSTGRES_PASSWORD}}
     networks:
       - codeserver-network
     healthcheck:

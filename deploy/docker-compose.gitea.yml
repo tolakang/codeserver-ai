@@ -17,7 +17,7 @@ services:
     networks:
       - codeserver-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${{project.GITEA_DB_USER}}"]
+      test: ["CMD-SHELL", "pg_isready -U ${{project.GITEA_DB_USER}} -d ${{project.GITEA_DB_NAME}}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -37,35 +37,33 @@ services:
     container_name: gitea-pgbouncer
     restart: unless-stopped
     environment:
-      - DATABASES_HOST=postgres
-      - DATABASES_PORT=5432
-      - DATABASES_DBNAME=${{project.GITEA_DB_NAME}}
-      - DATABASES_USER=${{project.GITEA_DB_USER}}
-      - DATABASES_PASSWORD=${{project.POSTGRES_PASSWORD}}
-      - PGBOUNCER_AUTH_TYPE=md5
-      - PGBOUNCER_POOL_MODE=transaction
-      - PGBOUNCER_MAX_CLIENT_CONN=100
-      - PGBOUNCER_DEFAULT_POOL_SIZE=20
-      - PGBOUNCER_MIN_POOL_SIZE=5
-      - PGBOUNCER_RESERVE_POOL_SIZE=5
-      - PGBOUNCER_RESERVE_POOL_TIMEOUT=5
-    ports:
-      - "6432:6432"
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${{project.GITEA_DB_NAME}}
+      - DB_USER=${{project.GITEA_DB_USER}}
+      - DB_PASSWORD=${{project.POSTGRES_PASSWORD}}
+      - AUTH_TYPE=scram-sha-256
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=100
+      - DEFAULT_POOL_SIZE=20
+      - MIN_POOL_SIZE=5
+      - RESERVE_POOL_SIZE=5
+      - RESERVE_POOL_TIMEOUT=5
     networks:
       - codeserver-network
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "6432", "-U", "${{project.GITEA_DB_USER}}"]
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 5432 -U ${{project.GITEA_DB_USER}}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   gitea:
     build:
-      context: .
-      dockerfile: Dockerfile.gitea
+      context: ..
+      dockerfile: ../Dockerfile.gitea
       args:
         GITEA_VERSION: ${{project.GITEA_VERSION}}
     image: gitea-custom:latest
@@ -89,7 +87,7 @@ services:
       - GITEA__database__PASSWD=${{project.POSTGRES_PASSWORD}}
       - GITEA__database__SSL_MODE=disable
       - GITEA__database__CONN_POOL_SIZE=10
-      - GITEA__server__ROOT_URL=${{project.GITEA_DOMAIN}}
+      - GITEA__server__ROOT_URL=${{project.GITEA_ROOT_URL}}
       - GITEA__server__HTTP_PORT=3000
       - GITEA__server__DOMAIN=${{project.GITEA_DOMAIN}}
       - GITEA__service__DISABLE_REGISTRATION=true

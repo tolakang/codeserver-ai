@@ -3,6 +3,26 @@
 # For individual service deployment, use files in deploy/ directory
 
 services:
+  rustfs:
+    extends:
+      file: deploy/docker-compose.rustfs.yml
+      service: rustfs
+
+  freellmapi:
+    extends:
+      file: deploy/docker-compose.freellmapi.yml
+      service: freellmapi
+
+  gitea:
+    extends:
+      file: deploy/docker-compose.gitea.yml
+      service: gitea
+
+  opencode-web:
+    extends:
+      file: deploy/docker-compose.opencode-web.yml
+      service: opencode-web
+
   code-server:
     extends:
       file: deploy/docker-compose.code-server.yml
@@ -14,26 +34,8 @@ services:
         condition: service_healthy
       opencode-web:
         condition: service_healthy
-
-  freellmapi:
-    extends:
-      file: deploy/docker-compose.freellmapi.yml
-      service: freellmapi
-
-  rustfs:
-    extends:
-      file: deploy/docker-compose.rustfs.yml
-      service: rustfs
-
-  gitea:
-    extends:
-      file: deploy/docker-compose.gitea.yml
-      service: gitea
-
-  opencode-web:
-    extends:
-      file: deploy/docker-compose.opencode-web.yml
-      service: opencode-web
+      rustfs:
+        condition: service_healthy
 
 networks:
   default:

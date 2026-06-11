@@ -22,7 +22,7 @@ Internet
     v
 Dokploy
     |
-    +-- Code Server (port 8443 HTTPS)
+    +-- Code Server (port 8443)
     |       +-- OpenCode
     |       +-- Claude-Mem
     |       +-- Workspace
@@ -437,8 +437,8 @@ OPENCODE_ZEN_BASE_URL=https://opencode.ai/zen/api/v1
 OPENCODE_ZEN_API_KEY=${{project.OPENCODE_ZEN_API_KEY}}
 
 # FreeLLMAPI Provider
-FRELLMAPI_BASE_URL=http://freellmapi:3000/v1
-FRELLMAPI_API_KEY=${{project.FRELLMAPI_API_KEY}}
+FREELLMAPI_BASE_URL=http://freellmapi:3000/v1
+FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
 
 # Anthropic Provider
 ANTHROPIC_BASE_URL=https://api.anthropic.com
@@ -491,7 +491,7 @@ OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
 ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
 
 # FreeLLMAPI (already configured)
-FRELLMAPI_API_KEY=${{project.FRELLMAPI_API_KEY}}
+FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
 ```
 
 ## Backup
@@ -501,7 +501,7 @@ See [docs/backup.md](docs/backup.md) for RustFS backup strategy.
 Daily automated backups at 2 AM:
 
 ```bash
-0 2 * * * docker exec code-server /scripts/backup.sh >> /var/log/backup.log 2>&1
+0 2 * * * docker exec code-server /scripts/backup.sh >> /tmp/backup.log 2>&1
 ```
 
 ## Documentation

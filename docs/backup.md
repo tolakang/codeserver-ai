@@ -29,13 +29,13 @@ docker compose logs code-server | grep backup
 Add to your system's crontab:
 
 ```bash
-0 2 * * * docker exec code-server /scripts/backup.sh >> /var/log/backup.log 2>&1
+0 2 * * * docker exec code-server /scripts/backup.sh >> /tmp/backup.log 2>&1
 ```
 
 ### Verify Backup Logs
 
 ```bash
-tail -f /var/log/backup.log
+tail -f /tmp/backup.log
 ```
 
 ## Restore Procedures
@@ -50,16 +50,16 @@ docker exec code-server /scripts/restore.sh
 
 ```bash
 # Download specific backup from RustFS
-aws s3 cp s3://code-server-backups/workspace-2024-01-01-120000.tar.gz /tmp/
+aws s3 cp s3://code-server-backups/workspace-20240101-120000.tar.gz /tmp/
 
 # Extract specific backup
-tar xzf /tmp/workspace-2024-01-01-120000.tar.gz -C /workspace
+tar xzf /tmp/workspace-20240101-120000.tar.gz -C /workspace
 ```
 
 ## Backup Retention
 
 - **Local backups**: 7 days
-- **Remote backups**: 30 days
+- **Remote backups**: 7 days
 
 Old backups are automatically cleaned up by the backup script.
 
@@ -152,8 +152,8 @@ aws s3 ls s3://code-server-backups/
 ### Check Backup Success
 
 ```bash
-grep "Backup Complete" /var/log/backup.log
-tail -n 10 /var/log/backup.log
+grep "Backup Complete" /tmp/backup.log
+tail -n 10 /tmp/backup.log
 ```
 
 ### Monitor Storage Usage
@@ -164,7 +164,7 @@ aws s3 ls s3://code-server-backups/ --human-readable
 
 ## Backup Security
 
-- All credentials encrypted in environment variables
-- Backup files stored in encrypted S3 bucket
+- Store credentials in Dokploy/Docker secrets or environment variables
+- Backup files are uploaded to RustFS/S3-compatible storage
 - Access restricted to container network
-- Regular rotation of encryption keys
+- Regular rotation of encryption keys and service credentials

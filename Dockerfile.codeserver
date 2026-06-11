@@ -9,11 +9,11 @@ ARG BASE=debian:13
 FROM ${BASE}
 
 ARG CODESERVER_VERSION=4.123.0
-ARG TARGETARCH
+ARG TARGETARCH=amd64
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     dumb-init \
     git \
@@ -21,7 +21,6 @@ RUN apt-get update && apt-get install -y \
     htop \
     locales \
     lsb-release \
-    man-db \
     nano \
     openssh-client \
     procps \
@@ -42,7 +41,10 @@ RUN if grep -q 1000 /etc/passwd; then \
       userdel -r "$(id -un 1000)"; \
     fi \
     && adduser --gecos '' --disabled-password coder \
-    && echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
+    && echo "coder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/nopasswd \
+    && chmod 0440 /etc/sudoers.d/nopasswd \
+    && mkdir -p /var/log/codeserver-ai \
+    && chown coder:coder /var/log/codeserver-ai
 
 # Install fixuid
 RUN ARCH="$(dpkg --print-architecture)" \
@@ -67,11 +69,12 @@ RUN TARGETARCH=${TARGETARCH:-$(dpkg --print-architecture)} && \
         echo "Arch mismatch: TARGETARCH=$TARGETARCH, system=$ARCH" && exit 1; \
     fi
 
-# Install AWS CLI for backup/restore
+# Install AWS CLI and PostgreSQL client for backup/restore
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3-pip \
     groff \
     less \
+    postgresql-client \
+    python3-pip \
     && pip3 install --break-system-packages --root-user-action=ignore awscli \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -83,7 +86,7 @@ RUN chmod +x /scripts/*.sh
 COPY config/code-server/config.yaml /home/coder/.config/code-server/config.yaml
 COPY config/code-server/settings.json /home/coder/.config/code-server/User/settings.json
 
-RUN chown -R 1000:1000 /home/coder/.config
+RUN chown -R coder:coder /home/coder/.config /workspace /var/log/codeserver-ai
 
 RUN mkdir -p /workspace/.memory
 
@@ -92,7 +95,7 @@ EXPOSE 8443
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8443 || exit 1
 
-USER 1000
+USER coder
 ENV USER=coder
 WORKDIR /home/coder
 

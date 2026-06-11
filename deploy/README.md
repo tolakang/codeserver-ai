@@ -122,8 +122,8 @@ All variables from `.env.example` must be set in Dokploy. Here's the complete li
 | `OPENROUTER_API_KEY` | OpenRouter API key | `sk-your-openrouter-key` | Yes |
 | `OPENCODE_ZEN_BASE_URL` | OpenCode Zen API base URL | `https://opencode.ai/zen/api/v1` | Yes |
 | `OPENCODE_ZEN_API_KEY` | OpenCode Zen API key | `your-opencode-zen-key` | Yes |
-| `FRELLMAPI_BASE_URL` | FreeLLMAPI API base URL | `http://freellmapi:3000/v1` | Yes |
-| `FRELLMAPI_API_KEY` | FreeLLMAPI API key | `your-freellmapi-key` | Yes |
+| `FREELLMAPI_BASE_URL` | FreeLLMAPI API base URL | `http://freellmapi:3000/v1` | Yes |
+| `FREELLMAPI_API_KEY` | FreeLLMAPI API key | `your-freellmapi-key` | Yes |
 | `ANTHROPIC_BASE_URL` | Anthropic API base URL | `https://api.anthropic.com` | Yes |
 | `ANTHROPIC_API_KEY` | Anthropic API key | `sk-ant-your-key` | Yes |
 | `OPENAI_BASE_URL` | OpenAI API base URL | `https://api.openai.com/v1` | Yes |
@@ -135,7 +135,8 @@ All variables from `.env.example` must be set in Dokploy. Here's the complete li
 | `RUSTFS_ROOT_USER` | RustFS root username | `admin` | Yes |
 | `RUSTFS_ROOT_PASSWORD` | RustFS root password | `your-rustfs-password` | Yes |
 | `ENCRYPTION_KEY` | FreeLLMAPI encryption key | `openssl rand -hex 32` | Yes |
-| `GITEA_DOMAIN` | Gitea domain (with protocol) | `https://gitea.yourdomain.com` | Yes |
+| `GITEA_DOMAIN` | Gitea hostname | `gitea.yourdomain.com` | Yes |
+| `GITEA_ROOT_URL` | Gitea public root URL including protocol | `https://gitea.yourdomain.com` | Yes |
 | `GITEA_DB_USER` | Gitea database user | `gitea` | Yes |
 | `GITEA_DB_NAME` | Gitea database name | `gitea` | Yes |
 | `GITEA_ADMIN_USER` | Gitea admin username | `admin` | Yes |
@@ -155,13 +156,11 @@ All variables from `.env.example` must be set in Dokploy. Here's the complete li
 
 All services communicate over `codeserver-network`. This network must exist before deployment.
 
-The compose files declare it as `external: true`, meaning it should be created first:
+The compose files declare it as `external: true`, so create it before deploying services:
 
 ```bash
 docker network create codeserver-network
 ```
-
-Or let the first service deployment create it automatically.
 
 ---
 

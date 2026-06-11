@@ -7,8 +7,8 @@
 services:
   opencode-web:
     build:
-      context: .
-      dockerfile: Dockerfile.opencode-web
+      context: ..
+      dockerfile: ../Dockerfile.opencode-web
       args:
         OPENCODE_VERSION: ${{project.OPENCODE_VERSION}}
     image: opencode-web-custom:latest
@@ -28,9 +28,6 @@ services:
       - FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
     networks:
       - codeserver-network
-    depends_on:
-      freellmapi:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
       interval: 30s
