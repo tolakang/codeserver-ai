@@ -370,23 +370,23 @@ Each provider can be configured using environment variables in your `.env` file:
 ```bash
 # OpenRouter Provider
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-OPENROUTER_API_KEY=your-openrouter-key
+OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
 
 # OpenCode Zen Provider
 OPENCODE_ZEN_BASE_URL=https://opencode.ai/zen/api/v1
-OPENCODE_ZEN_API_KEY=your-opencode-zen-key
+OPENCODE_ZEN_API_KEY=${{project.OPENCODE_ZEN_API_KEY}}
 
 # FreeLLMAPI Provider
 FRELLMAPI_BASE_URL=http://freellmapi:3000/v1
-FRELLMAPI_API_KEY=your-freellmapi-key
+FRELLMAPI_API_KEY=${{project.FRELLMAPI_API_KEY}}
 
 # Anthropic Provider
 ANTHROPIC_BASE_URL=https://api.anthropic.com
-ANTHROPIC_API_KEY=your-anthropic-key
+ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
 
 # OpenAI Provider
 OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_API_KEY=your-openai-key
+OPENAI_API_KEY=${{project.OPENAI_API_KEY}}
 
 # Default Provider
 DEFAULT_PROVIDER=freellmapi
@@ -412,26 +412,26 @@ During container startup, the system will automatically use the provider configu
 **Example 1: OpenRouter as primary provider:**
 ```bash
 DEFAULT_PROVIDER=openrouter
-OPENROUTER_API_KEY=your-openrouter-key
+OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
 ```
 
 **Example 2: OpenCode Zen as primary provider:**
 ```bash
 DEFAULT_PROVIDER=opencode-zen
-OPENCODE_ZEN_API_KEY=your-opencode-zen-key
+OPENCODE_ZEN_API_KEY=${{project.OPENCODE_ZEN_API_KEY}}
 ```
 
 **Example 3: Multiple providers:**
 ```bash
 # Primary provider
 DEFAULT_PROVIDER=openrouter
-OPENROUTER_API_KEY=your-openrouter-key
+OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
 
 # Backup provider
-ANTHROPIC_API_KEY=your-anthropic-key
+ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
 
 # FreeLLMAPI (already configured)
-FRELLMAPI_API_KEY=your-freellmapi-key
+FRELLMAPI_API_KEY=${{project.FRELLMAPI_API_KEY}}
 ```
 
 ## Backup

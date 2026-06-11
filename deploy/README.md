@@ -111,25 +111,25 @@ Set variables at the correct Dokploy level to avoid duplication:
 ### Environment Level (shared secrets)
 
 ```
-OPENROUTER_API_KEY=your-openrouter-api-key
-ANTHROPIC_API_KEY=your-anthropic-api-key
-OPENAI_API_KEY=your-openai-api-key
-GITHUB_TOKEN=your-github-token
-ENCRYPTION_KEY=generate-with-openssl-rand-hex-32
-RUSTFS_ACCESS_KEY=your-access-key
-RUSTFS_SECRET_KEY=your-secret-key
+OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
+ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
+OPENAI_API_KEY=${{project.OPENAI_API_KEY}}
+GITHUB_TOKEN=${{project.GITHUB_TOKEN}}
+ENCRYPTION_KEY=${{project.ENCRYPTION_KEY}}
+RUSTFS_ACCESS_KEY=${{project.RUSTFS_ACCESS_KEY}}
+RUSTFS_SECRET_KEY=${{project.RUSTFS_SECRET_KEY}}
 ```
 
 ### Project Level (shared config)
 
 ```
-CS_PASSWORD=your-secure-password
-CODESERVER_VERSION=4.123.0
+CS_PASSWORD=${{project.CS_PASSWORD}}
+CODESERVER_VERSION=${{project.CODESERVER_VERSION}}
 # TARGETARCH=amd64  # Auto-detected by Docker/buildx; do not override
-GITEA_DOMAIN=gitea.yourdomain.com
+GITEA_DOMAIN=${{project.GITEA_DOMAIN}}
 RUSTFS_ENDPOINT=http://rustfs:9000
 RUSTFS_BUCKET=code-server-backups
-TZ=UTC
+TZ=${{project.TZ}}
 ```
 
 ### Service Level (service-specific)
@@ -142,13 +142,13 @@ CS_DEFAULT_WORKSPACE=/workspace
 **Gitea:**
 ```
 GITEA_ADMIN_USER=admin
-GITEA_ADMIN_PASSWORD=your-secure-password
-GITEA_ADMIN_EMAIL=admin@yourdomain.com
+GITEA_ADMIN_PASSWORD=${{project.GITEA_ADMIN_PASSWORD}}
+GITEA_ADMIN_EMAIL=${{project.GITEA_ADMIN_EMAIL}}
 ```
 
 **FreeLLMAPI:**
 ```
-ENCRYPTION_KEY=your-encryption-key
+ENCRYPTION_KEY=${{project.ENCRYPTION_KEY}}
 FREELLM_VERSION=latest
 ```
 > Provider API keys (Google, NIM, OpenCode Zen, OpenRouter, GitHub, etc.) are configured through the FreeLLMAPI dashboard → Keys page, not as environment variables.
@@ -156,7 +156,7 @@ FREELLM_VERSION=latest
 **RustFS:**
 ```
 RUSTFS_ROOT_USER=admin
-RUSTFS_ROOT_PASSWORD=your-secure-password
+RUSTFS_ROOT_PASSWORD=${{project.RUSTFS_ROOT_PASSWORD}}
 ```
 
 ---
