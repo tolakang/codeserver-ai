@@ -262,7 +262,7 @@ docker compose -f deploy/docker-compose.gitea.yml up -d
 
 ```bash
 echo "--- Updating freellmapi ---"
-FREELLM_VERSION=${FREELLM_VERSION:-latest} \
+FREELLMAPI_VERSION=${FREELLMAPI_VERSION:-latest} \
   docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
 docker compose -f deploy/docker-compose.freellmapi.yml up -d
 ```

@@ -44,7 +44,7 @@ EOF
       cat > /home/coder/.config/opencode/config.json <<EOF
 {
   "provider": "openai",
-  "baseURL": "${FRELLMAPI_BASE_URL:-https://freellmapi:3000/v1}",
+  "baseURL": "${FREELLMAPI_BASE_URL:-https://freellmapi:3000/v1}",
   "apiKey": "${FREELLMAPI_API_KEY}"
 }
 EOF
@@ -72,7 +72,7 @@ EOF
       cat > /home/coder/.config/opencode/config.json <<EOF
 {
   "provider": "openai",
-  "baseURL": "${FRELLMAPI_BASE_URL:-https://freellmapi:3000/v1}",
+  "baseURL": "${FREELLMAPI_BASE_URL:-https://freellmapi:3000/v1}",
   "apiKey": "${FREELLMAPI_API_KEY}"
 }
 EOF

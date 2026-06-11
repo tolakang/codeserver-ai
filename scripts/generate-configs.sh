@@ -29,7 +29,7 @@ cat > "$OUTPUT_FILE" << EOF
       "description": "OpenCode Zen for fast, efficient AI coding"
     },
     "freellmapi": {
-      "baseURL": "${FRELLMAPI_BASE_URL:-http://freellmapi:3000/v1}",
+      "baseURL": "${FREELLMAPI_BASE_URL:-http://freellmapi:3000/v1}",
       "apiKey": "${FRELLMAPI_API_KEY}",
       "description": "FreeLLMAPI for proxying multiple free models"
     },

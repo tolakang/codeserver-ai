@@ -10,7 +10,7 @@ fi
 PROVIDERS=(
   "openrouter:OpenRouter:${OPENROUTER_API_KEY}:${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}"
   "opencode-zen:OpenCode Zen:${OPENCODE_ZEN_API_KEY}:${OPENCODE_ZEN_BASE_URL:-https://opencode.ai/zen/api/v1}"
-  "freellmapi:FreeLLMAPI:${FREELLMAPI_API_KEY}:${FRELLMAPI_BASE_URL:-https://freellmapi:3000/v1}"
+  "freellmapi:FreeLLMAPI:${FREELLMAPI_API_KEY}:${FREELLMAPI_BASE_URL:-https://freellmapi:3000/v1}"
   "anthropic:Anthropic:${ANTHROPIC_API_KEY}:${ANTHROPIC_BASE_URL:-https://api.anthropic.com}"
   "openai:OpenAI:${OPENAI_API_KEY}:${OPENAI_BASE_URL:-https://api.openai.com/v1}"
 )

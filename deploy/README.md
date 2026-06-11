@@ -42,7 +42,7 @@ This is the recommended approach for each service.
 5. Go to **Environment Variables** and add:
    ```
    ENCRYPTION_KEY=your-encryption-key
-   FREELLM_VERSION=latest
+    FREELLMAPI_VERSION=latest
    ```
    > Provider API keys are configured through the FreeLLMAPI dashboard after deployment, not as environment variables.
 6. Click **Deploy**
@@ -146,7 +146,7 @@ All variables from `.env.example` must be set in Dokploy. Here's the complete li
 | `OPENCODE_SERVER_PASSWORD` | OpenCode WEB password | `your-opencode-password` | Yes |
 | `CODESERVER_VERSION` | Code Server version | `4.123.0` | Yes |
 | `GITEA_VERSION` | Gitea version | `1.23.0` | Yes |
-| `FREELLM_VERSION` | FreeLLMAPI version | `latest` | Yes |
+| `FREELLMAPI_VERSION` | FreeLLMAPI version | `latest` | Yes |
 | `OPENCODE_VERSION` | OpenCode WEB version | `latest` | Yes |
 
 ---

@@ -4,7 +4,7 @@
 
 # syntax=docker/dockerfile:1.7
 ARG NODE_IMAGE=node:20-bookworm-slim
-ARG FREELLM_VERSION=latest
+ARG FREELLMAPI_VERSION=latest
 
 FROM ${NODE_IMAGE} AS deps
 WORKDIR /app
@@ -16,9 +16,9 @@ RUN apt-get update \
 RUN git clone --depth 1 --quiet https://github.com/tashfeenahmed/freellmapi.git .
 
 # Checkout specific version if not latest
-ARG FREELLM_VERSION=latest
-RUN if [ "${FREELLM_VERSION}" != "latest" ]; then \
-      git fetch --tags && git checkout "tags/${FREELLM_VERSION}" 2>/dev/null || git checkout "${FREELLM_VERSION}"; \
+ARG FREELLMAPI_VERSION=latest
+RUN if [ "${FREELLMAPI_VERSION}" != "latest" ]; then \
+      git fetch --tags && git checkout "tags/${FREELLMAPI_VERSION}" 2>/dev/null || git checkout "${FREELLMAPI_VERSION}"; \
     fi
 
 RUN mkdir -p tmp \

@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile.freellmapi
       args:
-        FREELLM_VERSION: ${{project.FREELLM_VERSION}}
+         FREELLMAPI_VERSION: ${{project.FREELLMAPI_VERSION}}
     image: freellmapi-custom:latest
     container_name: freellmapi
     restart: unless-stopped
