@@ -80,3 +80,61 @@ docker compose logs
 - Set up Git integration in Code Server
 - Configure automatic backups
 - Add custom extensions
+
+## AI Provider Selection
+
+During first container startup, you'll be prompted to select your preferred AI provider:
+
+1. **OpenRouter** - Access to 100+ open-source models
+2. **OpenCode Zen** - Fast, efficient coding assistant
+3. **FreeLLMAPI** - Proxy for multiple free models (default)
+4. **Anthropic** - Claude 3.5 Sonnet and Haiku
+5. **OpenAI** - GPT-4o, GPT-4 Turbo
+
+If you don't have an API key for your selected provider, you can set it up later:
+
+```bash
+# List available providers
+./scripts/manage-providers.sh list
+
+# Configure a provider
+./scripts/manage-providers.sh configure
+
+# Test provider connection
+./scripts/manage-providers.sh test
+```
+
+## Provider Configuration
+
+Each provider requires an API key. You can set these in your `.env` file:
+
+```bash
+# OpenRouter
+OPENROUTER_API_KEY=your-openrouter-key
+
+# OpenCode Zen
+OPENCODE_ZEN_API_KEY=your-opencode-zen-key
+
+# FreeLLMAPI (already configured)
+FREELLMAPI_API_KEY=your-freellmapi-key
+
+# Anthropic
+ANTHROPIC_API_KEY=your-anthropic-key
+
+# OpenAI
+OPENAI_API_KEY=your-openai-key
+```
+
+## Switching Providers
+
+You can switch providers at any time:
+
+```bash
+# List available providers
+./scripts/manage-providers.sh list
+
+# Configure a new provider
+./scripts/manage-providers.sh configure
+```
+
+The OpenCode extension will automatically use the new provider configuration.

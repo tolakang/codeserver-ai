@@ -240,6 +240,113 @@ Main update script with the following functions:
 ./scripts/update.sh opencode-web
 ```
 
+## Provider Management
+
+### manage-providers.sh
+
+Manage AI providers for OpenCode extension:
+
+```bash
+# List all available providers
+./scripts/manage-providers.sh list
+
+# Configure a new provider
+./scripts/manage-providers.sh configure
+
+# Test provider connection
+./scripts/manage-providers.sh test
+```
+
+### Available Providers
+
+1. **OpenRouter** - Access to 100+ open-source models
+2. **OpenCode Zen** - Fast, efficient coding assistant
+3. **FreeLLMAPI** - Proxy for multiple free models (default)
+4. **Anthropic** - Claude 3.5 Sonnet and Haiku
+5. **OpenAI** - GPT-4o, GPT-4 Turbo
+
+### Provider Configuration
+
+Each provider requires an API key. Set these in your `.env` file:
+
+```bash
+# OpenRouter
+OPENROUTER_API_KEY=your-openrouter-key
+
+# OpenCode Zen
+OPENCODE_ZEN_API_KEY=your-opencode-zen-key
+
+# FreeLLMAPI
+FREELLMAPI_API_KEY=your-freellmapi-key
+
+# Anthropic
+ANTHROPIC_API_KEY=your-anthropic-key
+
+# OpenAI
+OPENAI_API_KEY=your-openai-key
+```
+
+### Switching Providers During Updates
+
+If you need to change providers during an update:
+
+1. **Before updating:** Configure your preferred provider
+2. **During update:** The provider configuration will be preserved
+3. **After update:** OpenCode will use the new provider settings
+
+```bash
+# Configure provider before update
+./scripts/manage-providers.sh configure
+
+# Update all services
+./scripts/update.sh
+
+# Verify provider is working
+./scripts/manage-providers.sh test
+```
+
+### Provider-Specific Notes
+
+#### OpenRouter
+- **Best for:** General coding, conversation, research
+- **Models:** Claude, GPT, Gemini, Llama, and more
+- **Setup:** Get API key from [OpenRouter](https://openrouter.ai/keys)
+
+#### OpenCode Zen
+- **Best for:** Fast coding tasks, efficiency
+- **Models:** DeepSeek V4 Flash, Nemotron
+- **Setup:** Get API key from [OpenCode Zen](https://opencode.ai/zen)
+
+#### FreeLLMAPI
+- **Best for:** Free access to multiple models
+- **Models:** Google Gemini, NVIDIA NIM, GitHub Models, etc.
+- **Setup:** Configure through FreeLLMAPI dashboard
+
+#### Anthropic
+- **Best for:** Advanced reasoning, analysis
+- **Models:** Claude 3.5 Sonnet, Claude 3 Haiku
+- **Setup:** Get API key from [Anthropic](https://console.anthropic.com)
+
+#### OpenAI
+- **Best for:** Standard AI tasks, GPT models
+- **Models:** GPT-4o, GPT-4 Turbo, GPT-3.5
+- **Setup:** Get API key from [OpenAI](https://platform.openai.com/api-keys)
+
+## Post-Update Checklist
+
+After each update, verify:
+
+- [ ] All services are running
+- [ ] Code Server is accessible
+- [ ] Gitea Git server works
+- [ ] AI integrations function
+- [ ] Backups are working
+- [ ] Extensions are installed
+- [ ] User data is intact
+- [ ] Performance is acceptable
+- [ ] AI provider is correctly configured
+- [ ] Provider API keys are valid
+
 ## Post-Update Checklist
 
 After each update, verify:

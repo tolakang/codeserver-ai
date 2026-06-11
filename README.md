@@ -108,9 +108,28 @@ See [docs/quick-start.md](docs/quick-start.md) for detailed Dokploy setup.
 │   ├── install-extensions.sh     ← AI extensions installer
 │   ├── install-opencode-web.sh    ← OpenCode WEB installer
 │   ├── opencode-web.sh            ← OpenCode WEB server
+│   ├── update.sh                  ← update all services
+│   └── manage-providers.sh        ← AI provider management
+├── config/
+│   ├── unified-config.json        ← unified provider configuration
+│   ├── opencode/                  ← OpenCode extension config
+│   │   └── config.json
+│   └── opencode-web/              ← OpenCode WEB config
+│       └── opencode.json
+├── docs/
+│   ├── backup.sh                 ← backup to RustFS
+│   ├── restore.sh                ← restore from RustFS
+│   ├── init.sh                   ← container initialization
+│   ├── install-extensions.sh     ← AI extensions installer
+│   ├── install-opencode-web.sh    ← OpenCode WEB installer
+│   ├── opencode-web.sh            ← OpenCode WEB server
 │   └── update.sh                  ← update all services
 ├── config/
-│   └── config.json                ← unified configuration
+│   ├── unified-config.json        ← unified provider configuration
+│   ├── opencode/                  ← OpenCode extension config
+│   │   └── config.json
+│   └── opencode-web/              ← OpenCode WEB config
+│       └── opencode.json
 ├── docs/
 │   ├── quick-start.md             ← basic setup guide
 │   ├── backup.md                  ← backup procedures
@@ -142,6 +161,62 @@ Update specific service:
 ./scripts/update.sh opencode-web
 ```
 
+## AI Provider Management
+
+Manage AI providers for OpenCode extension:
+
+```bash
+# List all available providers
+./scripts/manage-providers.sh list
+
+# Configure a new provider
+./scripts/manage-providers.sh configure
+
+# Test provider connection
+./scripts/manage-providers.sh test
+```
+
+### Available Providers
+
+1. **OpenRouter** - Access to 100+ open-source models
+2. **OpenCode Zen** - Fast, efficient coding assistant
+3. **FreeLLMAPI** - Proxy for multiple free models (default)
+4. **Anthropic** - Claude 3.5 Sonnet and Haiku
+5. **OpenAI** - GPT-4o, GPT-4 Turbo
+
+### Provider Configuration
+
+Each provider requires an API key. Set these in your `.env` file:
+
+```bash
+# OpenRouter
+OPENROUTER_API_KEY=your-openrouter-key
+
+# OpenCode Zen
+OPENCODE_ZEN_API_KEY=your-opencode-zen-key
+
+# FreeLLMAPI
+FREELLMAPI_API_KEY=your-freellmapi-key
+
+# Anthropic
+ANTHROPIC_API_KEY=your-anthropic-key
+
+# OpenAI
+OPENAI_API_KEY=your-openai-key
+```
+
+### Provider Selection
+
+During first container startup, you'll be prompted to select your preferred AI provider:
+
+1. **OpenRouter** - Access to 100+ open-source models
+2. **OpenCode Zen** - Fast, efficient coding assistant
+3. **FreeLLMAPI** - Proxy for multiple free models (default)
+4. **Anthropic** - Claude 3.5 Sonnet and Haiku
+5. **OpenAI** - GPT-4o, GPT-4 Turbo
+
+If you don't have an API key for your selected provider, you can set it up later using the provider management script.
+
 ## Backup
 
 See [docs/backup.md](docs/backup.md) for RustFS backup strategy.
@@ -157,6 +232,7 @@ Daily automated backups at 2 AM:
 - [Quick Start Guide](docs/quick-start.md)
 - [Backup Strategy](docs/backup.md)
 - [Update Procedures](docs/update.md)
+- [Provider Management](docs/update.md#provider-management)
 
 ## License
 

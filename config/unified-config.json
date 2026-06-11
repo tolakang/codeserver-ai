@@ -1,0 +1,32 @@
+{
+  "providers": {
+    "openrouter": {
+      "baseURL": "https://openrouter.ai/api/v1",
+      "description": "OpenRouter AI platform with multiple model support"
+    },
+    "opencode-zen": {
+      "baseURL": "https://opencode.ai/zen/api/v1",
+      "description": "OpenCode Zen for fast, efficient AI coding"
+    },
+    "freellmapi": {
+      "baseURL": "http://freellmapi:3000/v1",
+      "description": "FreeLLMAPI for proxying multiple free models"
+    },
+    "anthropic": {
+      "baseURL": "https://api.anthropic.com",
+      "description": "Anthropic Claude models"
+    },
+    "openai": {
+      "baseURL": "https://api.openai.com/v1",
+      "description": "OpenAI GPT models"
+    }
+  },
+  "defaultProvider": "freellmapi",
+  "server": {
+    "port": 4001,
+    "hostname": "0.0.0.0",
+    "mdns": true,
+    "mdns-domain": "opencode.local",
+    "cors": []
+  }
+}
