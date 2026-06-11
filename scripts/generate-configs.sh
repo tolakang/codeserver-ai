@@ -1,0 +1,50 @@
+#!/bin/bash
+# scripts/generate-configs.sh
+
+# Load environment variables
+if [ -f .env ]; then
+  source .env
+fi
+
+# Generate unified-config.json with variable substitution
+cat > config/unified-config.json << EOF
+{
+  "providers": {
+    "openrouter": {
+      "baseURL": "${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}",
+      "apiKey": "${OPENROUTER_API_KEY}",
+      "description": "OpenRouter AI platform with multiple model support"
+    },
+    "opencode-zen": {
+      "baseURL": "${OPENCODE_ZEN_BASE_URL:-https://opencode.ai/zen/api/v1}",
+      "apiKey": "${OPENCODE_ZEN_API_KEY}",
+      "description": "OpenCode Zen for fast, efficient AI coding"
+    },
+    "freellmapi": {
+      "baseURL": "${FRELLMAPI_BASE_URL:-https://freellmapi:3000/v1}",
+      "apiKey": "${FREELLMAPI_API_KEY}",
+      "description": "FreeLLMAPI for proxying multiple free models"
+    },
+    "anthropic": {
+      "baseURL": "${ANTHROPIC_BASE_URL:-https://api.anthropic.com}",
+      "apiKey": "${ANTHROPIC_API_KEY}",
+      "description": "Anthropic Claude models"
+    },
+    "openai": {
+      "baseURL": "${OPENAI_BASE_URL:-https://api.openai.com/v1}",
+      "apiKey": "${OPENAI_API_KEY}",
+      "description": "OpenAI GPT models"
+    }
+  },
+  "defaultProvider": "${DEFAULT_PROVIDER:-freellmapi}",
+  "server": {
+    "port": 4001,
+    "hostname": "0.0.0.0",
+    "mdns": true,
+    "mdns-domain": "opencode.local",
+    "cors": []
+  }
+}
+EOF
+
+echo "✅ Generated unified-config.json with environment variables"

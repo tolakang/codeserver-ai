@@ -169,7 +169,7 @@ Manage AI providers for OpenCode extension:
 # List all available providers
 ./scripts/manage-providers.sh list
 
-# Configure a new provider
+# Configure a provider (uses environment variables)
 ./scripts/manage-providers.sh configure
 
 # Test provider connection
@@ -186,36 +186,85 @@ Manage AI providers for OpenCode extension:
 
 ### Provider Configuration
 
-Each provider requires an API key. Set these in your `.env` file:
+Each provider can be configured using environment variables in your `.env` file:
 
 ```bash
-# OpenRouter
+# OpenRouter Provider
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_API_KEY=your-openrouter-key
 
-# OpenCode Zen
+# OpenCode Zen Provider
+OPENCODE_ZEN_BASE_URL=https://opencode.ai/zen/api/v1
 OPENCODE_ZEN_API_KEY=your-opencode-zen-key
 
-# FreeLLMAPI
-FREELLMAPI_API_KEY=your-freellmapi-key
+# FreeLLMAPI Provider
+FRELLMAPI_BASE_URL=https://freellmapi:3000/v1
+FRELLMAPI_API_KEY=your-freellmapi-key
 
-# Anthropic
+# Anthropic Provider
+ANTHROPIC_BASE_URL=https://api.anthropic.com
 ANTHROPIC_API_KEY=your-anthropic-key
 
-# OpenAI
+# OpenAI Provider
+OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_API_KEY=your-openai-key
+
+# Default Provider
+DEFAULT_PROVIDER=freellmapi
 ```
+
+### Configuration Generation
+
+After setting up your environment variables, generate the configuration:
+
+```bash
+# Generate unified configuration
+./scripts/generate-configs.sh
+```
+
+This will create `config/unified-config.json` with all provider configurations based on your environment variables.
 
 ### Provider Selection
 
-During first container startup, you'll be prompted to select your preferred AI provider:
+During container startup, the system will automatically use the provider configuration from your environment variables. No manual selection is required - the system will use the default provider or the one specified in your environment.
 
-1. **OpenRouter** - Access to 100+ open-source models
-2. **OpenCode Zen** - Fast, efficient coding assistant
-3. **FreeLLMAPI** - Proxy for multiple free models (default)
-4. **Anthropic** - Claude 3.5 Sonnet and Haiku
-5. **OpenAI** - GPT-4o, GPT-4 Turbo
+### Configuration Examples
 
-If you don't have an API key for your selected provider, you can set it up later using the provider management script.
+**Example 1: OpenRouter as primary provider:**
+```bash
+DEFAULT_PROVIDER=openrouter
+OPENROUTER_API_KEY=your-openrouter-key
+```
+
+**Example 2: OpenCode Zen as primary provider:**
+```bash
+DEFAULT_PROVIDER=opencode-zen
+OPENCODE_ZEN_API_KEY=your-opencode-zen-key
+```
+
+**Example 3: Multiple providers:**
+```bash
+# Primary provider
+DEFAULT_PROVIDER=openrouter
+OPENROUTER_API_KEY=your-openrouter-key
+
+# Backup provider
+ANTHROPIC_API_KEY=your-anthropic-key
+
+# FreeLLMAPI (already configured)
+FRELLMAPI_API_KEY=your-freellmapi-key
+```
+
+### Configuration Generation
+
+The system supports flexible provider configuration:
+
+1. **Setup Environment:** Copy `config/.env.template` to `.env` and fill in your values
+2. **Generate Configuration:** Run `./scripts/generate-configs.sh`
+3. **Update Services:** Run `./scripts/update.sh` to apply changes
+4. **Verify:** Test provider functionality with `./scripts/manage-providers.sh test`
+
+This flexible system makes it easy to manage multiple AI providers and switch between them as needed.
 
 ## Backup
 

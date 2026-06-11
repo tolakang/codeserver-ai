@@ -250,7 +250,7 @@ Manage AI providers for OpenCode extension:
 # List all available providers
 ./scripts/manage-providers.sh list
 
-# Configure a new provider
+# Configure a provider (uses environment variables)
 ./scripts/manage-providers.sh configure
 
 # Test provider connection
@@ -267,36 +267,56 @@ Manage AI providers for OpenCode extension:
 
 ### Provider Configuration
 
-Each provider requires an API key. Set these in your `.env` file:
+Each provider can be configured using environment variables in your `.env` file:
 
 ```bash
-# OpenRouter
+# OpenRouter Provider
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_API_KEY=your-openrouter-key
 
-# OpenCode Zen
+# OpenCode Zen Provider
+OPENCODE_ZEN_BASE_URL=https://opencode.ai/zen/api/v1
 OPENCODE_ZEN_API_KEY=your-opencode-zen-key
 
-# FreeLLMAPI
-FREELLMAPI_API_KEY=your-freellmapi-key
+# FreeLLMAPI Provider
+FRELLMAPI_BASE_URL=https://freellmapi:3000/v1
+FRELLMAPI_API_KEY=your-freellmapi-key
 
-# Anthropic
+# Anthropic Provider
+ANTHROPIC_BASE_URL=https://api.anthropic.com
 ANTHROPIC_API_KEY=your-anthropic-key
 
-# OpenAI
+# OpenAI Provider
+OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_API_KEY=your-openai-key
+
+# Default Provider
+DEFAULT_PROVIDER=freellmapi
+```
+
+### Configuration Generation
+
+After setting up your environment variables, generate the configuration:
+
+```bash
+# Generate unified configuration
+./scripts/generate-configs.sh
 ```
 
 ### Switching Providers During Updates
 
 If you need to change providers during an update:
 
-1. **Before updating:** Configure your preferred provider
+1. **Before updating:** Update your `.env` file with new provider configuration
 2. **During update:** The provider configuration will be preserved
 3. **After update:** OpenCode will use the new provider settings
 
 ```bash
-# Configure provider before update
+# Update environment variables
 ./scripts/manage-providers.sh configure
+
+# Regenerate configuration
+./scripts/generate-configs.sh
 
 # Update all services
 ./scripts/update.sh
@@ -332,6 +352,62 @@ If you need to change providers during an update:
 - **Models:** GPT-4o, GPT-4 Turbo, GPT-3.5
 - **Setup:** Get API key from [OpenAI](https://platform.openai.com/api-keys)
 
+## Configuration Generation
+
+### generate-configs.sh
+
+Generate unified configuration from environment variables:
+
+```bash
+# Generate unified configuration
+./scripts/generate-configs.sh
+```
+
+This script reads your `.env` file and generates:
+
+- `config/unified-config.json` - Unified provider configuration
+- Updates all provider configurations based on environment variables
+- Maintains backward compatibility with existing settings
+
+### Environment Variable Template
+
+Use `config/.env.template` as a starting point for your `.env` file:
+
+```bash
+# Copy template to .env
+cp config/.env.template .env
+
+# Edit .env with your values
+nano .env
+```
+
+### Provider Configuration Examples
+
+**Example 1: OpenRouter as primary provider:**
+```bash
+DEFAULT_PROVIDER=openrouter
+OPENROUTER_API_KEY=your-openrouter-key
+```
+
+**Example 2: OpenCode Zen as primary provider:**
+```bash
+DEFAULT_PROVIDER=opencode-zen
+OPENCODE_ZEN_API_KEY=your-opencode-zen-key
+```
+
+**Example 3: Multiple providers:**
+```bash
+# Primary provider
+DEFAULT_PROVIDER=openrouter
+OPENROUTER_API_KEY=your-openrouter-key
+
+# Backup provider
+ANTHROPIC_API_KEY=your-anthropic-key
+
+# FreeLLMAPI (already configured)
+FREELLMAPI_API_KEY=your-freellmapi-key
+```
+
 ## Post-Update Checklist
 
 After each update, verify:
@@ -346,6 +422,8 @@ After each update, verify:
 - [ ] Performance is acceptable
 - [ ] AI provider is correctly configured
 - [ ] Provider API keys are valid
+- [ ] Environment variables are properly set
+- [ ] Configuration files are generated correctly
 
 ## Post-Update Checklist
 

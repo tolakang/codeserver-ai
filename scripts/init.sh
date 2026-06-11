@@ -11,74 +11,74 @@ echo "=== Code Server Init ===" | tee -a "$LOG_FILE"
 # Run extension installer
 /scripts/install-extensions.sh
 
-# Provider selection for OpenCode
+# Provider configuration from environment variables
 if [ ! -f /home/coder/.config/opencode/config.json ]; then
-  echo "=== AI Provider Selection ===" | tee -a "$LOG_FILE"
-  echo "Select your preferred AI provider:" | tee -a "$LOG_FILE"
-  echo "1. OpenRouter (default)" | tee -a "$LOG_FILE"
-  echo "2. OpenCode Zen" | tee -a "$LOG_FILE"
-  echo "3. FreeLLMAPI (default)" | tee -a "$LOG_FILE"
-  echo "4. Anthropic" | tee -a "$LOG_FILE"
-  echo "5. OpenAI" | tee -a "$LOG_FILE"
-  echo "" | tee -a "$LOG_FILE"
+  echo "=== AI Provider Configuration ===" | tee -a "$LOG_FILE"
   
-  read -p "Enter choice (1-5): " provider_choice
+  # Load environment variables
+  if [ -f .env ]; then
+    source .env
+  fi
   
-  case $provider_choice in
-    1) PROVIDER="openrouter" ;;
-    2) PROVIDER="opencode-zen" ;;
-    3) PROVIDER="freellmapi" ;;
-    4) PROVIDER="anthropic" ;;
-    5) PROVIDER="openai" ;;
-    *) PROVIDER="freellmapi" ;;
-  esac
+  # Determine provider from environment or use default
+  PROVIDER="${DEFAULT_PROVIDER:-freellmapi}"
   
   mkdir -p /home/coder/.config/opencode
   
-  # Generate provider config
+  # Generate provider config based on environment
   case $PROVIDER in
     openrouter)
-      cat > /home/coder/.config/opencode/config.json <<'EOF'
+      cat > /home/coder/.config/opencode/config.json <<EOF
 {
   "provider": "openai",
-  "baseURL": "https://openrouter.ai/api/v1",
+  "baseURL": "${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}",
   "apiKey": "${OPENROUTER_API_KEY}"
 }
 EOF
       ;;
     opencode-zen)
-      cat > /home/coder/.config/opencode/config.json <<'EOF'
+      cat > /home/coder/.config/opencode/config.json <<EOF
 {
   "provider": "openai",
-  "baseURL": "https://opencode.ai/zen/api/v1",
+  "baseURL": "${OPENCODE_ZEN_BASE_URL:-https://opencode.ai/zen/api/v1}",
   "apiKey": "${OPENCODE_ZEN_API_KEY}"
 }
 EOF
       ;;
     freellmapi)
-      cat > /home/coder/.config/opencode/config.json <<'EOF'
+      cat > /home/coder/.config/opencode/config.json <<EOF
 {
   "provider": "openai",
-  "baseURL": "https://freellmapi:3000/v1",
+  "baseURL": "${FRELLMAPI_BASE_URL:-https://freellmapi:3000/v1}",
   "apiKey": "${FREELLMAPI_API_KEY}"
 }
 EOF
       ;;
     anthropic)
-      cat > /home/coder/.config/opencode/config.json <<'EOF'
+      cat > /home/coder/.config/opencode/config.json <<EOF
 {
   "provider": "anthropic",
-  "baseURL": "https://api.anthropic.com",
+  "baseURL": "${ANTHROPIC_BASE_URL:-https://api.anthropic.com}",
   "apiKey": "${ANTHROPIC_API_KEY}"
 }
 EOF
       ;;
     openai)
-      cat > /home/coder/.config/opencode/config.json <<'EOF'
+      cat > /home/coder/.config/opencode/config.json <<EOF
 {
   "provider": "openai",
-  "baseURL": "https://api.openai.com/v1",
+  "baseURL": "${OPENAI_BASE_URL:-https://api.openai.com/v1}",
   "apiKey": "${OPENAI_API_KEY}"
+}
+EOF
+      ;;
+    *)
+      echo "Warning: Unknown provider '$PROVIDER', using freellmapi as default" | tee -a "$LOG_FILE"
+      cat > /home/coder/.config/opencode/config.json <<EOF
+{
+  "provider": "openai",
+  "baseURL": "${FRELLMAPI_BASE_URL:-https://freellmapi:3000/v1}",
+  "apiKey": "${FREELLMAPI_API_KEY}"
 }
 EOF
       ;;
@@ -87,7 +87,7 @@ EOF
   echo "OpenCode configured with $PROVIDER provider" | tee -a "$LOG_FILE"
   echo "Provider config saved to: /home/coder/.config/opencode/config.json"
 else
-  echo "OpenCode extension config already exists, skipping provider selection" | tee -a "$LOG_FILE"
+  echo "OpenCode extension config already exists, skipping provider configuration" | tee -a "$LOG_FILE"
 fi
 
 # Copy OpenCode WEB config if not already in place
