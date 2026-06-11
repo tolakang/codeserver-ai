@@ -1,5 +1,5 @@
 {
   "provider": "openai",
-  "baseURL": "http://freellmapi:3000/v1",
-  "apiKey": "${FREELLMAPI_API_KEY}"
+  "baseURL": "https://openrouter.ai/api/v1",
+  "apiKey": "${OPENROUTER_API_KEY}"
 }

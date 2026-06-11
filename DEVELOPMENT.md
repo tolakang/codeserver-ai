@@ -13,7 +13,7 @@ This starts all 4 services: Code Server, Gitea, FreeLLMAPI, and RustFS.
 All project files live in `/workspace` inside the container, mounted from:
 
 ```
-/mnt/storage/code-server/workspace
+/mnt/storage/code-server
 ```
 
 This persists across container restarts, updates, and redeployments.
@@ -25,6 +25,7 @@ Installed automatically at startup via `scripts/install-extensions.sh`:
 - OpenCode AI
 - Amazon S3 Explorer
 - GitLens
+- GitHub Pull Requests
 
 To add more extensions, edit `scripts/install-extensions.sh`.
 
@@ -32,7 +33,7 @@ To add more extensions, edit `scripts/install-extensions.sh`.
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| Code Server | http://localhost:8080 | Web IDE |
+| Code Server | https://localhost:8443 | Web IDE |
 | Gitea | http://localhost:3001 | Git hosting |
 | FreeLLMAPI | http://localhost:3000 | LLM proxy |
 | RustFS | http://localhost:9000 | S3 storage |

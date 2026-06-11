@@ -4,6 +4,8 @@
 
 set -e
 
+LOG_FILE="/var/log/restore.log"
+
 # Configuration
 RUSTFS_ENDPOINT="${RUSTFS_ENDPOINT:-http://rustfs:9000}"
 RUSTFS_BUCKET="${RUSTFS_BUCKET:-code-server-backups}"
@@ -15,11 +17,11 @@ export AWS_DEFAULT_REGION="us-east-1"
 
 RESTORE_DIR="/tmp/restore"
 
-echo "=== Restore Started ==="
+echo "=== Restore Started ===" | tee -a "$LOG_FILE"
 
 # Validate credentials
 if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-  echo "Error: RUSTFS_ACCESS_KEY and RUSTFS_SECRET_KEY must be set"
+  echo "Error: RUSTFS_ACCESS_KEY and RUSTFS_SECRET_KEY must be set" | tee -a "$LOG_FILE"
   exit 1
 fi
 
@@ -53,7 +55,8 @@ mkdir -p "${SNAPSHOT_DIR}"
 tar czf "${SNAPSHOT_DIR}/workspace-pre-restore-$(date +%Y%m%d-%H%M%S).tar.gz" \
   --exclude='node_modules' \
   --exclude='.cache' \
-  -C /mnt/storage/code-server workspace 2>/dev/null || true
+  -C /workspace workspace 2>/dev/null || true
+
 echo "Snapshot saved to ${SNAPSHOT_DIR}/"
 
 # Download from RustFS

@@ -22,7 +22,7 @@ Internet
     v
 Dokploy
     |
-    +-- Code Server (port 8080)
+    +-- Code Server (port 8443 HTTPS)
     |       +-- OpenCode
     |       +-- Claude-Mem
     |       +-- Workspace
@@ -42,7 +42,7 @@ Dokploy
 
 | Service | Source | Build Method | Port |
 |---------|--------|--------------|------|
-| code-server | [coder/code-server](https://github.com/coder/code-server) | .deb from GitHub releases | 8080 |
+| code-server | [coder/code-server](https://github.com/coder/code-server) | .deb from GitHub releases | 8443 |
 | gitea | [go-gitea/gitea](https://github.com/go-gitea/gitea) | Cloned at build time | 3001 |
 | freellmapi | [tashfeenahmed/freellmapi](https://github.com/tashfeenahmed/freellmapi) | Cloned at build time | 3000 |
 | rustfs | [rustfs/rustfs](https://github.com/rustfs/rustfs) | Binary from releases | 9000 |
@@ -66,7 +66,7 @@ cp .env.example .env
 ### 3. Create Storage Directories
 
 ```bash
-sudo mkdir -p /mnt/storage/code-server/{config,workspace,extensions}
+sudo mkdir -p /mnt/storage/code-server
 sudo mkdir -p /mnt/storage/gitea/data
 sudo mkdir -p /mnt/storage/freellmapi/data
 sudo mkdir -p /mnt/storage/rustfs/data

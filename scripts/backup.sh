@@ -4,6 +4,8 @@
 
 set -e
 
+LOG_FILE="/var/log/backup.log"
+
 # Configuration
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 BACKUP_DIR="/tmp/backups"
@@ -18,31 +20,31 @@ export AWS_DEFAULT_REGION="us-east-1"
 # Retention (days)
 DAILY_RETENTION=7
 
-echo "=== Backup Started: ${TIMESTAMP} ==="
+echo "=== Backup Started: ${TIMESTAMP} ===" | tee -a "$LOG_FILE"
 
 mkdir -p "${BACKUP_DIR}"
 
 # Validate credentials
 if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-  echo "Error: RUSTFS_ACCESS_KEY and RUSTFS_SECRET_KEY must be set"
+  echo "Error: RUSTFS_ACCESS_KEY and RUSTFS_SECRET_KEY must be set" | tee -a "$LOG_FILE"
   exit 1
 fi
 
-# Backup workspace
+# Backup workspace (now in single persistent volume)
 echo "Backing up workspace..."
 tar czf "${BACKUP_DIR}/workspace-${TIMESTAMP}.tar.gz" \
   --exclude='node_modules' \
   --exclude='.cache' \
   --exclude='.npm' \
   --exclude='__pycache__' \
-  -C /mnt/storage/code-server workspace 2>/dev/null || true
+  -C /workspace workspace 2>/dev/null || true
 
-# Backup config
+# Backup config (now in single persistent volume)
 echo "Backing up config..."
 tar czf "${BACKUP_DIR}/config-${TIMESTAMP}.tar.gz" \
-  -C /mnt/storage/code-server config 2>/dev/null || true
+  -C /workspace config 2>/dev/null || true
 
-# Backup gitea
+# Backup gitea (still in separate volume)
 echo "Backing up gitea..."
 tar czf "${BACKUP_DIR}/gitea-${TIMESTAMP}.tar.gz" \
   --exclude='*.log' \

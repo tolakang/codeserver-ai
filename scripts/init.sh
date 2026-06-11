@@ -4,7 +4,9 @@
 
 set -e
 
-echo "=== Code Server Init ==="
+LOG_FILE="/var/log/init.log"
+
+echo "=== Code Server Init ===" | tee -a "$LOG_FILE"
 
 # Run extension installer
 /scripts/install-extensions.sh
@@ -13,16 +15,16 @@ echo "=== Code Server Init ==="
 if [ ! -f /home/coder/.config/opencode/config.json ]; then
   mkdir -p /home/coder/.config/opencode
   if cp /config/opencode/config.json /home/coder/.config/opencode/config.json 2>/dev/null; then
-    echo "OpenCode extension config installed"
+    echo "OpenCode extension config installed" | tee -a "$LOG_FILE"
   else
-    echo "Warning: OpenCode extension config not found, skipping"
+    echo "Warning: OpenCode extension config not found, skipping" | tee -a "$LOG_FILE"
   fi
 fi
 
 # Copy OpenCode WEB config if not already in place
 if [ ! -f /config/opencode-web/opencode.json ]; then
   mkdir -p /config/opencode-web
-  echo "Warning: OpenCode WEB config not found, skipping"
+  echo "Warning: OpenCode WEB config not found, skipping" | tee -a "$LOG_FILE"
 fi
 
 # Substitute ${CS_PASSWORD} in code-server config
@@ -54,10 +56,10 @@ if [ ! -f /home/coder/.gitconfig ]; then
     ci = commit
     lg = log --oneline --graph --decorate -20
 EOF
-  echo "Git config created"
+  echo "Git config created" | tee -a "$LOG_FILE"
 fi
 
-echo "=== Init Complete ==="
+echo "=== Init Complete ===" | tee -a "$LOG_FILE"
 
 # Execute code-server
 exec code-server --bind-addr 0.0.0.0:8080 /workspace "$@"

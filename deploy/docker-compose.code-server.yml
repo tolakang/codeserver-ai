@@ -14,22 +14,21 @@ services:
     container_name: code-server
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8443:8443"
     volumes:
-      - code-server-config:/config
-      - code-server-workspace:/workspace
-      - code-server-extensions:/extensions
-      - code-server-code-server-config:/home/coder/.config/code-server
+      - code-server-persistent:/workspace
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=${TZ:-UTC}
       - DEFAULT_WORKSPACE=/workspace
       - CS_PASSWORD=${CS_PASSWORD}
+      - CODE_SERVER_TLS_CERT=/workspace/config/tls/cert.pem
+      - CODE_SERVER_TLS_KEY=/workspace/config/tls/key.pem
     networks:
       - codeserver-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "curl", "-f", "https://localhost:8443"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -40,7 +39,4 @@ networks:
     external: true
 
 volumes:
-  code-server-config:
-  code-server-workspace:
-  code-server-extensions:
-  code-server-code-server-config:
+  code-server-persistent:

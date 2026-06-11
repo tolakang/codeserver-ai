@@ -8,8 +8,7 @@ Daily automated backups using RustFS (S3-compatible storage).
 
 | Path | Container | Purpose |
 |------|-----------|---------|
-| /mnt/storage/code-server/workspace | code-server | Project files |
-| /mnt/storage/code-server/config | code-server | IDE configuration |
+| /workspace | code-server | Project files + IDE configuration |
 | /mnt/storage/gitea/data | gitea | Git repositories + DB |
 
 ## What Does NOT Get Backed Up
@@ -77,7 +76,7 @@ See `scripts/backup.sh` for implementation details.
 
 The script:
 
-1. Creates timestamped tarballs of workspace, config, and gitea data
+1. Creates timestamped tarballs of workspace and gitea data
 2. Uploads to RustFS S3 bucket
 3. Cleans up local tarballs
 4. Removes backups older than retention period
