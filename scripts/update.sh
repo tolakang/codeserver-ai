@@ -56,8 +56,8 @@ update_rustfs() {
 update_opencode_web() {
   echo "--- Updating opencode-web ---"
   OPENCODE_VERSION=${OPENCODE_VERSION:-latest} \
-    docker compose -f docker-compose.opencode-web.yml build --no-cache
-  docker compose -f docker-compose.opencode-web.yml up -d
+    docker compose -f deploy/docker-compose.opencode-web.yml build --no-cache
+  docker compose -f deploy/docker-compose.opencode-web.yml up -d
 }
 
 update_all() {
@@ -77,8 +77,8 @@ update_all() {
   docker compose -f deploy/docker-compose.rustfs.yml up -d
 
   OPENCODE_VERSION=${OPENCODE_VERSION:-latest} \
-    docker compose -f docker-compose.opencode-web.yml build --no-cache
-  docker compose -f docker-compose.opencode-web.yml up -d
+    docker compose -f deploy/docker-compose.opencode-web.yml build --no-cache
+  docker compose -f deploy/docker-compose.opencode-web.yml up -d
 }
 
 case "$SERVICE" in
@@ -103,4 +103,4 @@ echo ""
   docker compose -f deploy/docker-compose.gitea.yml ps 2>/dev/null || true
   docker compose -f deploy/docker-compose.freellmapi.yml ps 2>/dev/null || true
   docker compose -f deploy/docker-compose.rustfs.yml ps 2>/dev/null || true
-  docker compose -f docker-compose.opencode-web.yml ps 2>/dev/null || true
+  docker compose -f deploy/docker-compose.opencode-web.yml ps 2>/dev/null || true

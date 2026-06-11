@@ -1,0 +1,5 @@
+{
+  "provider": "openai",
+  "baseURL": "http://freellmapi:3000/v1",
+  "apiKey": "freellmapi-your-unified-key"
+}

@@ -32,7 +32,7 @@ services:
 
   opencode-web:
     extends:
-      file: docker-compose.opencode-web.yml
+      file: deploy/docker-compose.opencode-web.yml
       service: opencode-web
 
 networks:

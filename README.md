@@ -83,7 +83,7 @@ docker compose up -d
 
 **Option B: Individual services via Dokploy**
 
-See [deploy/README.md](deploy/README.md) for detailed Dokploy setup.
+See [docs/quick-start.md](docs/quick-start.md) for detailed Dokploy setup.
 
 ## File Structure
 
@@ -95,28 +95,31 @@ See [deploy/README.md](deploy/README.md) for detailed Dokploy setup.
 ├── Dockerfile.rustfs              ← downloads rustfs binary
 ├── Dockerfile.opencode-web        ← builds OpenCode WEB server
 ├── docker-compose.yml             ← combined orchestrator
-├── docker-compose.opencode-web.yml ← OpenCode WEB service config
 ├── deploy/
 │   ├── docker-compose.code-server.yml
 │   ├── docker-compose.gitea.yml
 │   ├── docker-compose.freellmapi.yml
-│   └── docker-compose.rustfs.yml
+│   ├── docker-compose.rustfs.yml
+│   └── docker-compose.opencode-web.yml
 ├── scripts/
-│   ├── backup.sh
-│   ├── restore.sh
-│   ├── init.sh
-│   ├── install-extensions.sh
-│   ├── install-opencode-web.sh
-│   ├── opencode-web.sh
-│   └── update.sh
+│   ├── backup.sh                 ← backup to RustFS
+│   ├── restore.sh                ← restore from RustFS
+│   ├── init.sh                   ← container initialization
+│   ├── install-extensions.sh     ← AI extensions installer
+│   ├── install-opencode-web.sh    ← OpenCode WEB installer
+│   ├── opencode-web.sh            ← OpenCode WEB server
+│   └── update.sh                  ← update all services
 ├── config/
-│   ├── opencode/
-│   │   └── config.json
-│   └── opencode-web/
-│       └── opencode.json
+│   └── config.json                ← unified configuration
 ├── docs/
-├── .env.example
-└── README.md
+│   ├── quick-start.md             ← basic setup guide
+│   ├── backup.md                  ← backup procedures
+│   └── update.md                  ← update procedures
+└── deploy/
+    ├── docker-compose.code-server.yml
+    ├── docker-compose.gitea.yml
+    ├── docker-compose.freellmapi.yml
+    └── docker-compose.rustfs.yml
 ```
 
 > **Architecture Note:** code-server builds for **both amd64 and arm64** automatically via Docker/buildx. No manual `TARGETARCH` configuration needed.
@@ -141,7 +144,7 @@ Update specific service:
 
 ## Backup
 
-See [BACKUP.md](BACKUP.md) for RustFS backup strategy.
+See [docs/backup.md](docs/backup.md) for RustFS backup strategy.
 
 Daily automated backups at 2 AM:
 
@@ -151,14 +154,9 @@ Daily automated backups at 2 AM:
 
 ## Documentation
 
-- [Dokploy Deployment Guide](deploy/README.md)
-- [Development Guide](DEVELOPMENT.md)
-- [Backup Strategy](BACKUP.md)
-- [RustFS Setup](docs/rustfs.md)
-- [OpenCode Guide](docs/opencode.md)
-- [FreeLLMAPI Integration](docs/freellmapi.md)
-- [Claude Memory](docs/claude-mem.md)
-- [Gitea Setup](docs/gitea.md)
+- [Quick Start Guide](docs/quick-start.md)
+- [Backup Strategy](docs/backup.md)
+- [Update Procedures](docs/update.md)
 
 ## License
 
