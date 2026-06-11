@@ -9,7 +9,7 @@
       "description": "OpenCode Zen for fast, efficient AI coding"
     },
     "freellmapi": {
-      "baseURL": "http://freellmapi:3000/v1",
+      "baseURL": "https://freellmapi:3000/v1",
       "description": "FreeLLMAPI for proxying multiple free models"
     },
     "anthropic": {

@@ -6,7 +6,7 @@ set -e
 echo "=== OpenCode WEB Server Starting ==="
 
 # Wait for dependencies
-FRELLMAPI_URL="http://freellmapi:3000/health"
+  FRELLMAPI_URL="https://freellmapi:3000/health"
 MAX_RETRIES=30
 RETRY_COUNT=0
 

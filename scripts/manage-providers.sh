@@ -7,7 +7,7 @@
 PROVIDERS=(
   "openrouter:OpenRouter:OPENROUTER_API_KEY:https://openrouter.ai/api/v1"
   "opencode-zen:OpenCode Zen:OPENCODE_ZEN_API_KEY:https://opencode.ai/zen/api/v1"
-  "freellmapi:FreeLLMAPI:FREELLMAPI_API_KEY:http://freellmapi:3000/v1"
+  "freellmapi:FreeLLMAPI:FREELLMAPI_API_KEY:https://freellmapi:3000/v1"
   "anthropic:Anthropic:ANTHROPIC_API_KEY:https://api.anthropic.com"
   "openai:OpenAI:OPENAI_API_KEY:https://api.openai.com/v1"
 )
@@ -76,7 +76,7 @@ function test_provider_connection() {
       base_url="https://opencode.ai/zen/api/v1"
       ;;
     freellmapi)
-      base_url="http://freellmapi:3000/v1"
+      base_url="https://freellmapi:3000/v1"
       ;;
     anthropic)
       base_url="https://api.anthropic.com"
