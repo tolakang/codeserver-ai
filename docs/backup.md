@@ -8,6 +8,14 @@ This document covers the backup procedures for Code Server AI, including workspa
 
 All backups are stored in RustFS S3-compatible storage.
 
+The backup script connects to Gitea PostgreSQL through PgBouncer. Make sure these environment variables are set for the code-server container:
+
+- `POSTGRES_HOST=pgbouncer`
+- `POSTGRES_PORT=6432`
+- `POSTGRES_USER=gitea`
+- `POSTGRES_DB=gitea`
+- `POSTGRES_PASSWORD=your-postgres-password`
+
 ## Manual Backup
 
 ### Run Backup Script

@@ -58,6 +58,11 @@ This is the recommended approach for each service.
 5. Go to **Environment Variables** and add:
    ```
    GITEA_DOMAIN=gitea.yourdomain.com
+   GITEA_ROOT_URL=https://gitea.yourdomain.com
+   GITEA_ADMIN_USER=admin
+   POSTGRES_HOST=pgbouncer
+   POSTGRES_PORT=6432
+   POSTGRES_PASSWORD=your-postgres-password
    ```
 6. Click **Deploy**
 

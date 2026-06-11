@@ -68,6 +68,7 @@ cd codeserver-ai
    - Repeat for each service or use `docker-compose.yml` for all services
 
 3. **Deploy**
+   - code-server serves plain HTTP on port `8443`; configure Dokploy/reverse proxy upstream protocol as **HTTP** to avoid Bad Gateway.
 
 See [deploy/README.md](deploy/README.md) for detailed Dokploy deployment instructions.
 
@@ -448,6 +449,13 @@ ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_API_KEY=${{project.OPENAI_API_KEY}}
 
+# Gitea backup database
+GITEA_DB_USER=gitea
+GITEA_DB_NAME=gitea
+POSTGRES_HOST=pgbouncer
+POSTGRES_PORT=6432
+POSTGRES_PASSWORD=${{project.POSTGRES_PASSWORD}}
+
 # Default Provider
 DEFAULT_PROVIDER=freellmapi
 ```
@@ -491,6 +499,7 @@ OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
 ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
 
 # FreeLLMAPI (already configured)
+FREELLMAPI_BASE_URL=http://freellmapi:3000/v1
 FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
 ```
 
