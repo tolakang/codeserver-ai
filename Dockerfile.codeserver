@@ -9,7 +9,7 @@ ARG BASE=debian:13
 FROM ${BASE}
 
 ARG CODESERVER_VERSION=4.123.0
-ARG TARGETARCH=amd64
+ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -57,18 +57,18 @@ RUN ARCH="$(dpkg --print-architecture)" \
     && printf "user: coder\ngroup: coder\n" > /etc/fixuid/config.yml
 
 # Download and install code-server .deb from GitHub releases
-RUN curl -fsSL \
-    "https://github.com/coder/code-server/releases/download/v${CODESERVER_VERSION}/code-server_${CODESERVER_VERSION}_${TARGETARCH}.deb" \
-    -o /tmp/code-server.deb \
+RUN DEB_ARCH="${TARGETARCH:-$(dpkg --print-architecture)}" \
+    && curl -fsSL \
+      "https://github.com/coder/code-server/releases/download/v${CODESERVER_VERSION}/code-server_${CODESERVER_VERSION}_${DEB_ARCH}.deb" \
+      -o /tmp/code-server.deb \
+    && PACKAGE_ARCH="$(dpkg-deb -f /tmp/code-server.deb Architecture)" \
+    && SYSTEM_ARCH="$(dpkg --print-architecture)" \
+    && if [ "$PACKAGE_ARCH" != "$SYSTEM_ARCH" ]; then \
+         echo "code-server package architecture mismatch: package=$PACKAGE_ARCH system=$SYSTEM_ARCH" >&2; \
+         exit 1; \
+       fi \
     && dpkg -i /tmp/code-server.deb \
     && rm /tmp/code-server.deb
-
-# Validate architecture matches (with local-build fallback)
-RUN TARGETARCH=${TARGETARCH:-$(dpkg --print-architecture)} && \
-    ARCH="$(dpkg --print-architecture)" && \
-    if [ "$ARCH" != "$TARGETARCH" ]; then \
-        echo "Arch mismatch: TARGETARCH=$TARGETARCH, system=$ARCH" && exit 1; \
-    fi
 
 # Install AWS CLI and PostgreSQL client for backup/restore
 RUN apt-get update && apt-get install -y --no-install-recommends \
