@@ -59,8 +59,12 @@ cd codeserver-ai
 ### 2. Configure Environment
 
 ```bash
-cp .env.example .env
-# Edit .env with your values
+# Copy the values file and fill in your actual values
+cp .env.values .env.values.local
+
+# Edit .env.values.local with your values
+# Then resolve placeholders to create .env
+source scripts/resolve-env.sh
 ```
 
 ### 3. Create Storage Directories
@@ -100,7 +104,8 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 │   ├── docker-compose.gitea.yml
 │   ├── docker-compose.freellmapi.yml
 │   ├── docker-compose.rustfs.yml
-│   └── docker-compose.opencode-web.yml
+│   ├── docker-compose.opencode-web.yml
+│   └── README.md                  ← deployment guide
 ├── k8s/
 │   └── backup-cron.yml            ← Kubernetes backup cronjob
 ├── scripts/
@@ -112,7 +117,8 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 │   ├── opencode-web.sh            ← OpenCode WEB server
 │   ├── update.sh                  ← update all services
 │   ├── configure-provider.sh      ← AI provider management
-│   └── generate-configs.sh        ← configuration generation
+│   ├── generate-configs.sh        ← configuration generation
+│   └── resolve-env.sh             ← resolve ${{project.*}} placeholders
 ├── config/
 │   ├── unified-config.json        ← unified provider configuration
 │   ├── code-server/               ← code-server config
@@ -121,13 +127,44 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 │   └── opencode-web/              ← OpenCode WEB config
 ├── docs/
 │   └── backup.md                  ← backup procedures
-├── .env.example                   ← environment template
+├── .env.example                   ← environment template with placeholders
+├── .env.values                    ← sample values file (gitignored)
 ├── .dockerignore                  ← Docker build exclusions
 ├── LICENSE                        ← MIT license
 └── README.md
 ```
 
 > **Architecture Note:** code-server builds for **both amd64 and arm64** automatically via Docker/buildx. No manual `TARGETARCH` configuration needed.
+
+## Environment Variable Workflow
+
+This project uses `${{project.*}}` placeholders for configuration. Here's how it works:
+
+### 1. Template File (`.env.example`)
+Contains all environment variables with `${{project.*}}` placeholders:
+```bash
+CS_PASSWORD=${{project.CS_PASSWORD}}
+OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
+```
+
+### 2. Values File (`.env.values`)
+Contains your actual values (gitignored):
+```bash
+CS_PASSWORD=my-secure-password
+OPENROUTER_API_KEY=sk-actual-key-here
+```
+
+### 3. Resolve Placeholders
+```bash
+# Resolve .env.example with values from .env.values → creates .env
+source scripts/resolve-env.sh
+```
+
+### 4. Use Resolved `.env`
+```bash
+# Docker Compose uses the resolved .env
+docker compose up -d
+```
 
 ## Update Procedures
 
