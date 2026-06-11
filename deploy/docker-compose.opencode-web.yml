@@ -25,6 +25,7 @@ services:
       - TZ=${{project.TZ}}
       - OPENCODE_SERVER_PASSWORD=${{project.OPENCODE_SERVER_PASSWORD}}
       - OPENCODE_SERVER_USERNAME=${{project.OPENCODE_SERVER_USERNAME}}
+      - FREELLMAPI_BASE_URL=${{project.FREELLMAPI_BASE_URL}}
       - FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
     networks:
       - codeserver-network

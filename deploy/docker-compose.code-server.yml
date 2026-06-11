@@ -23,8 +23,6 @@ services:
       - TZ=${{project.TZ}}
       - DEFAULT_WORKSPACE=${{project.CS_DEFAULT_WORKSPACE}}
       - CS_PASSWORD=${{project.CS_PASSWORD}}
-      - CODE_SERVER_TLS_CERT=/workspace/config/tls/cert.pem
-      - CODE_SERVER_TLS_KEY=/workspace/config/tls/key.pem
       - DEFAULT_PROVIDER=${{project.DEFAULT_PROVIDER}}
       - OPENROUTER_BASE_URL=${{project.OPENROUTER_BASE_URL}}
       - OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
@@ -41,8 +39,8 @@ services:
       - RUSTFS_ENDPOINT=${{project.RUSTFS_ENDPOINT}}
       - RUSTFS_BUCKET=${{project.RUSTFS_BUCKET}}
       - ENCRYPTION_KEY=${{project.ENCRYPTION_KEY}}
-      - POSTGRES_HOST=pgbouncer
-      - POSTGRES_PORT=6432
+      - POSTGRES_HOST=${{project.POSTGRES_HOST}}
+      - POSTGRES_PORT=${{project.POSTGRES_PORT}}
       - POSTGRES_USER=${{project.GITEA_DB_USER}}
       - POSTGRES_DB=${{project.GITEA_DB_NAME}}
       - POSTGRES_PASSWORD=${{project.POSTGRES_PASSWORD}}

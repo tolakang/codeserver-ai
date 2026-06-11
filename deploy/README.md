@@ -142,6 +142,8 @@ All variables from `.env.example` must be set in Dokploy. Here's the complete li
 | `GITEA_ADMIN_USER` | Gitea admin username | `admin` | Yes |
 | `GITEA_ADMIN_PASSWORD` | Gitea admin password | `your-gitea-password` | Yes |
 | `GITEA_ADMIN_EMAIL` | Gitea admin email | `admin@yourdomain.com` | Yes |
+| `POSTGRES_HOST` | PostgreSQL host used by backups | `pgbouncer` | Yes |
+| `POSTGRES_PORT` | PostgreSQL port used by backups | `6432` | Yes |
 | `POSTGRES_PASSWORD` | PostgreSQL password for Gitea | `your-postgres-password` | Yes |
 | `OPENCODE_SERVER_USERNAME` | OpenCode WEB username | `opencode` | Yes |
 | `OPENCODE_SERVER_PASSWORD` | OpenCode WEB password | `your-opencode-password` | Yes |
