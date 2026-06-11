@@ -83,7 +83,7 @@ docker compose up -d
 
 **Option B: Individual services via Dokploy**
 
-See [docs/quick-start.md](docs/quick-start.md) for detailed Dokploy setup.
+See [docs/backup.md](docs/backup.md) for backup strategy.
 
 ## File Structure
 
@@ -109,18 +109,15 @@ See [docs/quick-start.md](docs/quick-start.md) for detailed Dokploy setup.
 │   ├── install-opencode-web.sh    ← OpenCode WEB installer
 │   ├── opencode-web.sh            ← OpenCode WEB server
 │   ├── update.sh                  ← update all services
-│   └── manage-providers.sh        ← AI provider management
+│   └── configure-provider.sh      ← AI provider management
 ├── config/
 │   ├── unified-config.json        ← unified provider configuration
-│   ├── .env.template              ← environment variable template
 │   ├── opencode/                  ← OpenCode extension config
 │   │   └── config.json
 │   └── opencode-web/              ← OpenCode WEB config
 │       └── opencode.json
 ├── docs/
-│   ├── quick-start.md             ← basic setup guide
-│   ├── backup.md                  ← backup procedures
-│   └── update.md                  ← update procedures
+│   └── backup.md                  ← backup procedures
 └── deploy/
     ├── docker-compose.code-server.yml
     ├── docker-compose.gitea.yml
@@ -130,15 +127,25 @@ See [docs/quick-start.md](docs/quick-start.md) for detailed Dokploy setup.
 
 > **Architecture Note:** code-server builds for **both amd64 and arm64** automatically via Docker/buildx. No manual `TARGETARCH` configuration needed.
 
-## Update
+## Update Procedures
 
-Update all services (rebuilds from latest source):
+### Overview
+
+All services are rebuilt from source during updates to ensure latest security patches and features.
+
+### Update Strategy
+
+All services are rebuilt from source during updates to ensure latest security patches and features.
+
+### Update All Services
+
+#### Basic Update
 
 ```bash
 ./scripts/update.sh
 ```
 
-Update specific service:
+#### Update Specific Service
 
 ```bash
 ./scripts/update.sh code-server
@@ -148,19 +155,206 @@ Update specific service:
 ./scripts/update.sh opencode-web
 ```
 
+### Update Process
+
+#### 1. Check Latest Versions
+
+The update script automatically fetches the latest versions from GitHub:
+
+- **code-server**: Latest stable release
+- **gitea**: Latest stable release
+- **freellmapi**: Latest version (default: `latest`)
+- **rustfs**: Latest stable release
+- **opencode-web**: Latest version (default: `latest`)
+
+#### 2. Architecture Detection
+
+The script automatically detects system architecture:
+
+```bash
+# x86_64 systems
+TARGETARCH=amd64
+
+# ARM systems (Raspberry Pi, etc.)
+TARGETARCH=arm64
+```
+
+#### 3. Service Updates
+
+Each service is updated in sequence:
+
+##### Code Server Update
+
+```bash
+echo "--- Updating code-server ---"
+CODESERVER_VERSION=$CODESERVER_VERSION TARGETARCH=$TARGETARCH \
+  docker compose -f deploy/docker-compose.code-server.yml build --no-cache
+docker compose -f deploy/docker-compose.code-server.yml up -d
+```
+
+##### Gitea Update
+
+```bash
+echo "--- Updating gitea ---"
+docker compose -f deploy/docker-compose.gitea.yml build --no-cache
+docker compose -f deploy/docker-compose.gitea.yml up -d
+```
+
+##### FreeLLMAPI Update
+
+```bash
+echo "--- Updating freellmapi ---"
+FREELLM_VERSION=${FREELLM_VERSION:-latest} \
+  docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
+docker compose -f deploy/docker-compose.freellmapi.yml up -d
+```
+
+##### RustFS Update
+
+```bash
+echo "--- Updating rustfs ---"
+docker compose -f deploy/docker-compose.rustfs.yml build --no-cache
+docker compose -f deploy/docker-compose.rustfs.yml up -d
+```
+
+##### OpenCode WEB Update
+
+```bash
+echo "--- Updating opencode-web ---"
+  OPENCODE_VERSION=${OPENCODE_VERSION:-latest} \
+    docker compose -f deploy/docker-compose.opencode-web.yml build --no-cache
+docker compose -f deploy/docker-compose.opencode-web.yml up -d
+```
+
+### Update Best Practices
+
+#### Before Updating
+
+1. **Backup data**: Run backup script before updating
+2. **Check system resources**: Ensure sufficient disk space
+3. **Test in staging**: Update test environment first
+4. **Notify users**: Inform users of potential downtime
+
+#### During Update
+
+1. **Monitor logs**: Watch for errors during update
+2. **Check service health**: Verify services start correctly
+3. **Test functionality**: Test critical features after update
+4. **Rollback plan**: Have rollback procedure ready
+
+#### After Update
+
+1. **Verify services**: Check all services are running
+2. **Test integrations**: Verify AI integrations work
+3. **Check backups**: Ensure backup system still works
+4. **Monitor performance**: Watch for performance issues
+
+### Update Troubleshooting
+
+#### Update Fails
+
+```bash
+# Check update logs
+docker compose logs code-server
+
+# Check specific service logs
+docker compose logs gitea
+```
+
+#### Service Not Starting After Update
+
+```bash
+# Check container status
+docker compose ps
+
+# Check container logs
+docker compose logs [service-name]
+```
+
+#### Rollback
+
+If an update causes issues:
+
+1. **Stop all services**:
+
+```bash
+docker compose down
+```
+
+2. **Restore from backup**:
+
+```bash
+./scripts/restore.sh
+```
+
+3. **Restart services**:
+
+```bash
+docker compose up -d
+```
+
+### Update Monitoring
+
+#### Check Update Status
+
+```bash
+# Check if update is running
+docker compose ps
+
+# Check update logs
+tail -f /var/log/update.log
+```
+
+#### Monitor Service Health
+
+```bash
+# Check code-server status
+docker compose -f deploy/docker-compose.code-server.yml ps
+
+# Check gitea status
+docker compose -f deploy/docker-compose.gitea.yml ps
+
+# Check freellmapi status
+docker compose -f deploy/docker-compose.freellmapi.yml ps
+
+# Check rustfs status
+docker compose -f deploy/docker-compose.rustfs.yml ps
+
+# Check opencode-web status
+docker compose -f deploy/docker-compose.opencode-web.yml ps
+```
+
+### Update Frequency
+
+#### Recommended Schedule
+
+- **Security patches**: Update immediately when available
+- **Feature updates**: Update during maintenance windows
+- **Major versions**: Plan for downtime and test thoroughly
+
+### Automated Updates
+
+Consider setting up a monitoring system to alert when new versions are available:
+
+```bash
+# Example: Check for updates weekly
+crontab -e
+0 0 * * 0 ./scripts/update.sh --check-only
+```
+
 ## AI Provider Management
 
 Manage AI providers for OpenCode extension:
 
 ```bash
 # List all available providers
-./scripts/manage-providers.sh list
+./scripts/configure-provider.sh list
 
 # Configure a provider (uses environment variables)
-./scripts/manage-providers.sh configure
+./scripts/configure-provider.sh configure
 
 # Test provider connection
-./scripts/manage-providers.sh test
+./scripts/configure-provider.sh test
 ```
 
 ### Available Providers
@@ -246,10 +440,10 @@ FRELLMAPI_API_KEY=your-freellmapi-key
 
 The system supports flexible provider configuration:
 
-1. **Setup Environment:** Copy `config/.env.template` to `.env` and fill in your values
+1. **Setup Environment:** Copy `.env.example` to `.env` and fill in your values
 2. **Generate Configuration:** Run `./scripts/generate-configs.sh`
 3. **Update Services:** Run `./scripts/update.sh` to apply changes
-4. **Verify:** Test provider functionality with `./scripts/manage-providers.sh test`
+4. **Verify:** Test provider functionality with `./scripts/configure-provider.sh test`
 
 This flexible system makes it easy to manage multiple AI providers and switch between them as needed.
 
@@ -265,10 +459,7 @@ Daily automated backups at 2 AM:
 
 ## Documentation
 
-- [Quick Start Guide](docs/quick-start.md)
 - [Backup Strategy](docs/backup.md)
-- [Update Procedures](docs/update.md)
-- [Provider Management](docs/update.md#provider-management)
 
 ## License
 

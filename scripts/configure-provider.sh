@@ -1,20 +1,27 @@
 #!/bin/bash
-# scripts/manage-providers.sh
+# scripts/configure-provider.sh - Unified provider configuration
 
 # Load environment variables
 if [ -f .env ]; then
   source .env
 fi
 
-# Provider configuration mapping with environment variable support
-# Format: provider_name:display_name:api_key_env_var:base_url
-
+# Provider configuration mapping
 PROVIDERS=(
-  "openrouter:OpenRouter:\${OPENROUTER_API_KEY}:\${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}"
-  "opencode-zen:OpenCode Zen:\${OPENCODE_ZEN_API_KEY}:\${OPENCODE_ZEN_BASE_URL:-https://opencode.ai/zen/api/v1}"
-  "freellmapi:FreeLLMAPI:\${FREELLMAPI_API_KEY}:\${FRELLMAPI_BASE_URL:-https://freellmapi:3000/v1}"
-  "anthropic:Anthropic:\${ANTHROPIC_API_KEY}:\${ANTHROPIC_BASE_URL:-https://api.anthropic.com}"
-  "openai:OpenAI:\${OPENAI_API_KEY}:\${OPENAI_BASE_URL:-https://api.openai.com/v1}"
+  "openrouter:OpenRouter:${OPENROUTER_API_KEY}:${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}"
+  "opencode-zen:OpenCode Zen:${OPENCODE_ZEN_API_KEY}:${OPENCODE_ZEN_BASE_URL:-https://opencode.ai/zen/api/v1}"
+  "freellmapi:FreeLLMAPI:${FREELLMAPI_API_KEY}:${FRELLMAPI_BASE_URL:-https://freellmapi:3000/v1}"
+  "anthropic:Anthropic:${ANTHROPIC_API_KEY}:${ANTHROPIC_BASE_URL:-https://api.anthropic.com}"
+  "openai:OpenAI:${OPENAI_API_KEY}:${OPENAI_BASE_URL:-https://api.openai.com/v1}"
+)
+
+# Provider mapping to OpenCode provider names
+PROVIDER_MAP=(
+  "openrouter:openai"
+  "opencode-zen:openai"
+  "freellmapi:openai"
+  "anthropic:anthropic"
+  "openai:openai"
 )
 
 function show_providers() {
@@ -55,9 +62,14 @@ function configure_provider() {
     fi
     
     # Generate config
+    mkdir -p /home/coder/.config/opencode
+    
+    # Get OpenCode provider name from map
+    IFS=':' read -r _ _ _ _ <<< "${PROVIDER_MAP[$((choice-1))]}" opencode_provider
+    
     cat > /home/coder/.config/opencode/config.json << EOF
 {
-  "provider": "openai",
+  "provider": "$opencode_provider",
   "baseURL": "$base_url",
   "apiKey": "\${$api_key_var}"
 }
@@ -101,7 +113,7 @@ function test_provider_connection() {
   api_key_var="${provider^^}_API_KEY"
   if [[ -z "${!api_key_var}" ]]; then
     echo "❌ API key not set. Please configure first."
-    echo "Run: ./scripts/manage-providers.sh configure"
+    echo "Run: ./scripts/configure-provider.sh configure"
     return
   fi
   

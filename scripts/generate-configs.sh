@@ -1,5 +1,5 @@
 #!/bin/bash
-# scripts/generate-configs.sh
+# scripts/generate-configs.sh - Unified configuration generator
 
 # Load environment variables
 if [ -f .env ]; then
