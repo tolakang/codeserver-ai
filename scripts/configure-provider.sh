@@ -65,7 +65,7 @@ function configure_provider() {
     mkdir -p /home/coder/.config/opencode
     
     # Get OpenCode provider name from map
-    IFS=':' read -r _ _ _ _ <<< "${PROVIDER_MAP[$((choice-1))]}" opencode_provider
+    IFS=':' read -r _ opencode_provider <<< "${PROVIDER_MAP[$((choice-1))]}"
     
     cat > /home/coder/.config/opencode/config.json << EOF
 {

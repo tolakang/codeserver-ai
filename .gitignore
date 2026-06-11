@@ -3,6 +3,9 @@
 .env.local
 .env.production
 
+# Generated configs
+config/unified-config.json
+
 # Backups
 *.tar.gz
 *.tar.bz2

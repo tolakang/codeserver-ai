@@ -1,0 +1,17 @@
+.git/
+.gitignore
+.env
+.env.*
+!.env.example
+*.md
+!README.md
+LICENSE
+CONTRIBUTING.md
+SECURITY.md
+CHANGELOG.md
+deploy/
+docs/
+k8s/
+backups/
+*.log
+.DS_Store

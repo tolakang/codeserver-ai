@@ -15,11 +15,6 @@ echo "=== Code Server Init ===" | tee -a "$LOG_FILE"
 if [ ! -f /home/coder/.config/opencode/config.json ]; then
   echo "=== AI Provider Configuration ===" | tee -a "$LOG_FILE"
   
-  # Load environment variables
-  if [ -f .env ]; then
-    source .env
-  fi
-  
   # Determine provider from environment or use default
   PROVIDER="${DEFAULT_PROVIDER:-freellmapi}"
   
@@ -98,7 +93,7 @@ fi
 
 # Substitute ${CS_PASSWORD} in code-server config
 if [ -f /home/coder/.config/code-server/config.yaml ]; then
-  sed -i "s|\${CS_PASSWORD}|${CS_PASSWORD:-changeme}|g" /home/coder/.config/code-server/config.yaml
+  sed -i "s|\${CS_PASSWORD}|${CS_PASSWORD:?CS_PASSWORD must be set}|g" /home/coder/.config/code-server/config.yaml
 fi
 
 # Create memory directory
@@ -131,4 +126,4 @@ fi
 echo "=== Init Complete ===" | tee -a "$LOG_FILE"
 
 # Execute code-server
-exec code-server --bind-addr 0.0.0.0:8080 /workspace "$@"
+exec code-server --bind-addr 0.0.0.0:8443 /workspace "$@"

@@ -7,6 +7,12 @@
 
 set -e
 
+# Validate .env file exists
+if [ ! -f .env ]; then
+  echo "Error: .env file not found. Copy .env.example to .env and configure it."
+  exit 1
+fi
+
 echo "=== codeserver-ai Update ==="
 
 # Get latest code-server version from GitHub releases
@@ -96,9 +102,9 @@ case "$SERVICE" in
 esac
 
 echo ""
-  echo "=== Update Complete ==="
-  echo "Services updated: $SERVICE"
-  echo ""
+echo "=== Update Complete ==="
+echo "Services updated: $SERVICE"
+echo ""
   docker compose -f deploy/docker-compose.code-server.yml ps 2>/dev/null || true
   docker compose -f deploy/docker-compose.gitea.yml ps 2>/dev/null || true
   docker compose -f deploy/docker-compose.freellmapi.yml ps 2>/dev/null || true

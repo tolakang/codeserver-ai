@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl dumb-init 
 RUN adduser --gecos '' --disabled-password opencode \
     && echo "opencode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/nopasswd
 
+# Install opencode-ai
+RUN npm install -g opencode-ai
+
 # Install fixuid for PUID/PGID support
 RUN ARCH="$(dpkg --print-architecture)" \
     && curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixuid-0.6.0-linux-$ARCH.tar.gz" \

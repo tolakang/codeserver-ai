@@ -123,7 +123,7 @@ RUSTFS_SECRET_KEY=your-secret-key
 ### Project Level (shared config)
 
 ```
-CS_PASSWORD=changeme
+CS_PASSWORD=your-secure-password
 CODESERVER_VERSION=4.123.0
 # TARGETARCH=amd64  # Auto-detected by Docker/buildx; do not override
 GITEA_DOMAIN=gitea.yourdomain.com
@@ -142,7 +142,7 @@ CS_DEFAULT_WORKSPACE=/workspace
 **Gitea:**
 ```
 GITEA_ADMIN_USER=admin
-GITEA_ADMIN_PASSWORD=changeme
+GITEA_ADMIN_PASSWORD=your-secure-password
 GITEA_ADMIN_EMAIL=admin@yourdomain.com
 ```
 
@@ -156,7 +156,7 @@ FREELLM_VERSION=latest
 **RustFS:**
 ```
 RUSTFS_ROOT_USER=admin
-RUSTFS_ROOT_PASSWORD=changeme
+RUSTFS_ROOT_PASSWORD=your-secure-password
 ```
 
 ---

@@ -100,8 +100,9 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 │   ├── docker-compose.gitea.yml
 │   ├── docker-compose.freellmapi.yml
 │   ├── docker-compose.rustfs.yml
-│   ├── docker-compose.opencode-web.yml
-│   └── backup-cron.yml
+│   └── docker-compose.opencode-web.yml
+├── k8s/
+│   └── backup-cron.yml            ← Kubernetes backup cronjob
 ├── scripts/
 │   ├── backup.sh                  ← backup to RustFS
 │   ├── restore.sh                 ← restore from RustFS
@@ -115,12 +116,13 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 ├── config/
 │   ├── unified-config.json        ← unified provider configuration
 │   ├── code-server/               ← code-server config
-│   ├── gitea/                     ← gitea config
-│   ├── opencode/                  ← OpenCode extension config
-│   └── opencode-web/              ← OpenCode WEB config
+│   └── gitea/                     ← gitea config
 ├── docs/
 │   └── backup.md                  ← backup procedures
-└── .env.example                   ← environment template
+├── .env.example                   ← environment template
+├── .dockerignore                  ← Docker build exclusions
+├── LICENSE                        ← MIT license
+└── README.md
 ```
 
 > **Architecture Note:** code-server builds for **both amd64 and arm64** automatically via Docker/buildx. No manual `TARGETARCH` configuration needed.
@@ -128,10 +130,6 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 ## Update Procedures
 
 ### Overview
-
-All services are rebuilt from source during updates to ensure latest security patches and features.
-
-### Update Strategy
 
 All services are rebuilt from source during updates to ensure latest security patches and features.
 
@@ -377,7 +375,7 @@ OPENCODE_ZEN_BASE_URL=https://opencode.ai/zen/api/v1
 OPENCODE_ZEN_API_KEY=your-opencode-zen-key
 
 # FreeLLMAPI Provider
-FRELLMAPI_BASE_URL=https://freellmapi:3000/v1
+FRELLMAPI_BASE_URL=http://freellmapi:3000/v1
 FRELLMAPI_API_KEY=your-freellmapi-key
 
 # Anthropic Provider
@@ -401,7 +399,7 @@ After setting up your environment variables, generate the configuration:
 ./scripts/generate-configs.sh
 ```
 
-This will create `config/unified-config.json` with all provider configurations based on your environment variables.
+This will create the unified configuration based on your environment variables.
 
 ### Provider Selection
 
@@ -433,17 +431,6 @@ ANTHROPIC_API_KEY=your-anthropic-key
 # FreeLLMAPI (already configured)
 FRELLMAPI_API_KEY=your-freellmapi-key
 ```
-
-### Configuration Generation
-
-The system supports flexible provider configuration:
-
-1. **Setup Environment:** Copy `.env.example` to `.env` and fill in your values
-2. **Generate Configuration:** Run `./scripts/generate-configs.sh`
-3. **Update Services:** Run `./scripts/update.sh` to apply changes
-4. **Verify:** Test provider functionality with `./scripts/configure-provider.sh test`
-
-This flexible system makes it easy to manage multiple AI providers and switch between them as needed.
 
 ## Backup
 

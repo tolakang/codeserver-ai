@@ -1,13 +1,16 @@
 #!/bin/bash
 # scripts/generate-configs.sh - Unified configuration generator
+# NOTE: This script generates config at runtime, not in the repo.
 
 # Load environment variables
 if [ -f .env ]; then
   source .env
 fi
 
+OUTPUT_FILE="${1:-/tmp/unified-config.json}"
+
 # Generate unified-config.json with variable substitution
-cat > config/unified-config.json << EOF
+cat > "$OUTPUT_FILE" << EOF
 {
   "providers": {
     "openrouter": {
@@ -21,8 +24,8 @@ cat > config/unified-config.json << EOF
       "description": "OpenCode Zen for fast, efficient AI coding"
     },
     "freellmapi": {
-      "baseURL": "${FRELLMAPI_BASE_URL:-https://freellmapi:3000/v1}",
-      "apiKey": "${FREELLMAPI_API_KEY}",
+      "baseURL": "${FRELLMAPI_BASE_URL:-http://freellmapi:3000/v1}",
+      "apiKey": "${FRELLMAPI_API_KEY}",
       "description": "FreeLLMAPI for proxying multiple free models"
     },
     "anthropic": {
@@ -47,4 +50,4 @@ cat > config/unified-config.json << EOF
 }
 EOF
 
-echo "✅ Generated unified-config.json with environment variables"
+echo "Generated unified-config.json at $OUTPUT_FILE"
