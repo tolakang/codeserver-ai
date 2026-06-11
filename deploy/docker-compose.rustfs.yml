@@ -16,7 +16,7 @@ services:
     volumes:
       - /mnt/storage/rustfs/data:/data
     environment:
-      - RUSTFS_ROOT_USER=${{project.RUSTFS_ROOT_USER:-admin}}
+      - RUSTFS_ROOT_USER=${{project.RUSTFS_ROOT_USER}}
       - RUSTFS_ROOT_PASSWORD=${{project.RUSTFS_ROOT_PASSWORD}}
       - RUSTFS_VOLUMES=/data
     networks:

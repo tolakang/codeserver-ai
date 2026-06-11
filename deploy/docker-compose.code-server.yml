@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile.codeserver
       args:
-        CODESERVER_VERSION: ${{project.CODESERVER_VERSION:-4.123.0}}
+        CODESERVER_VERSION: ${{project.CODESERVER_VERSION}}
     image: codeserver-custom:latest
     container_name: code-server
     restart: unless-stopped
@@ -20,26 +20,26 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=${{project.TZ:-UTC}}
-      - DEFAULT_WORKSPACE=${{project.CS_DEFAULT_WORKSPACE:-/workspace}}
+      - TZ=${{project.TZ}}
+      - DEFAULT_WORKSPACE=${{project.CS_DEFAULT_WORKSPACE}}
       - CS_PASSWORD=${{project.CS_PASSWORD}}
       - CODE_SERVER_TLS_CERT=/workspace/config/tls/cert.pem
       - CODE_SERVER_TLS_KEY=/workspace/config/tls/key.pem
-      - DEFAULT_PROVIDER=${{project.DEFAULT_PROVIDER:-freellmapi}}
-      - OPENROUTER_BASE_URL=${{project.OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}}
+      - DEFAULT_PROVIDER=${{project.DEFAULT_PROVIDER}}
+      - OPENROUTER_BASE_URL=${{project.OPENROUTER_BASE_URL}}
       - OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
-      - OPENCODE_ZEN_BASE_URL=${{project.OPENCODE_ZEN_BASE_URL:-https://opencode.ai/zen/api/v1}}
+      - OPENCODE_ZEN_BASE_URL=${{project.OPENCODE_ZEN_BASE_URL}}
       - OPENCODE_ZEN_API_KEY=${{project.OPENCODE_ZEN_API_KEY}}
-      - FRELLMAPI_BASE_URL=${{project.FRELLMAPI_BASE_URL:-http://freellmapi:3000/v1}}
+      - FRELLMAPI_BASE_URL=${{project.FRELLMAPI_BASE_URL}}
       - FRELLMAPI_API_KEY=${{project.FRELLMAPI_API_KEY}}
-      - ANTHROPIC_BASE_URL=${{project.ANTHROPIC_BASE_URL:-https://api.anthropic.com}}
+      - ANTHROPIC_BASE_URL=${{project.ANTHROPIC_BASE_URL}}
       - ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
-      - OPENAI_BASE_URL=${{project.OPENAI_BASE_URL:-https://api.openai.com/v1}}
+      - OPENAI_BASE_URL=${{project.OPENAI_BASE_URL}}
       - OPENAI_API_KEY=${{project.OPENAI_API_KEY}}
       - RUSTFS_ACCESS_KEY=${{project.RUSTFS_ACCESS_KEY}}
       - RUSTFS_SECRET_KEY=${{project.RUSTFS_SECRET_KEY}}
-      - RUSTFS_ENDPOINT=${{project.RUSTFS_ENDPOINT:-http://rustfs:9000}}
-      - RUSTFS_BUCKET=${{project.RUSTFS_BUCKET:-code-server-backups}}
+      - RUSTFS_ENDPOINT=${{project.RUSTFS_ENDPOINT}}
+      - RUSTFS_BUCKET=${{project.RUSTFS_BUCKET}}
       - ENCRYPTION_KEY=${{project.ENCRYPTION_KEY}}
     networks:
       - codeserver-network
