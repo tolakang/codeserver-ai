@@ -104,60 +104,42 @@ Use this if you want to build custom images without compose.
 
 ---
 
-## Environment Variables by Dokploy Level
+## Environment Variables
 
-Set variables at the correct Dokploy level to avoid duplication:
+Set these variables in Dokploy's Environment Variables UI. The `${{project.*}}` placeholders in docker-compose files will resolve to these values at deploy time.
 
-### Environment Level (shared secrets)
+### Required Variables
 
-```
-OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
-ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
-OPENAI_API_KEY=${{project.OPENAI_API_KEY}}
-GITHUB_TOKEN=${{project.GITHUB_TOKEN}}
-ENCRYPTION_KEY=${{project.ENCRYPTION_KEY}}
-RUSTFS_ACCESS_KEY=${{project.RUSTFS_ACCESS_KEY}}
-RUSTFS_SECRET_KEY=${{project.RUSTFS_SECRET_KEY}}
-```
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `CS_PASSWORD` | Code Server authentication password | `your-secure-password` |
+| `GITEA_DOMAIN` | Gitea domain (with protocol) | `https://gitea.yourdomain.com` |
+| `GITEA_ADMIN_PASSWORD` | Gitea admin password | `your-gitea-password` |
+| `GITEA_ADMIN_EMAIL` | Gitea admin email | `admin@yourdomain.com` |
+| `POSTGRES_PASSWORD` | PostgreSQL password for Gitea | `your-postgres-password` |
+| `ENCRYPTION_KEY` | FreeLLMAPI encryption key | `openssl rand -hex 32` |
+| `OPENCODE_SERVER_PASSWORD` | OpenCode WEB password | `your-opencode-password` |
+| `RUSTFS_ROOT_PASSWORD` | RustFS root password | `your-rustfs-password` |
+| `RUSTFS_ACCESS_KEY` | RustFS S3 access key | `your-access-key` |
+| `RUSTFS_SECRET_KEY` | RustFS S3 secret key | `your-secret-key` |
+| `OPENROUTER_API_KEY` | OpenRouter API key (if using) | `sk-your-key` |
+| `ANTHROPIC_API_KEY` | Anthropic API key (if using) | `sk-ant-your-key` |
+| `OPENAI_API_KEY` | OpenAI API key (if using) | `sk-your-key` |
 
-### Project Level (shared config)
+### Optional Variables (with defaults)
 
-```
-CS_PASSWORD=${{project.CS_PASSWORD}}
-CODESERVER_VERSION=${{project.CODESERVER_VERSION}}
-# TARGETARCH=amd64  # Auto-detected by Docker/buildx; do not override
-GITEA_DOMAIN=${{project.GITEA_DOMAIN}}
-RUSTFS_ENDPOINT=http://rustfs:9000
-RUSTFS_BUCKET=code-server-backups
-TZ=${{project.TZ}}
-```
-
-### Service Level (service-specific)
-
-**Code Server:**
-```
-CS_DEFAULT_WORKSPACE=/workspace
-```
-
-**Gitea:**
-```
-GITEA_ADMIN_USER=admin
-GITEA_ADMIN_PASSWORD=${{project.GITEA_ADMIN_PASSWORD}}
-GITEA_ADMIN_EMAIL=${{project.GITEA_ADMIN_EMAIL}}
-```
-
-**FreeLLMAPI:**
-```
-ENCRYPTION_KEY=${{project.ENCRYPTION_KEY}}
-FREELLM_VERSION=latest
-```
-> Provider API keys (Google, NIM, OpenCode Zen, OpenRouter, GitHub, etc.) are configured through the FreeLLMAPI dashboard → Keys page, not as environment variables.
-
-**RustFS:**
-```
-RUSTFS_ROOT_USER=admin
-RUSTFS_ROOT_PASSWORD=${{project.RUSTFS_ROOT_PASSWORD}}
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TZ` | `UTC` | Timezone |
+| `CS_DEFAULT_WORKSPACE` | `/workspace` | Default workspace path |
+| `CODESERVER_VERSION` | `4.123.0` | Code Server version |
+| `GITEA_VERSION` | `1.23.0` | Gitea version |
+| `FREELLM_VERSION` | `latest` | FreeLLMAPI version |
+| `OPENCODE_VERSION` | `latest` | OpenCode WEB version |
+| `DEFAULT_PROVIDER` | `freellmapi` | AI provider (openrouter|opencode-zen|freellmapi|anthropic|openai) |
+| `RUSTFS_ENDPOINT` | `http://rustfs:9000` | RustFS endpoint |
+| `RUSTFS_BUCKET` | `code-server-backups` | RustFS bucket name |
+| `RUSTFS_ROOT_USER` | `admin` | RustFS root username |
 
 ---
 

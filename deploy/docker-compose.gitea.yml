@@ -9,15 +9,15 @@ services:
     container_name: gitea-postgres
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=gitea
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=gitea
+      - POSTGRES_USER=${{project.GITEA_DB_USER:-gitea}}
+      - POSTGRES_PASSWORD=${{project.POSTGRES_PASSWORD}}
+      - POSTGRES_DB=${{project.GITEA_DB_NAME:-gitea}}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - codeserver-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gitea"]
+      test: ["CMD-SHELL", "pg_isready -U ${{project.GITEA_DB_USER:-gitea}}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -39,9 +39,9 @@ services:
     environment:
       - DATABASES_HOST=postgres
       - DATABASES_PORT=5432
-      - DATABASES_DBNAME=gitea
-      - DATABASES_USER=gitea
-      - DATABASES_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASES_DBNAME=${{project.GITEA_DB_NAME:-gitea}}
+      - DATABASES_USER=${{project.GITEA_DB_USER:-gitea}}
+      - DATABASES_PASSWORD=${{project.POSTGRES_PASSWORD}}
       - PGBOUNCER_AUTH_TYPE=md5
       - PGBOUNCER_POOL_MODE=transaction
       - PGBOUNCER_MAX_CLIENT_CONN=100
@@ -57,7 +57,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "6432", "-U", "gitea"]
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "6432", "-U", "${{project.GITEA_DB_USER:-gitea}}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -67,7 +67,7 @@ services:
       context: .
       dockerfile: Dockerfile.gitea
       args:
-        GITEA_VERSION: ${GITEA_VERSION:-1.23.0}
+        GITEA_VERSION: ${{project.GITEA_VERSION:-1.23.0}}
     image: gitea-custom:latest
     container_name: gitea
     restart: unless-stopped
@@ -84,15 +84,18 @@ services:
       - GITEA__database__DB_TYPE=postgres
       - GITEA__database__HOST=pgbouncer
       - GITEA__database__PORT=6432
-      - GITEA__database__NAME=gitea
-      - GITEA__database__USER=gitea
-      - GITEA__database__PASSWD=${POSTGRES_PASSWORD}
+      - GITEA__database__NAME=${{project.GITEA_DB_NAME:-gitea}}
+      - GITEA__database__USER=${{project.GITEA_DB_USER:-gitea}}
+      - GITEA__database__PASSWD=${{project.POSTGRES_PASSWORD}}
       - GITEA__database__SSL_MODE=disable
       - GITEA__database__CONN_POOL_SIZE=10
-      - GITEA__server__ROOT_URL=${GITEA_DOMAIN}
+      - GITEA__server__ROOT_URL=${{project.GITEA_DOMAIN}}
       - GITEA__server__HTTP_PORT=3000
-      - GITEA__server__DOMAIN=${GITEA_DOMAIN}
-      - GITEA__service__DISABLE_REGISTRATION=false
+      - GITEA__server__DOMAIN=${{project.GITEA_DOMAIN}}
+      - GITEA__service__DISABLE_REGISTRATION=true
+      - GITEA__security__INSTALL_LOCK=true
+      - GITEA__security__REQUIRE_SIGNIN_VIEW=true
+      - GITEA__service__DEFAULT_ALLOW_CREATE_REPO=true
     networks:
       - codeserver-network
     depends_on:

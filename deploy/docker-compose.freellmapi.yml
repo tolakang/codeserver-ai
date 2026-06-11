@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile.freellmapi
       args:
-        FREELLM_VERSION: ${FREELLM_VERSION:-latest}
+        FREELLM_VERSION: ${{project.FREELLM_VERSION:-latest}}
     image: freellmapi-custom:latest
     container_name: freellmapi
     restart: unless-stopped
@@ -21,8 +21,8 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=${TZ:-UTC}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - TZ=${{project.TZ:-UTC}}
+      - ENCRYPTION_KEY=${{project.ENCRYPTION_KEY}}
     networks:
       - codeserver-network
     healthcheck:

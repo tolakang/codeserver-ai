@@ -56,38 +56,38 @@ git clone https://github.com/youruser/codeserver-ai.git
 cd codeserver-ai
 ```
 
-### 2. Configure Environment
+### 2. Deploy with Dokploy
+
+1. **Set Environment Variables** in Dokploy's UI using values from `.env.example`:
+   - Copy the `PROJECT_*` values from `.env.example`
+   - Set each variable in Dokploy's Environment Variables UI
+
+2. **Create Application** in Dokploy:
+   - Select "Docker Compose" deployment type
+   - Set compose file path to `deploy/docker-compose.code-server.yml`
+   - Repeat for each service or use `docker-compose.yml` for all services
+
+3. **Deploy**
+
+See [deploy/README.md](deploy/README.md) for detailed Dokploy deployment instructions.
+
+### 3. Alternative: Deploy with Docker Compose
 
 ```bash
-# Copy the values file and fill in your actual values
-cp .env.values .env.values.local
-
-# Edit .env.values.local with your values
-# Then resolve placeholders to create .env
-source scripts/resolve-env.sh
-```
-
-### 3. Create Storage Directories
-
-```bash
-sudo mkdir -p /mnt/storage/code-server
-sudo mkdir -p /mnt/storage/gitea/data
-sudo mkdir -p /mnt/storage/freellmapi/data
-sudo mkdir -p /mnt/storage/rustfs/data
+# Create storage directories
+sudo mkdir -p /mnt/storage/{code-server,gitea/data,freellmapi/data,rustfs/data}
 sudo chown -R 1000:1000 /mnt/storage
-```
 
-### 4. Deploy
+# Copy and edit values file
+cp .env.values .env.values.local
+# Edit .env.values.local with your values
 
-**Option A: All services at once (docker compose)**
+# Resolve placeholders
+source scripts/resolve-env.sh
 
-```bash
+# Deploy
 docker compose up -d
 ```
-
-**Option B: Individual services via Dokploy**
-
-See [docs/backup.md](docs/backup.md) for backup strategy.
 
 ## File Structure
 
@@ -138,91 +138,58 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 
 ## Environment Variable Workflow
 
-This project uses a hierarchical configuration system with `${{project.*}}` placeholders. The `.env.example` file is structured into four tiers:
+This project uses `${{project.*}}` placeholders in docker-compose files, which are resolved by Dokploy at deploy time.
 
-### 1. Main Section (Real Values - Edit These)
-All primary configuration values are defined here with the `PROJECT_` prefix. Edit this section once:
-```bash
-# OpenRouter Provider
-PROJECT_OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-PROJECT_OPENROUTER_API_KEY=sk-your-openrouter-key
+### How It Works
 
-# Code Server Configuration
-PROJECT_CS_PASSWORD=your-secure-password
-PROJECT_CODESERVER_VERSION=4.123.0
+1. **Dokploy** reads the docker-compose files
+2. **Placeholders** like `${{project.CS_PASSWORD}}` are replaced with actual values from your Dokploy Environment Variables
+3. **Containers** receive the resolved values as environment variables
 
-# Gitea Configuration
-PROJECT_GITEA_DOMAIN=gitea.yourdomain.com
-PROJECT_GITEA_ADMIN_PASSWORD=your-gitea-password
+### Setup
+
+1. **Set Variables in Dokploy** - Add your values in Dokploy's Environment Variables UI
+2. **Deploy** - Dokploy resolves placeholders and injects values into containers
+
+### Example
+
+**In docker-compose.yml:**
+```yaml
+environment:
+  - CS_PASSWORD=${{project.CS_PASSWORD}}
 ```
 
-### 2. Environment Level (Shared Global Secrets)
-Variables shared across multiple services. Reference Main Section values via placeholders:
-```bash
-OPENROUTER_BASE_URL=${{project.OPENROUTER_BASE_URL}}
-OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
-CS_PASSWORD=${{project.CS_PASSWORD}}
+**In Dokploy Environment Variables:**
+```
+CS_PASSWORD=your-secure-password
 ```
 
-### 3. Project Level Configuration
-Settings that define this specific project instance:
-```bash
-CODESERVER_VERSION=${{project.CODESERVER_VERSION}}
-GITEA_DOMAIN=${{project.GITEA_DOMAIN}}
-TZ=${{project.TZ}}
+**In Container:**
+```
+CS_PASSWORD=your-secure-password
 ```
 
-### 4. Service Level (Service-Specific Overrides)
-Override individual service settings here if needed:
-```bash
-# Example: Override code-server port
-# CODE_SERVER_PORT=8080
-```
-
-### How to Use
-
-```bash
-# 1. Copy the values file
-cp .env.values .env.values.local
-
-# 2. Edit with your actual values (only Main Section)
-nano .env.values.local
-
-# 3. Resolve placeholders to create .env
-source scripts/resolve-env.sh
-
-# 4. Deploy
-docker compose up -d
-```
-
-### Hierarchy Diagram
+### Hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Main Section (PROJECT_*)                               │
-│  Edit these values once                                 │
-│  PROJECT_CS_PASSWORD=super-secret                       │
-│  PROJECT_OPENROUTER_API_KEY=sk-real-key                 │
+│  Dokploy Environment Variables                          │
+│  CS_PASSWORD=your-secure-password                       │
+│  OPENROUTER_API_KEY=sk-real-key                         │
 └─────────────────────────────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│  Environment Level (Shared Secrets)                     │
+│  docker-compose.yml                                     │
 │  CS_PASSWORD=${{project.CS_PASSWORD}}                   │
 │  OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}     │
 └─────────────────────────────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│  Project Level (Instance Configuration)                 │
-│  CODESERVER_VERSION=${{project.CODESERVER_VERSION}}     │
-│  GITEA_DOMAIN=${{project.GITEA_DOMAIN}}                 │
-└─────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│  Service Level (Optional Overrides)                     │
-│  CODE_SERVER_PORT=8080 (override if needed)             │
+│  Container Environment                                  │
+│  CS_PASSWORD=your-secure-password                       │
+│  OPENROUTER_API_KEY=sk-real-key                         │
 └─────────────────────────────────────────────────────────┘
 ```
 

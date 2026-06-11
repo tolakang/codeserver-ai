@@ -10,7 +10,7 @@ services:
       context: .
       dockerfile: Dockerfile.opencode-web
       args:
-        OPENCODE_VERSION: ${OPENCODE_VERSION:-latest}
+        OPENCODE_VERSION: ${{project.OPENCODE_VERSION:-latest}}
     image: opencode-web-custom:latest
     container_name: opencode-web
     restart: unless-stopped
@@ -22,10 +22,10 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=${TZ:-UTC}
-      - OPENCODE_SERVER_PASSWORD=${OPENCODE_SERVER_PASSWORD}
-      - OPENCODE_SERVER_USERNAME=${OPENCODE_SERVER_USERNAME:-opencode}
-      - FREELLMAPI_API_KEY=${FREELLMAPI_API_KEY}
+      - TZ=${{project.TZ:-UTC}}
+      - OPENCODE_SERVER_PASSWORD=${{project.OPENCODE_SERVER_PASSWORD}}
+      - OPENCODE_SERVER_USERNAME=${{project.OPENCODE_SERVER_USERNAME:-opencode}}
+      - FREELLMAPI_API_KEY=${{project.FRELLMAPI_API_KEY}}
     networks:
       - codeserver-network
     depends_on:
