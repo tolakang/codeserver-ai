@@ -138,32 +138,92 @@ See [docs/backup.md](docs/backup.md) for backup strategy.
 
 ## Environment Variable Workflow
 
-This project uses `${{project.*}}` placeholders for configuration. Here's how it works:
+This project uses a hierarchical configuration system with `${{project.*}}` placeholders. The `.env.example` file is structured into four tiers:
 
-### 1. Template File (`.env.example`)
-Contains all environment variables with `${{project.*}}` placeholders:
+### 1. Main Section (Real Values - Edit These)
+All primary configuration values are defined here with the `PROJECT_` prefix. Edit this section once:
 ```bash
-CS_PASSWORD=${{project.CS_PASSWORD}}
+# OpenRouter Provider
+PROJECT_OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+PROJECT_OPENROUTER_API_KEY=sk-your-openrouter-key
+
+# Code Server Configuration
+PROJECT_CS_PASSWORD=your-secure-password
+PROJECT_CODESERVER_VERSION=4.123.0
+
+# Gitea Configuration
+PROJECT_GITEA_DOMAIN=gitea.yourdomain.com
+PROJECT_GITEA_ADMIN_PASSWORD=your-gitea-password
+```
+
+### 2. Environment Level (Shared Global Secrets)
+Variables shared across multiple services. Reference Main Section values via placeholders:
+```bash
+OPENROUTER_BASE_URL=${{project.OPENROUTER_BASE_URL}}
 OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
+CS_PASSWORD=${{project.CS_PASSWORD}}
 ```
 
-### 2. Values File (`.env.values`)
-Contains your actual values (gitignored):
+### 3. Project Level Configuration
+Settings that define this specific project instance:
 ```bash
-CS_PASSWORD=my-secure-password
-OPENROUTER_API_KEY=sk-actual-key-here
+CODESERVER_VERSION=${{project.CODESERVER_VERSION}}
+GITEA_DOMAIN=${{project.GITEA_DOMAIN}}
+TZ=${{project.TZ}}
 ```
 
-### 3. Resolve Placeholders
+### 4. Service Level (Service-Specific Overrides)
+Override individual service settings here if needed:
 ```bash
-# Resolve .env.example with values from .env.values → creates .env
+# Example: Override code-server port
+# CODE_SERVER_PORT=8080
+```
+
+### How to Use
+
+```bash
+# 1. Copy the values file
+cp .env.values .env.values.local
+
+# 2. Edit with your actual values (only Main Section)
+nano .env.values.local
+
+# 3. Resolve placeholders to create .env
 source scripts/resolve-env.sh
+
+# 4. Deploy
+docker compose up -d
 ```
 
-### 4. Use Resolved `.env`
-```bash
-# Docker Compose uses the resolved .env
-docker compose up -d
+### Hierarchy Diagram
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Main Section (PROJECT_*)                               │
+│  Edit these values once                                 │
+│  PROJECT_CS_PASSWORD=super-secret                       │
+│  PROJECT_OPENROUTER_API_KEY=sk-real-key                 │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│  Environment Level (Shared Secrets)                     │
+│  CS_PASSWORD=${{project.CS_PASSWORD}}                   │
+│  OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}     │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│  Project Level (Instance Configuration)                 │
+│  CODESERVER_VERSION=${{project.CODESERVER_VERSION}}     │
+│  GITEA_DOMAIN=${{project.GITEA_DOMAIN}}                 │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│  Service Level (Optional Overrides)                     │
+│  CODE_SERVER_PORT=8080 (override if needed)             │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ## Update Procedures
