@@ -87,9 +87,8 @@ RUN chmod +x /scripts/*.sh
 COPY config/code-server/config.yaml /home/coder/.config/code-server/config.yaml
 COPY config/code-server/settings.json /home/coder/.config/code-server/User/settings.json
 
-RUN chown -R coder:coder /home/coder/.config /workspace /var/log/codeserver-ai
-
-RUN mkdir -p /workspace/.memory
+RUN mkdir -p /workspace/.memory /var/log/codeserver-ai \
+    && chown -R coder:coder /home/coder/.config /workspace /var/log/codeserver-ai
 
 EXPOSE 8443
 
