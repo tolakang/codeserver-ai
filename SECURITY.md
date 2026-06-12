@@ -10,7 +10,7 @@ If you discover a security vulnerability within this project, please send an ema
 
 - Never use default or weak passwords in production.
 - Use strong, randomly generated passwords for all services.
-- Set `CS_PASSWORD`, `GITEA_ADMIN_PASSWORD`, `POSTGRES_PASSWORD`, and `RUSTFS_ROOT_PASSWORD` to unique values.
+- Set `CS_PASSWORD`, `GITEA_ADMIN_PASSWORD`, `POSTGRES_PASSWORD`, `RUSTFS_ROOT_PASSWORD`, and `OPENCODE_SERVER_PASSWORD` to unique values.
 - Store secrets in Dokploy environment variables, Docker secrets, or another secret manager.
 - Never commit `.env`, API keys, RustFS credentials, generated passwords, or database passwords.
 
@@ -22,8 +22,9 @@ If you discover a security vulnerability within this project, please send an ema
 
 ### Network Security
 
-- Terminate TLS at the reverse proxy, not inside code-server.
+- Terminate TLS at the reverse proxy, not inside code-server or OpenCode WEB.
 - Configure the reverse proxy upstream protocol for code-server as `HTTP` on port `8443`.
+- Configure the reverse proxy upstream protocol for OpenCode WEB as `HTTP` on port `4001`.
 - Restrict CORS origins to trusted domains.
 - Use firewall rules to limit access to services.
 - Keep RustFS and PostgreSQL on the internal Docker network unless explicitly exposed.

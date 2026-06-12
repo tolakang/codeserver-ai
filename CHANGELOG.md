@@ -13,10 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenCode provider config permissions are restricted.
 - OpenCode WEB no longer enables mDNS by default, avoiding startup failures in Docker.
 - OpenCode WEB health checks now use the root endpoint instead of an assumed `/health` path.
-- RustFS builds now auto-detect `amd64` or `arm64` when `TARGETARCH` is not provided.
-- Gitea admin user creation is handled by a one-shot init service.
-- Restore now supports Gitea database backups.
-- Backup now creates the RustFS bucket when it does not exist.
+- OpenCode WEB Dockerfile now creates `/etc/sudoers.d` before writing sudoers rules.
+- OpenCode WEB generates a complete `opencode.json` at runtime for provider and model configuration.
+- code-server Dockerfile now creates `/etc/sudoers.d` before writing sudoers rules.
 - Root compose no longer blocks code-server startup on dependent service health checks.
 
 ### Changed
@@ -24,12 +23,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update script supports `--check-only`.
 - Local Docker Compose deployments now render Dokploy placeholders with `scripts/render-compose.sh`.
 - Documentation now calls out the code-server `HTTP` upstream requirement for Bad Gateway prevention.
+- OpenCode WEB is documented as a standalone Dokploy application with runtime provider configuration.
 
 ### Added
 - `scripts/render-compose.sh` for local Docker Compose deployments.
 - OpenCode WEB port and hostname environment overrides.
+- `OPENCODE_MODEL` environment variable for selecting the default OpenCode model.
+- `development_plan.md` for tracking the OpenCode refactor.
 
 ### Removed
+- Root `docker-compose.yml` orchestrator; each service now has its own standalone Dokploy compose file.
 - mDNS flags from the OpenCode WEB startup command.
 
 ## [1.0.0] - 2024-01-01

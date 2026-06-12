@@ -1,18 +1,6 @@
-# Code Server on Dokploy
+# Code Server AI
 
-Production-grade self-hosted Code Server with AI integration, Gitea, and RustFS backups.
-
-## Features
-
-- Persistent Workspace
-- OpenCode AI Integration
-- OpenRouter Support
-- FreeLLMAPI Free Models
-- RustFS S3 Backup
-- Claude Memory Persistence
-- Self-hosted Gitea Git Server
-- Auto-installed Extensions
-- Built from official code-server .deb releases (multi-arch: amd64/arm64 auto-detected)
+Production-grade self-hosted Code Server with OpenCode AI integration, Gitea, FreeLLMAPI, and RustFS backups.
 
 ## Architecture
 
@@ -22,30 +10,33 @@ Internet
     v
 Dokploy
     |
-    +-- Code Server (port 8443)
-    |       +-- OpenCode
-    |       +-- Claude-Mem
+    +-- code-server (port 8443)
+    |       +-- OpenCode VS Code extension
     |       +-- Workspace
     |
-    +-- Gitea (port 3001)
-    |       +-- Git Repos
+    +-- opencode-web (port 4001)
+    |       +-- OpenCode Web UI
+    |
+    +-- gitea (port 3001)
+    |       +-- Git repositories
     |       +-- PostgreSQL via PgBouncer
     |
-    +-- FreeLLMAPI (port 3000)
-    |       +-- OpenRouter Free Models
+    +-- freellmapi (port 3000)
+    |       +-- Free model proxy
     |
-    +-- RustFS (port 9000)
-            +-- S3 Backups
+    +-- rustfs (port 9000)
+            +-- S3-compatible backups
 ```
 
 ## Services
 
 | Service | Source | Build Method | Port |
 |---------|--------|--------------|------|
-| code-server | [coder/code-server](https://github.com/coder/code-server) | .deb from GitHub releases | 8443 |
-| gitea | [go-gitea/gitea](https://github.com/go-gitea/gitea) | Cloned at build time | 3001 |
-| freellmapi | [tashfeenahmed/freellmapi](https://github.com/tashfeenahmed/freellmapi) | Cloned at build time | 3000 |
-| rustfs | [rustfs/rustfs](https://github.com/rustfs/rustfs) | Binary from releases | 9000 |
+| code-server | [coder/code-server](https://github.com/coder/code-server) | Official .deb releases | 8443 |
+| opencode-web | [anomalyco/opencode](https://github.com/anomalyco/opencode) | `opencode-ai` npm package | 4001 |
+| gitea | [go-gitea/gitea](https://github.com/go-gitea/gitea) | Source build | 3001 |
+| freellmapi | [tashfeenahmed/freellmapi](https://github.com/tashfeenahmed/freellmapi) | Source build | 3000 |
+| rustfs | [rustfs/rustfs](https://github.com/rustfs/rustfs) | Binary release | 9000 |
 
 ## Quick Start
 
@@ -58,49 +49,75 @@ cd codeserver-ai
 
 ### 2. Deploy with Dokploy
 
-1. **Set Environment Variables** in Dokploy's UI using values from `.env.example`:
-   - Copy the values from the `ENVIRONMENT SECTION` in `.env.example`
-   - Set each variable in Dokploy's Environment Variables UI
+Each service has its own standalone compose file in `deploy/`.
 
-2. **Create Application** in Dokploy:
-   - Select "Docker Compose" deployment type
-   - Set compose file path to `deploy/docker-compose.code-server.yml`
-   - Repeat for each service or use `docker-compose.yml` for all services
+1. **Create one Dokploy application per service**
+   - `code-server` → `deploy/docker-compose.code-server.yml`
+   - `opencode-web` → `deploy/docker-compose.opencode-web.yml`
+   - `gitea` → `deploy/docker-compose.gitea.yml`
+   - `freellmapi` → `deploy/docker-compose.freellmapi.yml`
+   - `rustfs` → `deploy/docker-compose.rustfs.yml`
 
-3. **Deploy**
-   - code-server serves plain HTTP on port `8443`; configure Dokploy/reverse proxy upstream protocol as **HTTP** to avoid Bad Gateway.
-   - Force rebuild/redeploy after code changes so the container uses the latest image.
+2. **Set environment variables** in Dokploy using values from `.env.example`.
 
-See [deploy/README.md](deploy/README.md) for detailed Dokploy deployment instructions.
+3. **Configure reverse proxy**
+   - code-server upstream protocol: **HTTP**
+   - opencode-web upstream protocol: **HTTP**
+   - TLS termination should be handled by Dokploy / Let's Encrypt
 
-### 3. Alternative: Deploy with Docker Compose
+4. **Deploy**
 
-```bash
-# Create storage directories
-sudo mkdir -p /mnt/storage/{code-server,gitea/data,freellmapi/data,rustfs/data}
-sudo chown -R 1000:1000 /mnt/storage
+See [deploy/README.md](deploy/README.md) for the detailed Dokploy checklist.
 
-# Copy and edit env file
-cp .env.example .env
-# Edit .env with your values
+### 3. OpenCode WEB
 
-# Render Dokploy placeholders to Docker Compose syntax
-./scripts/render-compose.sh docker-compose.yml docker-compose.local.yml
+OpenCode WEB runs as a separate Dokploy application on port `4001`.
 
-# Deploy
-docker compose -f docker-compose.local.yml up -d
+Access it at:
+
+```text
+https://opencodeweb.yourdomain.com
 ```
 
-### 4. Bad Gateway Troubleshooting
+Required environment variables:
 
-If code-server returns Bad Gateway after deploy:
+```bash
+OPENCODE_SERVER_USERNAME=opencode
+OPENCODE_SERVER_PASSWORD=your-opencode-password
+OPENCODE_WEB_PORT=4001
+OPENCODE_WEB_HOSTNAME=0.0.0.0
+OPENCODE_MODEL=anthropic/claude-sonnet-4-6
+```
 
-1. Confirm code-server upstream protocol is `HTTP`, not `HTTPS`.
-2. Force rebuild/redeploy the code-server app in Dokploy.
-3. Check container logs for `=== Init Complete ===`.
-4. Set `CS_PASSWORD` in Dokploy. If it is missing, `scripts/init.sh` generates a temporary password at `/tmp/code-server-password` so the container can still start.
+OpenCode WEB generates `opencode.json` at runtime from environment variables. Provider configuration is stored in:
 
-See [deploy/README.md](deploy/README.md) for the full Dokploy checklist.
+```text
+/home/opencode/.config/opencode/opencode.json
+```
+
+### 4. Code Server OpenCode Integration
+
+The code-server container installs the OpenCode VS Code extension and generates provider configuration at startup.
+
+Provider config is stored in:
+
+```text
+/home/coder/.config/opencode/config.json
+```
+
+The default provider is controlled by:
+
+```bash
+DEFAULT_PROVIDER=freellmapi
+```
+
+Supported providers:
+
+- `freellmapi`
+- `openrouter`
+- `opencode-zen`
+- `anthropic`
+- `openai`
 
 ## File Structure
 
@@ -111,7 +128,6 @@ See [deploy/README.md](deploy/README.md) for the full Dokploy checklist.
 ├── Dockerfile.freellmapi          ← clones and builds freellmapi
 ├── Dockerfile.rustfs              ← downloads rustfs binary
 ├── Dockerfile.opencode-web        ← builds OpenCode WEB server
-├── docker-compose.yml             ← combined orchestrator
 ├── deploy/
 │   ├── docker-compose.code-server.yml
 │   ├── docker-compose.gitea.yml
@@ -119,67 +135,53 @@ See [deploy/README.md](deploy/README.md) for the full Dokploy checklist.
 │   ├── docker-compose.rustfs.yml
 │   ├── docker-compose.opencode-web.yml
 │   └── README.md                  ← deployment guide
-├── k8s/
-│   └── backup-cron.yml            ← Kubernetes backup cronjob
 ├── scripts/
-│   ├── backup.sh                  ← backup to RustFS
-│   ├── restore.sh                 ← restore from RustFS
-│   ├── init.sh                    ← container initialization
-│   ├── install-extensions.sh      ← AI extensions installer
-│   ├── install-opencode-web.sh    ← OpenCode WEB installer
-│   ├── opencode-web.sh            ← OpenCode WEB server
-│   ├── update.sh                  ← update all services
-│   ├── configure-provider.sh      ← AI provider management
-│   ├── generate-configs.sh        ← configuration generation
-│   ├── resolve-env.sh             ← resolve environment templates
-│   └── render-compose.sh          ← render Dokploy compose files for local Docker Compose
+│   ├── backup.sh
+│   ├── restore.sh
+│   ├── init.sh
+│   ├── install-extensions.sh
+│   ├── configure-provider.sh
+│   ├── generate-configs.sh
+│   ├── resolve-env.sh
+│   ├── render-compose.sh
+│   └── update.sh
 ├── config/
-│   ├── unified-config.json        ← unified provider configuration
 │   ├── code-server/               ← code-server config
-│   ├── gitea/                     ← gitea config
 │   ├── opencode/                  ← OpenCode extension config
-│   └── opencode-web/              ← OpenCode WEB config
+│   ├── opencode-web/              ← OpenCode WEB config
+│   └── gitea/                     ← gitea config
 ├── docs/
-│   └── backup.md                  ← backup procedures
-├── .env.example                   ← environment template (set values here)
-├── .dockerignore                  ← Docker build exclusions
-├── LICENSE                        ← MIT license
-└── README.md
+│   └── backup.md
+├── .env.example
+├── README.md
+└── LICENSE
 ```
-
-> **Architecture Note:** code-server and RustFS Dockerfiles auto-detect the target architecture via Docker's built-in `TARGETARCH`. Do not set `TARGETARCH` manually unless you are intentionally overriding the build platform.
 
 ## Environment Variable Workflow
 
 This project uses `${{project.*}}` placeholders in Dokploy compose files. For local Docker Compose, render them with `scripts/render-compose.sh` so Docker Compose can resolve them as `${VAR}` from `.env`.
 
-### How It Works
-
-1. **Dokploy** reads the docker-compose files
-2. **Placeholders** like `${{project.CS_PASSWORD}}` are replaced with actual values from your Dokploy Environment Variables
-3. **Containers** receive the resolved values as environment variables
-
-### Setup
-
-1. **Set Variables in Dokploy** - Add your values in Dokploy's Environment Variables UI
-2. **Deploy** - Dokploy resolves placeholders and injects values into containers
-
 ### Example
 
-**In docker-compose.yml:**
+**In `deploy/docker-compose.opencode-web.yml`:**
+
 ```yaml
 environment:
-  - CS_PASSWORD=${{project.CS_PASSWORD}}
+  - OPENCODE_MODEL=${{project.OPENCODE_MODEL}}
 ```
 
 **In Dokploy Environment Variables:**
-```
-CS_PASSWORD=your-secure-password
+
+```bash
+OPENCODE_MODEL=anthropic/claude-sonnet-4-6
 ```
 
-**In Container:**
-```
-CS_PASSWORD=your-secure-password
+**In container:**
+
+```json
+{
+  "model": "anthropic/claude-sonnet-4-6"
+}
 ```
 
 ### Local Docker Compose
@@ -187,308 +189,26 @@ CS_PASSWORD=your-secure-password
 Dokploy placeholders are not expanded by plain Docker Compose. Render a local compose file before running Docker Compose directly:
 
 ```bash
-./scripts/render-compose.sh docker-compose.yml docker-compose.local.yml
-docker compose -f docker-compose.local.yml up -d
-```
-
-### Hierarchy
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  Dokploy Environment Variables                          │
-│  CS_PASSWORD=your-secure-password                       │
-│  OPENROUTER_API_KEY=sk-real-key                         │
-└─────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│  docker-compose.yml                                     │
-│  CS_PASSWORD=${{project.CS_PASSWORD}}                   │
-│  OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}     │
-└─────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│  Container Environment                                  │
-│  CS_PASSWORD=your-secure-password                       │
-│  OPENROUTER_API_KEY=sk-real-key                         │
-└─────────────────────────────────────────────────────────┘
+./scripts/render-compose.sh deploy/docker-compose.opencode-web.yml docker-compose.opencode-web.local.yml
+docker compose -f docker-compose.opencode-web.local.yml up -d
 ```
 
 ## Update Procedures
 
-### Overview
-
-All services are rebuilt from source during updates to ensure latest security patches and features.
-
 ### Update All Services
-
-#### Basic Update
-
-```bash
-./scripts/update.sh
-```
-
-#### Update Specific Service
-
-```bash
-./scripts/update.sh code-server
-./scripts/update.sh gitea
-./scripts/update.sh freellmapi
-./scripts/update.sh rustfs
-./scripts/update.sh opencode-web
-```
-
-### Update Process
-
-#### 1. Check Latest Versions
-
-The update script automatically fetches the latest versions from GitHub:
-
-- **code-server**: Latest stable release
-- **gitea**: Latest stable release
-- **freellmapi**: Latest version (default: `latest`)
-- **rustfs**: Latest stable release
-- **opencode-web**: Latest version (default: `latest`)
-
-#### 2. Architecture Detection
-
-The script automatically detects system architecture and passes it to the code-server build only when needed.
-
-```bash
-# x86_64 systems detect as amd64
-# ARM64 systems detect as arm64
-```
-
-#### 3. Service Updates
-
-Each service is updated by `./scripts/update.sh`, which renders Dokploy compose placeholders before running Docker Compose.
 
 ```bash
 ./scripts/update.sh all
+```
+
+### Update Specific Service
+
+```bash
 ./scripts/update.sh code-server
+./scripts/update.sh opencode-web
 ./scripts/update.sh gitea
 ./scripts/update.sh freellmapi
 ./scripts/update.sh rustfs
-./scripts/update.sh opencode-web
-```
-
-### Update Best Practices
-
-#### Before Updating
-
-1. **Backup data**: Run backup script before updating
-2. **Check system resources**: Ensure sufficient disk space
-3. **Test in staging**: Update test environment first
-4. **Notify users**: Inform users of potential downtime
-
-#### During Update
-
-1. **Monitor logs**: Watch for errors during update
-2. **Check service health**: Verify services start correctly
-3. **Test functionality**: Test critical features after update
-4. **Rollback plan**: Have rollback procedure ready
-
-#### After Update
-
-1. **Verify services**: Check all services are running
-2. **Test integrations**: Verify AI integrations work
-3. **Check backups**: Ensure backup system still works
-4. **Monitor performance**: Watch for performance issues
-
-### Update Troubleshooting
-
-#### Update Fails
-
-```bash
-# Check update logs
-docker compose logs code-server
-
-# Check specific service logs
-docker compose logs gitea
-```
-
-#### Service Not Starting After Update
-
-```bash
-# Check container status
-docker compose ps
-
-# Check container logs
-docker compose logs [service-name]
-```
-
-#### Rollback
-
-If an update causes issues:
-
-1. **Stop all services**:
-
-```bash
-docker compose -f docker-compose.local.yml down
-```
-
-2. **Restore from backup**:
-
-```bash
-./scripts/restore.sh
-```
-
-3. **Restart services**:
-
-```bash
-docker compose -f docker-compose.local.yml up -d
-```
-
-### Update Monitoring
-
-#### Check Update Status
-
-```bash
-# Check if update is running
-docker compose ps
-
-# Check update logs
-tail -f /var/log/update.log
-```
-
-#### Monitor Service Health
-
-```bash
-# Check code-server status
-docker compose -f deploy/docker-compose.code-server.yml ps
-
-# Check gitea status
-docker compose -f deploy/docker-compose.gitea.yml ps
-
-# Check freellmapi status
-docker compose -f deploy/docker-compose.freellmapi.yml ps
-
-# Check rustfs status
-docker compose -f deploy/docker-compose.rustfs.yml ps
-
-# Check opencode-web status
-docker compose -f deploy/docker-compose.opencode-web.yml ps
-```
-
-### Update Frequency
-
-#### Recommended Schedule
-
-- **Security patches**: Update immediately when available
-- **Feature updates**: Update during maintenance windows
-- **Major versions**: Plan for downtime and test thoroughly
-
-### Automated Updates
-
-Consider setting up a monitoring system to alert when new versions are available:
-
-```bash
-# Example: Check for updates weekly
-crontab -e
-0 0 * * 0 ./scripts/update.sh --check-only
-```
-
-## AI Provider Management
-
-Manage AI providers for OpenCode extension:
-
-```bash
-# List all available providers
-./scripts/configure-provider.sh list
-
-# Configure a provider (uses environment variables)
-./scripts/configure-provider.sh configure
-
-# Test provider connection
-./scripts/configure-provider.sh test
-```
-
-### Available Providers
-
-1. **OpenRouter** - Access to 100+ open-source models
-2. **OpenCode Zen** - Fast, efficient coding assistant
-3. **FreeLLMAPI** - Proxy for multiple free models (default)
-4. **Anthropic** - Claude 3.5 Sonnet and Haiku
-5. **OpenAI** - GPT-4o, GPT-4 Turbo
-
-### Provider Configuration
-
-Each provider can be configured using environment variables in your `.env` file:
-
-```bash
-# OpenRouter Provider
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-OPENROUTER_API_KEY=sk-your-openrouter-key
-
-# OpenCode Zen Provider
-OPENCODE_ZEN_BASE_URL=https://opencode.ai/zen/api/v1
-OPENCODE_ZEN_API_KEY=your-opencode-zen-key
-
-# FreeLLMAPI Provider
-FREELLMAPI_BASE_URL=http://freellmapi:3000/v1
-FREELLMAPI_API_KEY=your-freellmapi-key
-
-# Anthropic Provider
-ANTHROPIC_BASE_URL=https://api.anthropic.com
-ANTHROPIC_API_KEY=sk-ant-your-key
-
-# OpenAI Provider
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_API_KEY=sk-your-openai-key
-
-# Gitea backup database
-GITEA_DB_USER=gitea
-GITEA_DB_NAME=gitea
-POSTGRES_HOST=pgbouncer
-POSTGRES_PORT=6432
-POSTGRES_PASSWORD=your-postgres-password
-
-# Default Provider
-DEFAULT_PROVIDER=freellmapi
-```
-
-### Configuration Generation
-
-After setting up your environment variables, generate the configuration:
-
-```bash
-# Generate unified configuration
-./scripts/generate-configs.sh
-```
-
-This will create the unified configuration based on your environment variables.
-
-### Provider Selection
-
-During container startup, the system will automatically use the provider configuration from your environment variables. No manual selection is required - the system will use the default provider or the one specified in your environment.
-
-### Configuration Examples
-
-**Example 1: OpenRouter as primary provider:**
-```bash
-DEFAULT_PROVIDER=openrouter
-OPENROUTER_API_KEY=sk-your-openrouter-key
-```
-
-**Example 2: OpenCode Zen as primary provider:**
-```bash
-DEFAULT_PROVIDER=opencode-zen
-OPENCODE_ZEN_API_KEY=your-opencode-zen-key
-```
-
-**Example 3: Multiple providers:**
-```bash
-# Primary provider
-DEFAULT_PROVIDER=openrouter
-OPENROUTER_API_KEY=sk-your-openrouter-key
-
-# Backup provider
-ANTHROPIC_API_KEY=sk-ant-your-key
-
-# FreeLLMAPI (already configured)
-FREELLMAPI_BASE_URL=http://freellmapi:3000/v1
-FREELLMAPI_API_KEY=your-freellmapi-key
 ```
 
 ## Backup
@@ -503,7 +223,9 @@ Daily automated backups at 2 AM:
 
 ## Documentation
 
+- [Deployment Guide](deploy/README.md)
 - [Backup Strategy](docs/backup.md)
+- [Development Plan](development_plan.md)
 
 ## License
 

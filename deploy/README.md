@@ -1,265 +1,156 @@
 # Dokploy Deployment Guide
 
-This guide explains how to deploy each service individually in Dokploy.
+Each service has a standalone compose file. Deploy one Dokploy application per service.
 
-## Important: Select Correct Deployment Type
+## Applications
 
-Dokploy has two deployment types. **You must select the correct one:**
+| Application | Compose File | Port |
+|-------------|--------------|------|
+| code-server | `deploy/docker-compose.code-server.yml` | 8443 |
+| opencode-web | `deploy/docker-compose.opencode-web.yml` | 4001 |
+| gitea | `deploy/docker-compose.gitea.yml` | 3001 |
+| freellmapi | `deploy/docker-compose.freellmapi.yml` | 3000 |
+| rustfs | `deploy/docker-compose.rustfs.yml` | 9000 |
 
-| Deployment Type | Use For | What to Provide |
-|----------------|---------|-----------------|
-| **Docker Compose** | Individual service deployment | Compose file path (e.g., `deploy/docker-compose.freellmapi.yml`) |
-| **Dockerfile** | Custom image builds | Dockerfile path (e.g., `Dockerfile.freellmapi`) |
+## Deployment Steps
 
-**Do NOT select "Dockerfile" type and point it at a compose file. This causes the parse error.**
+1. Create a new application in Dokploy.
+2. Select **Docker Compose** as the deployment type.
+3. Set the compose file path to one of the files above.
+4. Add the required environment variables from `.env.example`.
+5. Configure the reverse proxy:
+   - Domain: your service domain
+   - Port: service port
+   - Upstream protocol: **HTTP**
+   - Path: `/`
+6. Deploy.
 
----
+## Environment Variables
 
-## Option 1: Docker Compose Type (Recommended)
+Set these variables in Dokploy's Environment Variables UI.
 
-This is the recommended approach for each service.
+### Required for all services
 
-### Steps for Each Service
+```bash
+TZ=UTC
+```
 
-1. **Create Application** in Dokploy
-2. **Select "Docker Compose"** as the deployment type
-3. **Set the compose file path** to one of:
-   - `deploy/docker-compose.code-server.yml`
-   - `deploy/docker-compose.gitea.yml`
-   - `deploy/docker-compose.freellmapi.yml`
-   - `deploy/docker-compose.rustfs.yml`
-4. **Configure environment variables** in the Dokploy UI
-5. **Deploy**
+### code-server
 
-> **Note for code-server:** Uses Docker named volumes for persistence (automatic, no host setup required). Works with Dokploy Volume Backups to RustFS/S3.
+```bash
+CS_PASSWORD=your-secure-password
+CS_DEFAULT_WORKSPACE=/workspace
+DEFAULT_PROVIDER=freellmapi
+OPENCODE_MODEL=anthropic/claude-sonnet-4-6
+FREELLMAPI_BASE_URL=http://freellmapi:3000/v1
+FREELLMAPI_API_KEY=your-freellmapi-key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_API_KEY=sk-your-openrouter-key
+OPENCODE_ZEN_BASE_URL=https://opencode.ai/zen/api/v1
+OPENCODE_ZEN_API_KEY=your-opencode-zen-key
+ANTHROPIC_API_KEY=sk-ant-your-key
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_API_KEY=sk-your-openai-key
+RUSTFS_ACCESS_KEY=your-access-key
+RUSTFS_SECRET_KEY=your-secret-key
+RUSTFS_ENDPOINT=http://rustfs:9000
+RUSTFS_BUCKET=code-server-backups
+ENCRYPTION_KEY=generate-with-openssl-rand-hex-32
+POSTGRES_HOST=pgbouncer
+POSTGRES_PORT=6432
+POSTGRES_PASSWORD=your-postgres-password
+CODESERVER_VERSION=4.123.0
+```
 
-### Example: Deploying FreeLLMAPI
+### opencode-web
 
-1. Create new application in Dokploy
-2. Name: `freellmapi`
-3. Deployment type: **Docker Compose**
-4. Compose file: `deploy/docker-compose.freellmapi.yml`
-5. Go to **Environment Variables** and add:
-   ```
-   ENCRYPTION_KEY=your-encryption-key
-    FREELLMAPI_VERSION=latest
-   ```
-   > Provider API keys are configured through the FreeLLMAPI dashboard after deployment, not as environment variables.
-6. Click **Deploy**
+```bash
+OPENCODE_SERVER_USERNAME=opencode
+OPENCODE_SERVER_PASSWORD=your-opencode-password
+OPENCODE_WEB_PORT=4001
+OPENCODE_WEB_HOSTNAME=0.0.0.0
+OPENCODE_MODEL=anthropic/claude-sonnet-4-6
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_API_KEY=sk-your-openrouter-key
+OPENCODE_ZEN_BASE_URL=https://opencode.ai/zen/api/v1
+OPENCODE_ZEN_API_KEY=your-opencode-zen-key
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_API_KEY=sk-your-openai-key
+ANTHROPIC_API_KEY=sk-ant-your-key
+FREELLMAPI_BASE_URL=http://freellmapi:3000/v1
+FREELLMAPI_API_KEY=your-freellmapi-key
+OPENCODE_VERSION=latest
+```
 
-> **Note:** FreeLLMAPI uses named volumes (`freellmapi-data`, `freellmapi-config`) for persistence. These work with Dokploy Volume Backups to RustFS/S3.
+### freellmapi
 
-### Example: Deploying Gitea
+```bash
+ENCRYPTION_KEY=generate-with-openssl-rand-hex-32
+FREELLMAPI_VERSION=latest
+```
 
-1. Create new application in Dokploy
-2. Name: `gitea`
-3. Deployment type: **Docker Compose**
-4. Compose file: `deploy/docker-compose.gitea.yml`
-5. Go to **Environment Variables** and add:
-   ```
-   GITEA_DOMAIN=gitea.yourdomain.com
-   GITEA_ROOT_URL=https://gitea.yourdomain.com
-   GITEA_DB_USER=gitea
-   GITEA_DB_NAME=gitea
-   GITEA_ADMIN_USER=admin
-   GITEA_ADMIN_PASSWORD=your-gitea-password
-   GITEA_ADMIN_EMAIL=admin@yourdomain.com
-   POSTGRES_HOST=pgbouncer
-   POSTGRES_PORT=6432
-   POSTGRES_PASSWORD=your-postgres-password
-   ```
-6. Click **Deploy**
+### gitea
 
----
+```bash
+GITEA_DOMAIN=gitea.yourdomain.com
+GITEA_ROOT_URL=https://gitea.yourdomain.com
+GITEA_DB_USER=gitea
+GITEA_DB_NAME=gitea
+GITEA_ADMIN_USER=admin
+GITEA_ADMIN_PASSWORD=your-gitea-password
+GITEA_ADMIN_EMAIL=admin@yourdomain.com
+POSTGRES_HOST=pgbouncer
+POSTGRES_PORT=6432
+POSTGRES_PASSWORD=your-postgres-password
+GITEA_VERSION=1.23.0
+```
 
-## Option 2: Dockerfile Type
+### rustfs
 
-Use this if you want to build custom images without compose.
-
-### Steps for Each Service
-
-1. **Create Application** in Dokploy
-2. **Select "Dockerfile"** as the deployment type
-3. **Set the Dockerfile path** to one of:
-   - `Dockerfile.codeserver`
-   - `Dockerfile.gitea`
-   - `Dockerfile.freellmapi`
-   - `Dockerfile.rustfs`
-4. **Set build context** to `.` (repository root)
-5. **Configure build args** if needed:
-    - code-server: `CODESERVER_VERSION=4.123.0`  # TARGETARCH auto-detected by buildx
-6. **Configure run settings** (ports, volumes, environment) in the Dokploy UI
-7. **Deploy**
-
-### Example: Deploying FreeLLMAPI via Dockerfile
-
-1. Create new application in Dokploy
-2. Name: `freellmapi`
-3. Deployment type: **Dockerfile**
-4. Dockerfile: `Dockerfile.freellmapi`
-5. Build context: `.`
-6. After build, go to **Configuration** and set:
-   - Port: `3000`
-   - Volume: `/mnt/storage/freellmapi/data:/app/server/data`
-7. Go to **Environment Variables** and add:
-   ```
-    ENCRYPTION_KEY=your-encryption-key
-    PORT=3000
-    PUID=1000
-    PGID=1000
-    ```
-   > Provider API keys are configured through the FreeLLMAPI dashboard after deployment, not as environment variables.
-8. Click **Deploy**
-
----
+```bash
+RUSTFS_ROOT_USER=admin
+RUSTFS_ROOT_PASSWORD=your-rustfs-password
+```
 
 ## Local Docker Compose
 
 Dokploy compose files use `${{project.VAR}}` placeholders. Plain Docker Compose does not expand them, so render a local compose file first:
 
 ```bash
-./scripts/render-compose.sh docker-compose.yml docker-compose.local.yml
-docker compose -f docker-compose.local.yml up -d
+./scripts/render-compose.sh deploy/docker-compose.opencode-web.yml docker-compose.opencode-web.local.yml
+docker compose -f docker-compose.opencode-web.local.yml up -d
 ```
-
----
-
-## Environment Variables
-
-Set these variables in Dokploy's Environment Variables UI. The `${{project.*}}` placeholders in docker-compose files will resolve to these values at deploy time. Provider API keys are optional if you do not use that provider.
-
-### Complete Variable Reference
-
-All variables from `.env.example` must be set in Dokploy. Here's the complete list:
-
-| Variable | Description | Example | Required |
-|----------|-------------|---------|----------|
-| `TZ` | Timezone | `UTC` | Yes |
-| `CS_PASSWORD` | Code Server authentication password | `your-secure-password` | Yes |
-| `CS_DEFAULT_WORKSPACE` | Default workspace path | `/workspace` | Yes |
-| `DEFAULT_PROVIDER` | AI provider | `freellmapi` | Yes |
-| `OPENROUTER_BASE_URL` | OpenRouter API base URL | `https://openrouter.ai/api/v1` | Yes |
-| `OPENROUTER_API_KEY` | OpenRouter API key | `sk-your-openrouter-key` | Yes |
-| `OPENCODE_ZEN_BASE_URL` | OpenCode Zen API base URL | `https://opencode.ai/zen/api/v1` | Yes |
-| `OPENCODE_ZEN_API_KEY` | OpenCode Zen API key | `your-opencode-zen-key` | Yes |
-| `FREELLMAPI_BASE_URL` | FreeLLMAPI API base URL | `http://freellmapi:3000/v1` | Yes |
-| `FREELLMAPI_API_KEY` | FreeLLMAPI API key | `your-freellmapi-key` | Yes |
-| `ANTHROPIC_BASE_URL` | Anthropic API base URL | `https://api.anthropic.com` | Yes |
-| `ANTHROPIC_API_KEY` | Anthropic API key | `sk-ant-your-key` | Yes |
-| `OPENAI_BASE_URL` | OpenAI API base URL | `https://api.openai.com/v1` | Yes |
-| `OPENAI_API_KEY` | OpenAI API key | `sk-your-openai-key` | Yes |
-| `RUSTFS_ACCESS_KEY` | RustFS S3 access key | `your-access-key` | Yes |
-| `RUSTFS_SECRET_KEY` | RustFS S3 secret key | `your-secret-key` | Yes |
-| `RUSTFS_ENDPOINT` | RustFS endpoint | `http://rustfs:9000` | Yes |
-| `RUSTFS_BUCKET` | RustFS bucket name | `code-server-backups` | Yes |
-| `RUSTFS_ROOT_USER` | RustFS root username | `admin` | Yes |
-| `RUSTFS_ROOT_PASSWORD` | RustFS root password | `your-rustfs-password` | Yes |
-| `ENCRYPTION_KEY` | FreeLLMAPI encryption key | `openssl rand -hex 32` | Yes |
-| `GITEA_DOMAIN` | Gitea hostname | `gitea.yourdomain.com` | Yes |
-| `GITEA_ROOT_URL` | Gitea public root URL including protocol | `https://gitea.yourdomain.com` | Yes |
-| `GITEA_DB_USER` | Gitea database user | `gitea` | Yes |
-| `GITEA_DB_NAME` | Gitea database name | `gitea` | Yes |
-| `GITEA_ADMIN_USER` | Gitea admin username | `admin` | Yes |
-| `GITEA_ADMIN_PASSWORD` | Gitea admin password | `your-gitea-password` | Yes |
-| `GITEA_ADMIN_EMAIL` | Gitea admin email | `admin@yourdomain.com` | Yes |
-| `POSTGRES_HOST` | PostgreSQL host used by backups | `pgbouncer` | Yes |
-| `POSTGRES_PORT` | PostgreSQL port used by backups | `6432` | Yes |
-| `POSTGRES_PASSWORD` | PostgreSQL password for Gitea | `your-postgres-password` | Yes |
-| `OPENCODE_SERVER_USERNAME` | OpenCode WEB username | `opencode` | Yes |
-| `OPENCODE_SERVER_PASSWORD` | OpenCode WEB password | `your-opencode-password` | Yes |
-| `OPENCODE_WEB_PORT` | OpenCode WEB port | `4001` | Yes |
-| `OPENCODE_WEB_HOSTNAME` | OpenCode WEB bind hostname | `0.0.0.0` | Yes |
-| `CODESERVER_VERSION` | Code Server version | `4.123.0` | Yes |
-| `GITEA_VERSION` | Gitea version | `1.23.0` | Yes |
-| `FREELLMAPI_VERSION` | FreeLLMAPI version | `latest` | Yes |
-| `OPENCODE_VERSION` | OpenCode WEB version | `latest` | Yes |
-
----
-
-## Network Configuration
-
-All services communicate over `codeserver-network`. This network must exist before deployment.
-
-The compose files declare it as `external: true`, so create it before deploying services:
-
-```bash
-docker network create codeserver-network
-```
-
----
 
 ## Troubleshooting
 
-### Error: `dockerfile parse error on line 6: unknown instruction: services:`
+### Bad Gateway
 
-**Cause:** You selected "Dockerfile" type in Dokploy but pointed it at a compose file.
+**Cause:** Reverse proxy is trying to reach the container over HTTPS while the container serves HTTP.
 
-**Fix:** Change the deployment type to "Docker Compose" or use the correct Dockerfile path.
+**Fix:** Set upstream protocol to **HTTP** in Dokploy and redeploy.
 
-### Error: `No such container: select-a-container`
+### OpenCode WEB `ServeError`
 
-**Cause:** The build failed, so the container was never created.
+**Cause:** Missing `opencode.json` or missing provider configuration.
 
-**Fix:** Check the build logs in Dokploy. Usually caused by the error above.
+**Fix:** Ensure these env vars are set:
 
-### Error: `network codeserver-network not found`
-
-**Cause:** The Docker network doesn't exist yet.
-
-**Fix:** Deploy one service first (it will create the network), or run:
 ```bash
-docker network create codeserver-network
+OPENCODE_SERVER_USERNAME=opencode
+OPENCODE_SERVER_PASSWORD=your-opencode-password
+OPENCODE_MODEL=anthropic/claude-sonnet-4-6
 ```
 
-### Build fails with `COPY vendor/...: no such file or directory`
+Then force rebuild the opencode-web app.
 
-**Cause:** Source code not cloned during build.
+### Dockerfile parse error
 
-**Fix:** This should not happen with the current Dockerfiles (they clone source at build time). If you see this error, ensure you're using the latest Dockerfiles from the repository.
+**Cause:** Incorrect escaping in the Dockerfile.
 
-### Bad Gateway after deploy
+**Fix:** Make sure every multi-line `RUN` instruction uses a single `\` at the end of each continued line.
 
-**Cause:** The reverse proxy is trying to reach code-server with HTTPS while code-server serves plain HTTP on `8443`, or the running container is still using an old image.
+## Architecture Notes
 
-**Fix:**
-1. Set the Dokploy/reverse-proxy upstream protocol for code-server to `HTTP`.
-2. Force rebuild/redeploy the code-server application.
-3. Verify the container logs include `=== Init Complete ===`.
-4. If `CS_PASSWORD` is missing, the current init script generates a temporary password at `/tmp/code-server-password`, but setting `CS_PASSWORD` in Dokploy is still recommended.
-
-### Gitea admin user is not created
-
-**Cause:** `GITEA_ADMIN_USER`, `GITEA_ADMIN_PASSWORD`, or `GITEA_ADMIN_EMAIL` is missing.
-
-**Fix:** Add all three variables in Dokploy and redeploy. The `gitea-admin` init service creates the admin user or updates its password on deploy.
-
----
-
-## Architecture-Specific Notes
-
-### Multi-Arch Support
-
-The code-server and RustFS Dockerfiles auto-detect the target architecture via Docker's built-in `TARGETARCH` build argument when available. RustFS also falls back to `uname -m` if `TARGETARCH` is not provided.
-
-**Do not set `TARGETARCH` manually unless you are intentionally overriding the build platform:**
-- ❌ Don't add `TARGETARCH` to build args in Dokploy
-- ❌ Don't set `TARGETARCH` in Project/Environment variables
-- ✅ Let Docker/buildx auto-detect it
-
-**How it works:**
-| Build Scenario | TARGETARCH Value |
-|----------------|------------------|
-| buildx multi-platform (amd64) | `amd64` |
-| buildx multi-platform (arm64) | `arm64` |
-| Single-platform on arm64 host | `arm64` |
-| Single-platform on amd64 host | `amd64` |
-
-**If you see architecture mismatch error:**
-```
-Arch mismatch: TARGETARCH=amd64, system=arm64
-```
-This means `TARGETARCH` was overridden. Remove any manual `TARGETARCH` setting from:
-1. Dokploy build args
-2. Project environment variables
-3. Any local Docker Compose override files
-3. `.env` file
+- code-server and RustFS Dockerfiles auto-detect the target architecture via Docker's built-in `TARGETARCH`.
+- Do not set `TARGETARCH` manually unless you intentionally override the build platform.
+- All services communicate over `codeserver-network`.

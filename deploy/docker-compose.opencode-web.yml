@@ -1,8 +1,6 @@
 # docker-compose.opencode-web.yml
-# Deploy OpenCode WEB as separate Dokploy application
+# Deploy OpenCode WEB as a standalone Dokploy application.
 # Source: https://github.com/anomalyco/opencode
-
-# syntax=docker/compose.yml
 
 services:
   opencode-web:
@@ -16,24 +14,27 @@ services:
     container_name: opencode-web
     restart: unless-stopped
     ports:
-      - "4001:4001"
-    volumes:
-      - opencode-web-data:/data
-      - opencode-web-config:/config
+      - "${{project.OPENCODE_WEB_PORT}}:${{project.OPENCODE_WEB_PORT}}"
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=${{project.TZ}}
-      - OPENCODE_SERVER_PASSWORD=${{project.OPENCODE_SERVER_PASSWORD}}
       - OPENCODE_SERVER_USERNAME=${{project.OPENCODE_SERVER_USERNAME}}
+      - OPENCODE_SERVER_PASSWORD=${{project.OPENCODE_SERVER_PASSWORD}}
       - OPENCODE_WEB_PORT=${{project.OPENCODE_WEB_PORT}}
       - OPENCODE_WEB_HOSTNAME=${{project.OPENCODE_WEB_HOSTNAME}}
+      - OPENCODE_MODEL=${{project.OPENCODE_MODEL}}
+      - OPENROUTER_BASE_URL=${{project.OPENROUTER_BASE_URL}}
+      - OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
+      - OPENCODE_ZEN_BASE_URL=${{project.OPENCODE_ZEN_BASE_URL}}
+      - OPENCODE_ZEN_API_KEY=${{project.OPENCODE_ZEN_API_KEY}}
+      - OPENAI_BASE_URL=${{project.OPENAI_BASE_URL}}
+      - OPENAI_API_KEY=${{project.OPENAI_API_KEY}}
+      - ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
       - FREELLMAPI_BASE_URL=${{project.FREELLMAPI_BASE_URL}}
       - FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
     networks:
       - codeserver-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4001/"]
+      test: ["CMD", "curl", "-f", "http://localhost:${{project.OPENCODE_WEB_PORT}}/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -42,7 +43,3 @@ services:
 networks:
   codeserver-network:
     external: true
-
-volumes:
-  opencode-web-data:
-  opencode-web-config:

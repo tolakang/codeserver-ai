@@ -6,8 +6,8 @@
 services:
   code-server:
     build:
-      context: .
-      dockerfile: Dockerfile.codeserver
+      context: ..
+      dockerfile: ../Dockerfile.codeserver
       args:
         CODESERVER_VERSION: ${{project.CODESERVER_VERSION}}
     image: codeserver-custom:latest
@@ -25,13 +25,13 @@ services:
       - DEFAULT_WORKSPACE=${{project.CS_DEFAULT_WORKSPACE}}
       - CS_PASSWORD=${{project.CS_PASSWORD}}
       - DEFAULT_PROVIDER=${{project.DEFAULT_PROVIDER}}
+      - OPENCODE_MODEL=${{project.OPENCODE_MODEL}}
       - OPENROUTER_BASE_URL=${{project.OPENROUTER_BASE_URL}}
       - OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
       - OPENCODE_ZEN_BASE_URL=${{project.OPENCODE_ZEN_BASE_URL}}
       - OPENCODE_ZEN_API_KEY=${{project.OPENCODE_ZEN_API_KEY}}
       - FREELLMAPI_BASE_URL=${{project.FREELLMAPI_BASE_URL}}
       - FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
-      - ANTHROPIC_BASE_URL=${{project.ANTHROPIC_BASE_URL}}
       - ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
       - OPENAI_BASE_URL=${{project.OPENAI_BASE_URL}}
       - OPENAI_API_KEY=${{project.OPENAI_API_KEY}}

@@ -1,5 +1,12 @@
 {
-  "provider": "openai",
-  "baseURL": "http://freellmapi:3000/v1",
-  "apiKey": ""
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "openai": {
+      "options": {
+        "baseURL": "{env:FREELLMAPI_BASE_URL}",
+        "apiKey": "{env:FREELLMAPI_API_KEY}"
+      }
+    }
+  },
+  "model": "{env:OPENCODE_MODEL}"
 }

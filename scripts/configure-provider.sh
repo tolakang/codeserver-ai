@@ -1,5 +1,5 @@
 #!/bin/bash
-# scripts/configure-provider.sh - Unified provider configuration
+# scripts/configure-provider.sh - OpenCode provider configuration
 
 set -euo pipefail
 
@@ -58,6 +58,7 @@ show_providers() {
 
 configure_provider() {
   local choice key_choice api_key api_key_var base_url opencode_provider display_name
+  local config_dir="${OPENCODE_CONFIG_DIR:-${HOME}/.config/opencode}"
 
   show_providers
   read -r -p "Select provider (1-${#PROVIDER_NAMES[@]}): " choice
@@ -95,21 +96,26 @@ configure_provider() {
     fi
   fi
 
-CONFIG_DIR="${OPENCODE_CONFIG_DIR:-${HOME}/.config/opencode}"
+  mkdir -p "$config_dir"
 
-mkdir -p "$CONFIG_DIR"
-
-cat > "$CONFIG_DIR/config.json" <<EOF
+  cat > "$config_dir/config.json" <<EOF
 {
-  "provider": "$(json_escape "$opencode_provider")",
-  "baseURL": "$(json_escape "$base_url")",
-  "apiKey": "$(json_escape "${!api_key_var:-}")"
+  "\$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "$(json_escape "$opencode_provider")": {
+      "options": {
+        "baseURL": "$(json_escape "$base_url")",
+        "apiKey": "$(json_escape "${!api_key_var:-}")"
+      }
+    }
+  },
+  "model": "$(json_escape "${OPENCODE_MODEL:-}")"
 }
 EOF
-chmod 600 "$CONFIG_DIR/config.json"
+  chmod 600 "$config_dir/config.json"
 
-echo "${display_name} configured successfully"
-echo "Config saved to: $CONFIG_DIR/config.json"
+  echo "${display_name} configured successfully"
+  echo "Config saved to: $config_dir/config.json"
 }
 
 test_provider_connection() {

@@ -24,9 +24,16 @@ write_opencode_config() {
 
   cat > /home/coder/.config/opencode/config.json <<EOF
 {
-  "provider": "$(json_escape "$opencode_provider")",
-  "baseURL": "$(json_escape "$base_url")",
-  "apiKey": "$(json_escape "$api_key")"
+  "\$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "$(json_escape "$opencode_provider")": {
+      "options": {
+        "baseURL": "$(json_escape "$base_url")",
+        "apiKey": "$(json_escape "$api_key")"
+      }
+    }
+  },
+  "model": "$(json_escape "${OPENCODE_MODEL:-}")"
 }
 EOF
 }

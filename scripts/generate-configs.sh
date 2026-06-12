@@ -1,5 +1,5 @@
 #!/bin/bash
-# scripts/generate-configs.sh - Unified configuration generator
+# scripts/generate-configs.sh - OpenCode configuration generator
 # NOTE: This script generates config at runtime, not in the repo.
 
 set -euo pipefail
@@ -42,40 +42,38 @@ mkdir -p "$(dirname "$OUTPUT_FILE")"
 
 cat > "$OUTPUT_FILE" <<EOF
 {
-  "providers": {
-    "openrouter": {
-      "baseURL": "$(json_escape "${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}")",
-      "apiKey": "$(json_escape "${OPENROUTER_API_KEY:-}")",
-      "description": "OpenRouter AI platform with multiple model support"
-    },
-    "opencode-zen": {
-      "baseURL": "$(json_escape "${OPENCODE_ZEN_BASE_URL:-https://opencode.ai/zen/api/v1}")",
-      "apiKey": "$(json_escape "${OPENCODE_ZEN_API_KEY:-}")",
-      "description": "OpenCode Zen for fast, efficient AI coding"
-    },
-    "freellmapi": {
-      "baseURL": "$(json_escape "${FREELLMAPI_BASE_URL:-http://freellmapi:3000/v1}")",
-      "apiKey": "$(json_escape "${FREELLMAPI_API_KEY:-}")",
-      "description": "FreeLLMAPI for proxying multiple free models"
-    },
-    "anthropic": {
-      "baseURL": "$(json_escape "${ANTHROPIC_BASE_URL:-https://api.anthropic.com}")",
-      "apiKey": "$(json_escape "${ANTHROPIC_API_KEY:-}")",
-      "description": "Anthropic Claude models"
-    },
-    "openai": {
-      "baseURL": "$(json_escape "${OPENAI_BASE_URL:-https://api.openai.com/v1}")",
-      "apiKey": "$(json_escape "${OPENAI_API_KEY:-}")",
-      "description": "OpenAI GPT models"
-    }
-  },
-  "defaultProvider": "$(json_escape "${DEFAULT_PROVIDER:-freellmapi}")",
+  "\$schema": "https://opencode.ai/config.json",
   "server": {
     "port": 4001,
-    "hostname": "0.0.0.0",
-    "cors": []
-  }
+    "hostname": "0.0.0.0"
+  },
+  "provider": {
+    "openrouter": {
+      "options": {
+        "baseURL": "$(json_escape "${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}")",
+        "apiKey": "$(json_escape "${OPENROUTER_API_KEY:-}")"
+      }
+    },
+    "opencode-zen": {
+      "options": {
+        "baseURL": "$(json_escape "${OPENCODE_ZEN_BASE_URL:-https://opencode.ai/zen/api/v1}")",
+        "apiKey": "$(json_escape "${OPENCODE_ZEN_API_KEY:-}")"
+      }
+    },
+    "openai": {
+      "options": {
+        "baseURL": "$(json_escape "${FREELLMAPI_BASE_URL:-http://freellmapi:3000/v1}")",
+        "apiKey": "$(json_escape "${FREELLMAPI_API_KEY:-}")"
+      }
+    },
+    "anthropic": {
+      "options": {
+        "apiKey": "$(json_escape "${ANTHROPIC_API_KEY:-}")"
+      }
+    }
+  },
+  "model": "$(json_escape "${OPENCODE_MODEL:-}")"
 }
 EOF
 
-echo "Generated unified-config.json at $OUTPUT_FILE"
+echo "Generated OpenCode config at $OUTPUT_FILE"
