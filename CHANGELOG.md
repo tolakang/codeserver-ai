@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenCode WEB is documented as a standalone Dokploy application with runtime provider configuration.
 
 ### Added
+- Mobile-responsive CSS for code-server with collapsible sidebar.
+- Auto-copy terminal text on selection for easier mobile use.
+- Mobile CSS injected into the code-server image.
+- iPad Ctrl+C interrupt keybinding fix.
 - OpenCode CLI to the code-server image so `opencode` can run directly in the code-server terminal.
 - `scripts/render-compose.sh` for local Docker Compose deployments.
 - OpenCode WEB port and hostname environment overrides.

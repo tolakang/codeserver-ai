@@ -6,6 +6,14 @@
   "editor.minimap.enabled": false,
   "editor.formatOnSave": true,
   "terminal.integrated.fontSize": 14,
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "terminal.integrated.rightClickBehavior": "copyPaste",
+  "terminal.integrated.commandsToSkipShell": [
+    "workbench.action.terminal.copySelection",
+    "workbench.action.terminal.paste",
+    "workbench.action.terminal.selectAll"
+  ],
   "files.autoSave": "afterDelay",
   "files.autoSaveDelay": 1000,
   "git.autofetch": true,

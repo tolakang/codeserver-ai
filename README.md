@@ -13,6 +13,7 @@ Dokploy
     +-- code-server (port 8443)
     |       +-- OpenCode VS Code extension
     |       +-- OpenCode CLI in terminal
+    |       +-- Mobile-responsive touch UI
     |       +-- Workspace
     |
     +-- opencode-web (port 4001)
@@ -126,6 +127,24 @@ Supported providers:
 - `anthropic`
 - `openai`
 
+### 5. Mobile Responsive Code Server
+
+Code Server uses a mobile-responsive layout on small screens:
+
+- Sidebar becomes an overlay instead of pushing content
+- Activity bar and titlebar are hidden below `768px`
+- Tabs and scrollbars use larger touch targets
+- Inputs prevent iOS auto-zoom
+
+Terminal copy/paste is enabled for OpenCode and shell usage:
+
+```text
+Select text: click and drag in the terminal
+Copy: auto-copy on selection
+Paste: Ctrl+Shift+V or right-click
+iPad Ctrl+C: sends interrupt to terminal
+```
+
 ## File Structure
 
 ```
@@ -154,6 +173,8 @@ Supported providers:
 │   └── update.sh
 ├── config/
 │   ├── code-server/               ← code-server config
+│   │   ├── custom/mobile.css      ← mobile touch layout
+│   │   └── keybindings.json       ← iPad Ctrl+C interrupt
 │   ├── opencode/                  ← OpenCode extension config
 │   ├── opencode-web/              ← OpenCode WEB config
 │   └── gitea/                     ← gitea config

@@ -43,6 +43,10 @@ The code-server image includes the OpenCode VS Code extension and the `opencode`
 opencode
 ```
 
+Terminal text selection is copied automatically. On iPad, `Ctrl+C` sends interrupt to the terminal instead of copying text.
+
+The image also includes mobile-responsive CSS for touch-friendly code-server layout.
+
 ```bash
 CS_PASSWORD=your-secure-password
 CS_DEFAULT_WORKSPACE=/workspace

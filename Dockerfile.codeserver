@@ -3,7 +3,7 @@
 # Source: https://github.com/coder/code-server
 # Releases: https://github.com/coder/code-server/releases
 
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.7
 ARG BASE=debian:13
 
 FROM ${BASE}
@@ -89,12 +89,50 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Inject mobile CSS into code-server HTML
+COPY config/code-server/custom/mobile.css /tmp/code-server-mobile.css
+RUN node - <<'NODE'
+const fs = require('fs');
+const path = require('path');
+
+const css = fs.readFileSync('/tmp/code-server-mobile.css', 'utf8');
+const style = `<style id="codeserver-mobile-responsive">\n${css}\n</style>`;
+const files = [];
+
+function walk(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walk(fullPath);
+    } else if (entry.isFile() && entry.name.endsWith('.html')) {
+      files.push(fullPath);
+    }
+  }
+}
+
+walk('/usr/lib/code-server');
+
+let patched = 0;
+for (const file of files) {
+  const html = fs.readFileSync(file, 'utf8');
+  if (html.includes('</head>') && !html.includes('codeserver-mobile-responsive')) {
+    fs.writeFileSync(file, html.replace('</head>', `${style}</head>`));
+    patched += 1;
+  }
+}
+
+if (patched === 0) {
+  throw new Error('No code-server HTML files found');
+}
+NODE
+
 # Copy custom scripts and config
 COPY scripts/ /scripts/
 RUN chmod +x /scripts/*.sh
 
 COPY config/code-server/config.yaml /home/coder/.config/code-server/config.yaml
 COPY config/code-server/settings.json /home/coder/.config/code-server/User/settings.json
+COPY config/code-server/keybindings.json /home/coder/.config/code-server/User/keybindings.json
 
 RUN mkdir -p /workspace/.memory /var/log/codeserver-ai \
     && chown -R coder:coder /home/coder/.config /workspace /var/log/codeserver-ai

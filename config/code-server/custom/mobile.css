@@ -1,0 +1,44 @@
+input,
+textarea,
+select {
+  font-size: 16px !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  min-height: 40px !important;
+}
+
+@media screen and (max-width: 768px) {
+  .part.sidebar {
+    position: absolute !important;
+    z-index: 1000 !important;
+    height: 100% !important;
+    transition: transform 0.2s ease !important;
+  }
+
+  .part.activitybar {
+    display: none !important;
+  }
+
+  .part.titlebar {
+    display: none !important;
+  }
+
+  .tab {
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+  }
+
+  .terminal-instance {
+    width: 100% !important;
+  }
+
+  .monaco-editor .view-lines {
+    font-size: 16px !important;
+  }
+}
