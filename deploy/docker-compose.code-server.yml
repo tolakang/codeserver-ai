@@ -6,8 +6,8 @@
 services:
   code-server:
     build:
-      context: ..
-      dockerfile: ../Dockerfile.codeserver
+      context: .
+      dockerfile: Dockerfile.codeserver
       args:
         CODESERVER_VERSION: ${{project.CODESERVER_VERSION}}
     image: codeserver-custom:latest
