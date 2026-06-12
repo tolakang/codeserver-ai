@@ -37,6 +37,12 @@ TZ=UTC
 
 ### code-server
 
+The code-server image includes the OpenCode VS Code extension and the `opencode` CLI. Open the code-server terminal and run:
+
+```bash
+opencode
+```
+
 ```bash
 CS_PASSWORD=your-secure-password
 CS_DEFAULT_WORKSPACE=/workspace

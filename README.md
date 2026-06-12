@@ -12,6 +12,7 @@ Dokploy
     |
     +-- code-server (port 8443)
     |       +-- OpenCode VS Code extension
+    |       +-- OpenCode CLI in terminal
     |       +-- Workspace
     |
     +-- opencode-web (port 4001)
@@ -97,9 +98,15 @@ OpenCode WEB generates `opencode.json` at runtime from environment variables. Pr
 
 ### 4. Code Server OpenCode Integration
 
-The code-server container installs the OpenCode VS Code extension and generates provider configuration at startup.
+The code-server container installs the OpenCode VS Code extension and the `opencode` CLI. It generates provider configuration at startup.
 
-Provider config is stored in:
+Use OpenCode in the code-server terminal:
+
+```bash
+opencode
+```
+
+Provider config is shared by the extension and CLI at:
 
 ```text
 /home/coder/.config/opencode/config.json
