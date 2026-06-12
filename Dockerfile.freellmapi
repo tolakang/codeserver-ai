@@ -21,19 +21,6 @@ RUN if [ "${FREELLMAPI_VERSION}" != "latest" ]; then \
       git fetch --tags && git checkout "tags/${FREELLMAPI_VERSION}" 2>/dev/null || git checkout "${FREELLMAPI_VERSION}"; \
     fi
 
-RUN mkdir -p tmp \
-    && cp package.json package-lock.json ./tmp/ \
-    && cp shared/package.json ./tmp/shared/ \
-    && cp server/package.json ./tmp/server/ \
-    && cp client/package.json ./tmp/client/ \
-    && rm -rf node_modules shared server client \
-    && mkdir -p shared server client \
-    && mv tmp/package.json tmp/package-lock.json . \
-    && mv tmp/shared/package.json shared/ \
-    && mv tmp/server/package.json server/ \
-    && mv tmp/client/package.json client/ \
-    && rm -rf tmp
-
 RUN npm ci
 
 FROM deps AS build
