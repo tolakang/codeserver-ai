@@ -4,6 +4,8 @@
 
 Code Server AI backs up workspace files, code-server/OpenCode configuration, and the Gitea PostgreSQL database to RustFS S3-compatible storage.
 
+The code-server workspace is mounted at `/workspace` from the fixed Docker named volume `codeserver-ai-workspace`. Backups archive this path so workspace contents survive code-server container rebuilds and Dokploy updates.
+
 ## Required Environment Variables
 
 Set these on the `code-server` container:

@@ -14,7 +14,7 @@ Dokploy
     |       +-- OpenCode VS Code extension
     |       +-- OpenCode CLI in terminal
     |       +-- Mobile-responsive touch UI
-    |       +-- Workspace
+    |       +-- Workspace persisted in Docker named volume `codeserver-ai-workspace`
     |
     +-- opencode-web (port 4001)
     |       +-- OpenCode Web UI
@@ -240,6 +240,8 @@ docker compose -f docker-compose.opencode-web.local.yml up -d
 ```
 
 ## Backup
+
+Workspace files live under `/workspace` in the `codeserver-ai-workspace` Docker named volume. The backup scripts archive this path so code-server updates do not depend on container image contents.
 
 See [docs/backup.md](docs/backup.md) for RustFS backup strategy.
 

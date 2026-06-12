@@ -72,6 +72,12 @@ POSTGRES_PASSWORD=your-postgres-password
 CODESERVER_VERSION=4.123.0
 ```
 
+### code-server workspace persistence
+
+The code-server workspace is mounted at `/workspace` from the fixed Docker named volume `codeserver-ai-workspace`. This prevents Dokploy updates from creating a new empty workspace volume when the container is recreated.
+
+Keep this volume name stable. If you need to move to a host bind mount or another volume, copy the existing `/workspace` contents before changing the mount.
+
 ### opencode-web
 
 ```bash

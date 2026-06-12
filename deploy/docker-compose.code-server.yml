@@ -59,4 +59,6 @@ networks:
     external: true
 
 volumes:
+  # Fixed volume name keeps /workspace persistent across Dokploy updates.
   code-server-persistent:
+    name: codeserver-ai-workspace

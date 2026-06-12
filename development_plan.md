@@ -31,6 +31,7 @@ This document tracks the OpenCode WEB and AI provider refactoring for `codeserve
 - Updated `scripts/generate-configs.sh` to generate OpenCode-compatible config.
 - Updated `deploy/docker-compose.opencode-web.yml` with provider/model env vars.
 - Updated `deploy/docker-compose.code-server.yml` with `OPENCODE_MODEL`.
+- Updated `deploy/docker-compose.code-server.yml` with fixed workspace volume name `codeserver-ai-workspace`.
 - Updated `.env.example` with `OPENCODE_MODEL`.
 - Removed root `docker-compose.yml` orchestrator in favor of standalone service compose files.
 - Removed unused `scripts/install-opencode-web.sh`.
@@ -55,7 +56,7 @@ This document tracks the OpenCode WEB and AI provider refactoring for `codeserve
 | `config/opencode-web/opencode.json` | Full provider/model config | ✅ |
 | `config/opencode/config.json` | Provider/model config | ✅ |
 | `deploy/docker-compose.opencode-web.yml` | Standalone OpenCode WEB app config | ✅ |
-| `deploy/docker-compose.code-server.yml` | Added model env var and fixed context | ✅ |
+| `deploy/docker-compose.code-server.yml` | Added model env var and fixed workspace volume name | ✅ |
 | `docker-compose.yml` | Removed root orchestrator | ✅ |
 | `scripts/install-opencode-web.sh` | Removed unused script | ✅ |
 | `.env.example` | Added `OPENCODE_MODEL` and updated references | ✅ |

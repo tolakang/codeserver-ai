@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OpenCode WEB generates a complete `opencode.json` at runtime for provider and model configuration.
 - code-server Dockerfile now creates `/etc/sudoers.d` before writing sudoers rules.
 - Root compose no longer blocks code-server startup on dependent service health checks.
+- code-server workspace volume now uses the fixed name `codeserver-ai-workspace` so Dokploy updates do not create a fresh empty `/workspace`.
 
 ### Changed
 - Compose services now use `pull_policy: build` to force local image builds.
