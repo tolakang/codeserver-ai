@@ -77,11 +77,22 @@ else
 fi
 
 # Substitute CS_PASSWORD in code-server config
+if [ -z "${CS_PASSWORD:-}" ]; then
+  CS_PASSWORD="${PASSWORD:-${CODE_SERVER_PASSWORD:-}}"
+fi
+
+if [ -z "${CS_PASSWORD:-}" ]; then
+  CS_PASSWORD="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 24)"
+  printf '%s\n' "$CS_PASSWORD" > /tmp/code-server-password
+  chmod 600 /tmp/code-server-password
+  echo "Warning: CS_PASSWORD is not set; generated temporary password stored at /tmp/code-server-password" | tee -a "$LOG_FILE"
+fi
+
 if [ -f /home/coder/.config/code-server/config.yaml ]; then
   cat > /home/coder/.config/code-server/config.yaml <<EOF
 bind-addr: 0.0.0.0:8443
 auth: password
-password: '$(yaml_escape "${CS_PASSWORD:?CS_PASSWORD must be set}")'
+password: '$(yaml_escape "$CS_PASSWORD")'
 disable-telemetry: true
 EOF
 fi
