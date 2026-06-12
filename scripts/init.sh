@@ -76,12 +76,6 @@ else
   echo "OpenCode extension config already exists, skipping provider configuration" | tee -a "$LOG_FILE"
 fi
 
-# Copy OpenCode WEB config if not already in place
-if [ ! -f /config/opencode-web/opencode.json ]; then
-  mkdir -p /config/opencode-web
-  echo "Warning: OpenCode WEB config not found, skipping" | tee -a "$LOG_FILE"
-fi
-
 # Substitute CS_PASSWORD in code-server config
 if [ -f /home/coder/.config/code-server/config.yaml ]; then
   cat > /home/coder/.config/code-server/config.yaml <<EOF
