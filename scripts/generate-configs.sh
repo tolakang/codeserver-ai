@@ -73,8 +73,6 @@ cat > "$OUTPUT_FILE" <<EOF
   "server": {
     "port": 4001,
     "hostname": "0.0.0.0",
-    "mdns": true,
-    "mdns-domain": "opencode.local",
     "cors": []
   }
 }

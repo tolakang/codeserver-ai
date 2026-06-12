@@ -6,26 +6,31 @@ If you discover a security vulnerability within this project, please send an ema
 
 ## Security Best Practices
 
-### Passwords
+### Passwords and Secrets
 
-- Never use default or weak passwords in production
-- Use strong, randomly generated passwords for all services
-- Set `CS_PASSWORD`, `GITEA_ADMIN_PASSWORD`, and `RUSTFS_ROOT_PASSWORD` to unique values
+- Never use default or weak passwords in production.
+- Use strong, randomly generated passwords for all services.
+- Set `CS_PASSWORD`, `GITEA_ADMIN_PASSWORD`, `POSTGRES_PASSWORD`, and `RUSTFS_ROOT_PASSWORD` to unique values.
+- Store secrets in Dokploy environment variables, Docker secrets, or another secret manager.
+- Never commit `.env`, API keys, RustFS credentials, generated passwords, or database passwords.
 
 ### API Keys
 
-- Never commit API keys to version control
-- Use environment variables or secret management systems
-- Rotate API keys regularly
+- Never commit API keys to version control.
+- Use environment variables or secret management systems.
+- Rotate API keys regularly.
 
 ### Network Security
 
-- Use TLS termination at a reverse proxy (nginx, Traefik, etc.)
-- Restrict CORS origins to trusted domains
-- Use firewall rules to limit access to services
+- Terminate TLS at the reverse proxy, not inside code-server.
+- Configure the reverse proxy upstream protocol for code-server as `HTTP` on port `8443`.
+- Restrict CORS origins to trusted domains.
+- Use firewall rules to limit access to services.
+- Keep RustFS and PostgreSQL on the internal Docker network unless explicitly exposed.
 
 ### Updates
 
-- Keep all services updated to the latest versions
-- Monitor for security advisories
-- Apply security patches promptly
+- Keep all services updated to the latest secure versions.
+- Monitor for security advisories.
+- Apply security patches promptly.
+- Back up workspace, configuration, and Gitea database before updates.

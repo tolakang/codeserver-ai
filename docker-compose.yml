@@ -28,14 +28,10 @@ services:
       file: deploy/docker-compose.code-server.yml
       service: code-server
     depends_on:
-      gitea:
-        condition: service_healthy
-      freellmapi:
-        condition: service_healthy
-      opencode-web:
-        condition: service_healthy
-      rustfs:
-        condition: service_healthy
+      - gitea
+      - freellmapi
+      - opencode-web
+      - rustfs
 
 networks:
   default:

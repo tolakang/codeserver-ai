@@ -17,6 +17,7 @@ Thank you for your interest in contributing! This document provides guidelines a
 
 - Docker and Docker Compose
 - Git
+- Bash
 
 ### Local Development
 
@@ -31,50 +32,58 @@ Thank you for your interest in contributing! This document provides guidelines a
    cp .env.example .env
    ```
 
-3. Edit `.env` with your configuration
+3. Edit `.env` with your configuration.
 
-4. Start the services:
+4. Render Dokploy compose placeholders for local Docker Compose:
    ```bash
-   docker compose up -d
+   ./scripts/render-compose.sh docker-compose.yml docker-compose.local.yml
+   ```
+
+5. Start the services:
+   ```bash
+   docker compose -f docker-compose.local.yml up -d
    ```
 
 ## Code Style
 
 ### Shell Scripts
 
-- Use `#!/bin/bash` as the shebang
-- Use `set -e` for error handling
-- Quote variables: `"$VARIABLE"` not `$VARIABLE`
-- Use meaningful variable names
-- Add comments for complex logic
+- Use `#!/bin/bash` as the shebang.
+- Use `set -euo pipefail` for scripts that run in containers.
+- Quote variables: `"$VARIABLE"` not `$VARIABLE`.
+- Keep container entrypoints idempotent.
+- Validate scripts with `bash -n scripts/*.sh`.
 
 ### Docker
 
-- Use multi-stage builds when possible
-- Minimize image size by combining RUN commands
-- Use specific base image versions
-- Add HEALTHCHECK instructions
+- Use multi-stage builds when possible.
+- Minimize image size by combining `RUN` commands.
+- Use specific base image versions where practical.
+- Add `HEALTHCHECK` instructions for long-running services.
+- Do not bake secrets into images.
 
 ### Documentation
 
-- Update README.md for new features
-- Add inline comments for complex code
-- Keep documentation up to date
+- Update `README.md` for user-facing changes.
+- Update `deploy/README.md` for Dokploy deployment changes.
+- Update `docs/backup.md` for backup or restore changes.
+- Keep environment variable references consistent across compose files and docs.
 
 ## Pull Request Guidelines
 
-- Provide a clear description of changes
-- Reference any related issues
-- Ensure all tests pass
-- Update documentation as needed
-- Keep commits focused and atomic
+- Provide a clear description of changes.
+- Reference any related issues.
+- Ensure shell syntax checks pass.
+- Update documentation as needed.
+- Keep commits focused and atomic.
 
 ## Reporting Issues
 
-- Use the GitHub issue tracker
-- Provide detailed reproduction steps
-- Include environment information
-- Attach relevant logs
+- Use the GitHub issue tracker.
+- Provide detailed reproduction steps.
+- Include environment information.
+- Attach relevant logs.
+- Include Dokploy deployment type and reverse proxy upstream protocol when reporting Bad Gateway issues.
 
 ## License
 

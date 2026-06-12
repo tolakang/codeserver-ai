@@ -7,26 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- code-server now starts when `CS_PASSWORD` is missing by generating a temporary password.
+- code-server config is created at startup when the mounted/configured file is absent.
+- OpenCode provider config permissions are restricted.
+- OpenCode WEB no longer enables mDNS by default, avoiding startup failures in Docker.
+- OpenCode WEB health checks now use the root endpoint instead of an assumed `/health` path.
+- RustFS builds now auto-detect `amd64` or `arm64` when `TARGETARCH` is not provided.
+- Gitea admin user creation is handled by a one-shot init service.
+- Restore now supports Gitea database backups.
+- Backup now creates the RustFS bucket when it does not exist.
+- Root compose no longer blocks code-server startup on dependent service health checks.
+
 ### Changed
-- Fixed critical Docker build failures
-- Aligned code-server port configuration (8443)
-- Fixed FreeLLMAPI health check endpoints
-- Improved security defaults (mandatory passwords, restricted CORS)
-- Standardized project structure
+- Compose services now use `pull_policy: build` to force local image builds.
+- Update script supports `--check-only`.
+- Local Docker Compose deployments now render Dokploy placeholders with `scripts/render-compose.sh`.
+- Documentation now calls out the code-server `HTTP` upstream requirement for Bad Gateway prevention.
 
 ### Added
-- LICENSE file (MIT)
-- .dockerignore for optimized builds
-- SECURITY.md with security guidelines
-- CONTRIBUTING.md for contributors
-- CHANGELOG.md for version tracking
-- Complete .env.example with all required variables
-- Kubernetes manifests in k8s/ directory
+- `scripts/render-compose.sh` for local Docker Compose deployments.
+- OpenCode WEB port and hostname environment overrides.
 
 ### Removed
-- Obsolete config files (provider-variables.json, .env.template)
-- Duplicate documentation (quick-start.md, update.md)
-- Redundant scripts (generate-all-configs.sh, manage-providers.sh)
+- mDNS flags from the OpenCode WEB startup command.
 
 ## [1.0.0] - 2024-01-01
 

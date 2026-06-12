@@ -1,6 +1,5 @@
 # backup-cron.yml
-# Dokploy cron job for daily Gitea PostgreSQL backup
-# Deploy as a separate Dokploy application with type "Cron"
+# Kubernetes CronJob for daily Gitea PostgreSQL backup
 
 apiVersion: batch/v1
 kind: CronJob

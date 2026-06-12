@@ -2,97 +2,106 @@
 
 ## Overview
 
-This document covers the backup procedures for Code Server AI, including workspace data, configuration, and Gitea database.
+Code Server AI backs up workspace files, code-server/OpenCode configuration, and the Gitea PostgreSQL database to RustFS S3-compatible storage.
 
-## Backup Method
+## Required Environment Variables
 
-All backups are stored in RustFS S3-compatible storage.
+Set these on the `code-server` container:
 
-The backup script connects to Gitea PostgreSQL through PgBouncer. Make sure these environment variables are set for the code-server container:
+```bash
+RUSTFS_ACCESS_KEY=your-rustfs-access-key
+RUSTFS_SECRET_KEY=your-rustfs-secret-key
+RUSTFS_ENDPOINT=http://rustfs:9000
+RUSTFS_BUCKET=code-server-backups
+POSTGRES_HOST=pgbouncer
+POSTGRES_PORT=6432
+POSTGRES_USER=gitea
+POSTGRES_DB=gitea
+POSTGRES_PASSWORD=your-postgres-password
+```
 
-- `POSTGRES_HOST=pgbouncer`
-- `POSTGRES_PORT=6432`
-- `POSTGRES_USER=gitea`
-- `POSTGRES_DB=gitea`
-- `POSTGRES_PASSWORD=your-postgres-password`
+The backup script creates `RUSTFS_BUCKET` if it does not exist.
 
 ## Manual Backup
 
-### Run Backup Script
+Run the backup from the code-server container:
 
 ```bash
 docker exec code-server /scripts/backup.sh
 ```
 
-### Check Backup Status
+Expected backup names:
 
-```bash
-docker compose logs code-server | grep backup
+```text
+workspace-YYYYMMDD-HHMMSS.tar.gz
+config-YYYYMMDD-HHMMSS.tar.gz
+gitea-YYYYMMDD-HHMMSS.sql.gz
 ```
 
 ## Automated Backup
 
-### Cron Job Setup
-
-Add to your system's crontab:
+Add this to the host crontab:
 
 ```bash
 0 2 * * * docker exec code-server /scripts/backup.sh >> /tmp/backup.log 2>&1
 ```
 
-### Verify Backup Logs
-
-```bash
-tail -f /tmp/backup.log
-```
-
 ## Restore Procedures
 
-### Restore from RustFS
+List backups:
 
 ```bash
-docker exec code-server /scripts/restore.sh
+docker exec code-server sh -c 'aws s3 ls s3://code-server-backups/ --endpoint-url http://rustfs:9000'
 ```
 
-### Restore Specific Files
+Restore workspace or config:
 
 ```bash
-# Download specific backup from RustFS
-aws s3 cp s3://code-server-backups/workspace-20240101-120000.tar.gz /tmp/
-
-# Extract specific backup
-tar xzf /tmp/workspace-20240101-120000.tar.gz -C /workspace
+docker exec code-server /scripts/restore.sh workspace-20240101-120000.tar.gz
+docker exec code-server /scripts/restore.sh config-20240101-120000.tar.gz
 ```
+
+Restore the Gitea database:
+
+```bash
+docker exec code-server /scripts/restore.sh gitea-20240101-120000.sql.gz
+docker restart gitea
+```
+
+The restore script creates a pre-restore snapshot in `/tmp/pre-restore-snapshot/` before applying changes.
 
 ## Backup Retention
 
-- **Local backups**: 7 days
-- **Remote backups**: 7 days
+- Local temporary backups: 7 days
+- Remote RustFS backups: 7 days
 
-Old backups are automatically cleaned up by the backup script.
+Old backups are cleaned automatically by `/scripts/backup.sh`.
 
 ## Backup Contents
 
 ### Workspace Backup
 
 Includes:
+
 - User workspace files
 - Claude memory data
 - Git repositories
-- Extension installations
+- Installed extensions
 
 ### Configuration Backup
 
 Includes:
+
 - Code Server configuration
-- Gitea configuration
-- AI provider settings
+- OpenCode provider configuration
+- User dotfiles under `/home/coder/.config`
 
 ### Gitea Database Backup
 
 Includes:
+
 - User accounts
-- Git repositories metadata
+- Repository metadata
 - Issues and pull requests
 - Wiki data
 
@@ -101,78 +110,36 @@ Includes:
 ### Backup Fails
 
 ```bash
-docker compose logs code-server
+docker exec code-server sh -c 'tail -n 100 /tmp/backup.log'
+docker logs code-server
 ```
+
+Common causes:
+
+1. Missing `RUSTFS_ACCESS_KEY` or `RUSTFS_SECRET_KEY`
+2. Missing `POSTGRES_PASSWORD`
+3. RustFS is not reachable from `code-server`
+4. The RustFS bucket cannot be listed or created
 
 ### Restore Fails
 
 ```bash
-docker compose logs code-server
+docker exec code-server sh -c 'tail -n 100 /tmp/restore.log'
+docker logs code-server
+docker logs gitea
 ```
 
-### Missing Backups
+Common causes:
 
-1. Verify RustFS is running
-2. Check `.env` credentials
-3. Ensure bucket exists
-4. Verify backup script permissions
-
-## Backup Health Check
-
-### Verify RustFS Connection
-
-```bash
-curl http://localhost:9000/minio/health/live
-```
-
-### List Available Backups
-
-```bash
-aws s3 ls s3://code-server-backups/
-```
-
-## Backup Best Practices
-
-1. **Test restores regularly**: Verify backup integrity
-2. **Monitor disk space**: Ensure sufficient storage
-3. **Verify credentials**: Check `.env` file permissions
-4. **Schedule during low usage**: Run backups during off-peak hours
-5. **Document restore procedures**: Keep restore instructions accessible
-
-## Emergency Procedures
-
-### Complete System Failure
-
-1. Restore latest backup using `/scripts/restore.sh`
-2. Re-deploy all services
-3. Verify all data is restored
-4. Test critical functionality
-
-### Partial Data Loss
-
-1. Identify affected backup
-2. Restore specific component
-3. Test affected functionality
-4. Verify data integrity
-
-## Backup Monitoring
-
-### Check Backup Success
-
-```bash
-grep "Backup Complete" /tmp/backup.log
-tail -n 10 /tmp/backup.log
-```
-
-### Monitor Storage Usage
-
-```bash
-aws s3 ls s3://code-server-backups/ --human-readable
-```
+1. Backup filename does not match the expected format
+2. Missing `POSTGRES_PASSWORD` for Gitea database restore
+3. Gitea database connection settings are wrong
+4. The downloaded archive is empty or corrupt
 
 ## Backup Security
 
-- Store credentials in Dokploy/Docker secrets or environment variables
-- Backup files are uploaded to RustFS/S3-compatible storage
-- Access restricted to container network
-- Regular rotation of encryption keys and service credentials
+- Store credentials in Dokploy/Docker secrets or environment variables.
+- Never commit `.env`, API keys, RustFS credentials, or generated passwords.
+- Use TLS termination at the reverse proxy.
+- Keep code-server upstream protocol as `HTTP` behind the proxy.
+- Rotate service credentials regularly.

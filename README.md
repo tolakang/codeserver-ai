@@ -12,7 +12,7 @@ Production-grade self-hosted Code Server with AI integration, Gitea, and RustFS 
 - Claude Memory Persistence
 - Self-hosted Gitea Git Server
 - Auto-installed Extensions
-- Built from Source (multi-arch: amd64/arm64 auto-detected)
+- Built from official code-server .deb releases (multi-arch: amd64/arm64 auto-detected)
 
 ## Architecture
 
@@ -69,6 +69,7 @@ cd codeserver-ai
 
 3. **Deploy**
    - code-server serves plain HTTP on port `8443`; configure Dokploy/reverse proxy upstream protocol as **HTTP** to avoid Bad Gateway.
+   - Force rebuild/redeploy after code changes so the container uses the latest image.
 
 See [deploy/README.md](deploy/README.md) for detailed Dokploy deployment instructions.
 
@@ -83,9 +84,23 @@ sudo chown -R 1000:1000 /mnt/storage
 cp .env.example .env
 # Edit .env with your values
 
+# Render Dokploy placeholders to Docker Compose syntax
+./scripts/render-compose.sh docker-compose.yml docker-compose.local.yml
+
 # Deploy
-docker compose up -d
+docker compose -f docker-compose.local.yml up -d
 ```
+
+### 4. Bad Gateway Troubleshooting
+
+If code-server returns Bad Gateway after deploy:
+
+1. Confirm code-server upstream protocol is `HTTP`, not `HTTPS`.
+2. Force rebuild/redeploy the code-server app in Dokploy.
+3. Check container logs for `=== Init Complete ===`.
+4. Set `CS_PASSWORD` in Dokploy. If it is missing, `scripts/init.sh` generates a temporary password at `/tmp/code-server-password` so the container can still start.
+
+See [deploy/README.md](deploy/README.md) for the full Dokploy checklist.
 
 ## File Structure
 
@@ -116,7 +131,8 @@ docker compose up -d
 │   ├── update.sh                  ← update all services
 │   ├── configure-provider.sh      ← AI provider management
 │   ├── generate-configs.sh        ← configuration generation
-│   └── resolve-env.sh             ← resolve ${{project.*}} placeholders
+│   ├── resolve-env.sh             ← resolve environment templates
+│   └── render-compose.sh          ← render Dokploy compose files for local Docker Compose
 ├── config/
 │   ├── unified-config.json        ← unified provider configuration
 │   ├── code-server/               ← code-server config
@@ -131,11 +147,11 @@ docker compose up -d
 └── README.md
 ```
 
-> **Architecture Note:** code-server builds for **both amd64 and arm64** automatically via Docker/buildx. No manual `TARGETARCH` configuration needed.
+> **Architecture Note:** code-server and RustFS Dockerfiles auto-detect the target architecture via Docker's built-in `TARGETARCH`. Do not set `TARGETARCH` manually unless you are intentionally overriding the build platform.
 
 ## Environment Variable Workflow
 
-This project uses `${{project.*}}` placeholders in docker-compose files, which are resolved by Dokploy at deploy time.
+This project uses `${{project.*}}` placeholders in Dokploy compose files. For local Docker Compose, render them with `scripts/render-compose.sh` so Docker Compose can resolve them as `${VAR}` from `.env`.
 
 ### How It Works
 
@@ -164,6 +180,15 @@ CS_PASSWORD=your-secure-password
 **In Container:**
 ```
 CS_PASSWORD=your-secure-password
+```
+
+### Local Docker Compose
+
+Dokploy placeholders are not expanded by plain Docker Compose. Render a local compose file before running Docker Compose directly:
+
+```bash
+./scripts/render-compose.sh docker-compose.yml docker-compose.local.yml
+docker compose -f docker-compose.local.yml up -d
 ```
 
 ### Hierarchy
@@ -228,61 +253,24 @@ The update script automatically fetches the latest versions from GitHub:
 
 #### 2. Architecture Detection
 
-The script automatically detects system architecture:
+The script automatically detects system architecture and passes it to the code-server build only when needed.
 
 ```bash
-# x86_64 systems
-TARGETARCH=amd64
-
-# ARM systems (Raspberry Pi, etc.)
-TARGETARCH=arm64
+# x86_64 systems detect as amd64
+# ARM64 systems detect as arm64
 ```
 
 #### 3. Service Updates
 
-Each service is updated in sequence:
-
-##### Code Server Update
+Each service is updated by `./scripts/update.sh`, which renders Dokploy compose placeholders before running Docker Compose.
 
 ```bash
-echo "--- Updating code-server ---"
-CODESERVER_VERSION=$CODESERVER_VERSION TARGETARCH=$TARGETARCH \
-  docker compose -f deploy/docker-compose.code-server.yml build --no-cache
-docker compose -f deploy/docker-compose.code-server.yml up -d
-```
-
-##### Gitea Update
-
-```bash
-echo "--- Updating gitea ---"
-docker compose -f deploy/docker-compose.gitea.yml build --no-cache
-docker compose -f deploy/docker-compose.gitea.yml up -d
-```
-
-##### FreeLLMAPI Update
-
-```bash
-echo "--- Updating freellmapi ---"
-FREELLMAPI_VERSION=${FREELLMAPI_VERSION:-latest} \
-  docker compose -f deploy/docker-compose.freellmapi.yml build --no-cache
-docker compose -f deploy/docker-compose.freellmapi.yml up -d
-```
-
-##### RustFS Update
-
-```bash
-echo "--- Updating rustfs ---"
-docker compose -f deploy/docker-compose.rustfs.yml build --no-cache
-docker compose -f deploy/docker-compose.rustfs.yml up -d
-```
-
-##### OpenCode WEB Update
-
-```bash
-echo "--- Updating opencode-web ---"
-  OPENCODE_VERSION=${OPENCODE_VERSION:-latest} \
-    docker compose -f deploy/docker-compose.opencode-web.yml build --no-cache
-docker compose -f deploy/docker-compose.opencode-web.yml up -d
+./scripts/update.sh all
+./scripts/update.sh code-server
+./scripts/update.sh gitea
+./scripts/update.sh freellmapi
+./scripts/update.sh rustfs
+./scripts/update.sh opencode-web
 ```
 
 ### Update Best Practices
@@ -337,7 +325,7 @@ If an update causes issues:
 1. **Stop all services**:
 
 ```bash
-docker compose down
+docker compose -f docker-compose.local.yml down
 ```
 
 2. **Restore from backup**:
@@ -349,7 +337,7 @@ docker compose down
 3. **Restart services**:
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.local.yml up -d
 ```
 
 ### Update Monitoring
@@ -431,30 +419,30 @@ Each provider can be configured using environment variables in your `.env` file:
 ```bash
 # OpenRouter Provider
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
+OPENROUTER_API_KEY=sk-your-openrouter-key
 
 # OpenCode Zen Provider
 OPENCODE_ZEN_BASE_URL=https://opencode.ai/zen/api/v1
-OPENCODE_ZEN_API_KEY=${{project.OPENCODE_ZEN_API_KEY}}
+OPENCODE_ZEN_API_KEY=your-opencode-zen-key
 
 # FreeLLMAPI Provider
 FREELLMAPI_BASE_URL=http://freellmapi:3000/v1
-FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
+FREELLMAPI_API_KEY=your-freellmapi-key
 
 # Anthropic Provider
 ANTHROPIC_BASE_URL=https://api.anthropic.com
-ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
+ANTHROPIC_API_KEY=sk-ant-your-key
 
 # OpenAI Provider
 OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_API_KEY=${{project.OPENAI_API_KEY}}
+OPENAI_API_KEY=sk-your-openai-key
 
 # Gitea backup database
 GITEA_DB_USER=gitea
 GITEA_DB_NAME=gitea
 POSTGRES_HOST=pgbouncer
 POSTGRES_PORT=6432
-POSTGRES_PASSWORD=${{project.POSTGRES_PASSWORD}}
+POSTGRES_PASSWORD=your-postgres-password
 
 # Default Provider
 DEFAULT_PROVIDER=freellmapi
@@ -480,27 +468,27 @@ During container startup, the system will automatically use the provider configu
 **Example 1: OpenRouter as primary provider:**
 ```bash
 DEFAULT_PROVIDER=openrouter
-OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
+OPENROUTER_API_KEY=sk-your-openrouter-key
 ```
 
 **Example 2: OpenCode Zen as primary provider:**
 ```bash
 DEFAULT_PROVIDER=opencode-zen
-OPENCODE_ZEN_API_KEY=${{project.OPENCODE_ZEN_API_KEY}}
+OPENCODE_ZEN_API_KEY=your-opencode-zen-key
 ```
 
 **Example 3: Multiple providers:**
 ```bash
 # Primary provider
 DEFAULT_PROVIDER=openrouter
-OPENROUTER_API_KEY=${{project.OPENROUTER_API_KEY}}
+OPENROUTER_API_KEY=sk-your-openrouter-key
 
 # Backup provider
-ANTHROPIC_API_KEY=${{project.ANTHROPIC_API_KEY}}
+ANTHROPIC_API_KEY=sk-ant-your-key
 
 # FreeLLMAPI (already configured)
 FREELLMAPI_BASE_URL=http://freellmapi:3000/v1
-FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
+FREELLMAPI_API_KEY=your-freellmapi-key
 ```
 
 ## Backup

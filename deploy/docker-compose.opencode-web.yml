@@ -12,6 +12,7 @@ services:
       args:
         OPENCODE_VERSION: ${{project.OPENCODE_VERSION}}
     image: opencode-web-custom:latest
+    pull_policy: build
     container_name: opencode-web
     restart: unless-stopped
     ports:
@@ -25,12 +26,14 @@ services:
       - TZ=${{project.TZ}}
       - OPENCODE_SERVER_PASSWORD=${{project.OPENCODE_SERVER_PASSWORD}}
       - OPENCODE_SERVER_USERNAME=${{project.OPENCODE_SERVER_USERNAME}}
+      - OPENCODE_WEB_PORT=${{project.OPENCODE_WEB_PORT}}
+      - OPENCODE_WEB_HOSTNAME=${{project.OPENCODE_WEB_HOSTNAME}}
       - FREELLMAPI_BASE_URL=${{project.FREELLMAPI_BASE_URL}}
       - FREELLMAPI_API_KEY=${{project.FREELLMAPI_API_KEY}}
     networks:
       - codeserver-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:4001/"]
       interval: 30s
       timeout: 10s
       retries: 3

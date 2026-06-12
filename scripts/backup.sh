@@ -32,6 +32,15 @@ if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
   exit 1
 fi
 
+ensure_bucket() {
+  if ! aws s3 ls "s3://${RUSTFS_BUCKET}" --endpoint-url "${RUSTFS_ENDPOINT}" >/dev/null 2>&1; then
+    log "RustFS bucket not found; creating s3://${RUSTFS_BUCKET}"
+    aws s3 mb "s3://${RUSTFS_BUCKET}" --endpoint-url "${RUSTFS_ENDPOINT}"
+  fi
+}
+
+ensure_bucket
+
 if [ -z "${POSTGRES_PASSWORD:-}" ]; then
   log "Error: POSTGRES_PASSWORD must be set"
   exit 1

@@ -72,8 +72,10 @@ if [ ! -f /home/coder/.config/opencode/config.json ]; then
 
   echo "OpenCode configured with $PROVIDER provider" | tee -a "$LOG_FILE"
   echo "Provider config saved to: /home/coder/.config/opencode/config.json"
+  chmod 600 /home/coder/.config/opencode/config.json
 else
   echo "OpenCode extension config already exists, skipping provider configuration" | tee -a "$LOG_FILE"
+  chmod 600 /home/coder/.config/opencode/config.json 2>/dev/null || true
 fi
 
 # Substitute CS_PASSWORD in code-server config
@@ -95,6 +97,17 @@ auth: password
 password: '$(yaml_escape "$CS_PASSWORD")'
 disable-telemetry: true
 EOF
+  chmod 600 /home/coder/.config/code-server/config.yaml
+else
+  mkdir -p /home/coder/.config/code-server
+  cat > /home/coder/.config/code-server/config.yaml <<EOF
+bind-addr: 0.0.0.0:8443
+auth: password
+password: '$(yaml_escape "$CS_PASSWORD")'
+disable-telemetry: true
+EOF
+  chmod 600 /home/coder/.config/code-server/config.yaml
+  echo "Code Server config created" | tee -a "$LOG_FILE"
 fi
 
 # Create default git config if not exists

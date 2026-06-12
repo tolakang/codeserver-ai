@@ -67,6 +67,7 @@ services:
       args:
         GITEA_VERSION: ${{project.GITEA_VERSION}}
     image: gitea-custom:latest
+    pull_policy: build
     container_name: gitea
     restart: unless-stopped
     ports:
@@ -94,6 +95,8 @@ services:
       - GITEA__security__INSTALL_LOCK=true
       - GITEA__security__REQUIRE_SIGNIN_VIEW=true
       - GITEA__service__DEFAULT_ALLOW_CREATE_REPO=true
+      - GITEA__server__LFS_START_SERVER=true
+      - GITEA__service__ENABLE_NOTIFY_MAIL=false
     networks:
       - codeserver-network
     depends_on:
@@ -105,6 +108,42 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  gitea-admin:
+    build:
+      context: ..
+      dockerfile: ../Dockerfile.gitea
+      args:
+        GITEA_VERSION: ${{project.GITEA_VERSION}}
+    image: gitea-custom:latest
+    pull_policy: build
+    container_name: gitea-admin
+    restart: "no"
+    depends_on:
+      gitea:
+        condition: service_healthy
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA_ADMIN_USER=${{project.GITEA_ADMIN_USER}}
+      - GITEA_ADMIN_PASSWORD=${{project.GITEA_ADMIN_PASSWORD}}
+      - GITEA_ADMIN_EMAIL=${{project.GITEA_ADMIN_EMAIL}}
+    volumes:
+      - gitea-data:/data
+    networks:
+      - codeserver-network
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      set -e;
+      gitea admin user create
+      --username "$${GITEA_ADMIN_USER}"
+      --password "$${GITEA_ADMIN_PASSWORD}"
+      --email "$${GITEA_ADMIN_EMAIL}"
+      --admin
+      --must-change-password=false
+      || gitea admin user change-password
+      --username "$${GITEA_ADMIN_USER}"
+      --password "$${GITEA_ADMIN_PASSWORD}";
 
 networks:
   codeserver-network:

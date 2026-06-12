@@ -95,18 +95,21 @@ configure_provider() {
     fi
   fi
 
-  mkdir -p /home/coder/.config/opencode
+CONFIG_DIR="${OPENCODE_CONFIG_DIR:-${HOME}/.config/opencode}"
 
-  cat > /home/coder/.config/opencode/config.json <<EOF
+mkdir -p "$CONFIG_DIR"
+
+cat > "$CONFIG_DIR/config.json" <<EOF
 {
   "provider": "$(json_escape "$opencode_provider")",
   "baseURL": "$(json_escape "$base_url")",
   "apiKey": "$(json_escape "${!api_key_var:-}")"
 }
 EOF
+chmod 600 "$CONFIG_DIR/config.json"
 
-  echo "${display_name} configured successfully"
-  echo "Config saved to: /home/coder/.config/opencode/config.json"
+echo "${display_name} configured successfully"
+echo "Config saved to: $CONFIG_DIR/config.json"
 }
 
 test_provider_connection() {

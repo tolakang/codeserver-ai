@@ -11,6 +11,7 @@ services:
       args:
         CODESERVER_VERSION: ${{project.CODESERVER_VERSION}}
     image: codeserver-custom:latest
+    pull_policy: build
     container_name: code-server
     restart: unless-stopped
     ports:

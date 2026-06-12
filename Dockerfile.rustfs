@@ -5,10 +5,18 @@
 # syntax=docker/dockerfile:1
 FROM docker.io/library/alpine:3.23.4 AS build
 
-ARG TARGETARCH=amd64
+ARG TARGETARCH
 ARG RELEASE=latest
 
-RUN apk add --no-cache ca-certificates curl unzip
+RUN TARGETARCH="${TARGETARCH:-}" \
+    && if [ -z "$TARGETARCH" ]; then \
+         case "$(uname -m)" in \
+           x86_64) TARGETARCH="amd64" ;; \
+           aarch64|arm64) TARGETARCH="arm64" ;; \
+           *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;; \
+         esac; \
+       fi; \
+    apk add --no-cache ca-certificates curl unzip
 WORKDIR /build
 
 # Download binary from GitHub releases

@@ -59,7 +59,11 @@ This is the recommended approach for each service.
    ```
    GITEA_DOMAIN=gitea.yourdomain.com
    GITEA_ROOT_URL=https://gitea.yourdomain.com
+   GITEA_DB_USER=gitea
+   GITEA_DB_NAME=gitea
    GITEA_ADMIN_USER=admin
+   GITEA_ADMIN_PASSWORD=your-gitea-password
+   GITEA_ADMIN_EMAIL=admin@yourdomain.com
    POSTGRES_HOST=pgbouncer
    POSTGRES_PORT=6432
    POSTGRES_PASSWORD=your-postgres-password
@@ -109,9 +113,20 @@ Use this if you want to build custom images without compose.
 
 ---
 
+## Local Docker Compose
+
+Dokploy compose files use `${{project.VAR}}` placeholders. Plain Docker Compose does not expand them, so render a local compose file first:
+
+```bash
+./scripts/render-compose.sh docker-compose.yml docker-compose.local.yml
+docker compose -f docker-compose.local.yml up -d
+```
+
+---
+
 ## Environment Variables
 
-Set these variables in Dokploy's Environment Variables UI. The `${{project.*}}` placeholders in docker-compose files will resolve to these values at deploy time.
+Set these variables in Dokploy's Environment Variables UI. The `${{project.*}}` placeholders in docker-compose files will resolve to these values at deploy time. Provider API keys are optional if you do not use that provider.
 
 ### Complete Variable Reference
 
@@ -152,6 +167,8 @@ All variables from `.env.example` must be set in Dokploy. Here's the complete li
 | `POSTGRES_PASSWORD` | PostgreSQL password for Gitea | `your-postgres-password` | Yes |
 | `OPENCODE_SERVER_USERNAME` | OpenCode WEB username | `opencode` | Yes |
 | `OPENCODE_SERVER_PASSWORD` | OpenCode WEB password | `your-opencode-password` | Yes |
+| `OPENCODE_WEB_PORT` | OpenCode WEB port | `4001` | Yes |
+| `OPENCODE_WEB_HOSTNAME` | OpenCode WEB bind hostname | `0.0.0.0` | Yes |
 | `CODESERVER_VERSION` | Code Server version | `4.123.0` | Yes |
 | `GITEA_VERSION` | Gitea version | `1.23.0` | Yes |
 | `FREELLMAPI_VERSION` | FreeLLMAPI version | `latest` | Yes |
@@ -200,15 +217,31 @@ docker network create codeserver-network
 
 **Fix:** This should not happen with the current Dockerfiles (they clone source at build time). If you see this error, ensure you're using the latest Dockerfiles from the repository.
 
+### Bad Gateway after deploy
+
+**Cause:** The reverse proxy is trying to reach code-server with HTTPS while code-server serves plain HTTP on `8443`, or the running container is still using an old image.
+
+**Fix:**
+1. Set the Dokploy/reverse-proxy upstream protocol for code-server to `HTTP`.
+2. Force rebuild/redeploy the code-server application.
+3. Verify the container logs include `=== Init Complete ===`.
+4. If `CS_PASSWORD` is missing, the current init script generates a temporary password at `/tmp/code-server-password`, but setting `CS_PASSWORD` in Dokploy is still recommended.
+
+### Gitea admin user is not created
+
+**Cause:** `GITEA_ADMIN_USER`, `GITEA_ADMIN_PASSWORD`, or `GITEA_ADMIN_EMAIL` is missing.
+
+**Fix:** Add all three variables in Dokploy and redeploy. The `gitea-admin` init service creates the admin user or updates its password on deploy.
+
 ---
 
 ## Architecture-Specific Notes
 
-### code-server Multi-Arch Support
+### Multi-Arch Support
 
-The code-server Dockerfile now automatically detects the target architecture via Docker's built-in `TARGETARCH` build argument (set by buildx during multi-platform builds).
+The code-server and RustFS Dockerfiles auto-detect the target architecture via Docker's built-in `TARGETARCH` build argument when available. RustFS also falls back to `uname -m` if `TARGETARCH` is not provided.
 
-**Do not set `TARGETARCH` manually:**
+**Do not set `TARGETARCH` manually unless you are intentionally overriding the build platform:**
 - ❌ Don't add `TARGETARCH` to build args in Dokploy
 - ❌ Don't set `TARGETARCH` in Project/Environment variables
 - ✅ Let Docker/buildx auto-detect it
@@ -228,4 +261,5 @@ Arch mismatch: TARGETARCH=amd64, system=arm64
 This means `TARGETARCH` was overridden. Remove any manual `TARGETARCH` setting from:
 1. Dokploy build args
 2. Project environment variables
+3. Any local Docker Compose override files
 3. `.env` file

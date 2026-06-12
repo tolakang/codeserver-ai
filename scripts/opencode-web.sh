@@ -9,7 +9,5 @@ echo "Starting OpenCode WEB..."
 
 # Start OpenCode WEB with configuration
 exec opencode web \
-  --port 4001 \
-  --hostname 0.0.0.0 \
-  --mdns \
-  --mdns-domain opencode.local
+  --port "${OPENCODE_WEB_PORT:-4001}" \
+  --hostname "${OPENCODE_WEB_HOSTNAME:-0.0.0.0}"
