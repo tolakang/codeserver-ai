@@ -8,5 +8,8 @@
       }
     }
   },
-  "model": "{env:OPENCODE_MODEL}"
+  "model": "{env:OPENCODE_MODEL}",
+  "skills": {
+    "paths": ["/home/coder/.agents/skills"]
+  }
 }

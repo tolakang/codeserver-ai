@@ -50,6 +50,10 @@ The image also includes mobile-responsive CSS for touch-friendly code-server lay
 ```bash
 CS_PASSWORD=your-secure-password
 CS_DEFAULT_WORKSPACE=/workspace
+UNDERSTAND_ANYTHING_ENABLED=1
+UNDERSTAND_ANYTHING_VERSION=main
+UNDERSTAND_ANYTHING_REPO_URL=https://github.com/Egonex-AI/Understand-Anything.git
+UNDERSTAND_ANYTHING_PNPM_VERSION=10.6.2
 DEFAULT_PROVIDER=freellmapi
 OPENCODE_MODEL=anthropic/claude-sonnet-4-6
 FREELLMAPI_BASE_URL=http://freellmapi:3000/v1
@@ -77,6 +81,14 @@ CODESERVER_VERSION=4.123.0
 The code-server workspace is mounted at `/workspace` from the fixed Docker named volume `codeserver-ai-workspace`. This prevents Dokploy updates from creating a new empty workspace volume when the container is recreated.
 
 Keep this volume name stable. If you need to move to a host bind mount or another volume, copy the existing `/workspace` contents before changing the mount.
+
+### Understand Anything for OpenCode
+
+Set `UNDERSTAND_ANYTHING_ENABLED=1` to install the Understand Anything OpenCode skills into the code-server container at startup. The skills are linked under `/home/coder/.agents/skills` and the plugin is built under `/home/coder/.understand-anything/repo`.
+
+Use `/understand` in the code-server terminal to analyze the current workspace, then `/understand-dashboard` to start the interactive dashboard. The dashboard runs inside the code-server container, so use code-server port forwarding or expose the dashboard separately if you need browser access from outside the container.
+
+If opencode is already running when the container starts, restart it after deployment so it loads the new skills path.
 
 ### opencode-web
 

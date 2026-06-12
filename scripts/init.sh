@@ -38,13 +38,42 @@ write_opencode_config() {
 EOF
 }
 
+ensure_opencode_skills_path() {
+  local config="/home/coder/.config/opencode/config.json"
+  local skill_path="${OPENCODE_SKILLS_PATH:-/home/coder/.agents/skills}"
+
+  [ -f "$config" ] || return 0
+
+  node - "$config" "$skill_path" <<'NODE'
+const fs = require('fs');
+const configPath = process.argv[2];
+const skillPath = process.argv[3];
+let config;
+
+try {
+  config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+} catch (error) {
+  console.error(`Invalid opencode config: ${configPath}`);
+  process.exit(1);
+}
+
+config["$schema"] = "https://opencode.ai/config.json";
+config.skills = config.skills || {};
+const existingPaths = Array.isArray(config.skills.paths) ? config.skills.paths : [];
+config.skills.paths = Array.from(new Set([...existingPaths, skillPath]));
+fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+NODE
+
+  chmod 600 "$config"
+}
+
 log() {
   echo "$1" | tee -a "$LOG_FILE"
 }
 
 echo "=== Code Server Init ===" | tee -a "$LOG_FILE"
 
-mkdir -p /workspace /workspace/.memory /home/coder/.config/code-server /home/coder/.config/opencode /var/log/codeserver-ai
+mkdir -p /workspace /workspace/.memory /home/coder/.agents/skills /home/coder/.config/code-server /home/coder/.config/opencode /var/log/codeserver-ai
 
 # Run extension installer
 /scripts/install-extensions.sh
@@ -83,6 +112,13 @@ if [ ! -f /home/coder/.config/opencode/config.json ]; then
 else
   echo "OpenCode extension config already exists, skipping provider configuration" | tee -a "$LOG_FILE"
   chmod 600 /home/coder/.config/opencode/config.json 2>/dev/null || true
+fi
+
+ensure_opencode_skills_path
+
+if [ "${UNDERSTAND_ANYTHING_ENABLED:-0}" = "1" ]; then
+  log "=== Understand Anything Installation ==="
+  /scripts/install-understand-anything.sh
 fi
 
 # Substitute CS_PASSWORD in code-server config

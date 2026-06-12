@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile CSS injected into the code-server image.
 - iPad Ctrl+C interrupt keybinding fix.
 - OpenCode CLI to the code-server image so `opencode` can run directly in the code-server terminal.
+- Understand Anything OpenCode skills support for code-server deployments.
 - `scripts/render-compose.sh` for local Docker Compose deployments.
 - OpenCode WEB port and hostname environment overrides.
 - `OPENCODE_MODEL` environment variable for selecting the default OpenCode model.

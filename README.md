@@ -13,6 +13,7 @@ Dokploy
     +-- code-server (port 8443)
     |       +-- OpenCode VS Code extension
     |       +-- OpenCode CLI in terminal
+    |       +-- Optional Understand Anything OpenCode skills
     |       +-- Mobile-responsive touch UI
     |       +-- Workspace persisted in Docker named volume `codeserver-ai-workspace`
     |
@@ -126,6 +127,22 @@ Supported providers:
 - `opencode-zen`
 - `anthropic`
 - `openai`
+
+### Understand Anything Integration
+
+Set `UNDERSTAND_ANYTHING_ENABLED=1` in Dokploy to install Understand Anything OpenCode skills into the code-server container. The installer links skills to `/home/coder/.agents/skills`, builds the plugin under `/home/coder/.understand-anything/repo`, and makes these commands available in the code-server terminal:
+
+```bash
+/understand
+/understand-dashboard
+/understand-chat
+/understand-diff
+/understand-explain
+```
+
+Use `/understand` to generate `.understand-anything/knowledge-graph.json` for the current workspace. Use `/understand-dashboard` to start the interactive dashboard inside the code-server container.
+
+Restart opencode after deployment if it was already running so it loads the new skills path.
 
 ### 5. Mobile Responsive Code Server
 
