@@ -19,11 +19,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     dumb-init \
     git \
     git-lfs \
-+    g++ \
+    g++ \
     htop \
     locales \
     lsb-release \
-+    make \
+    make \
     nano \
     openssh-client \
     procps \
